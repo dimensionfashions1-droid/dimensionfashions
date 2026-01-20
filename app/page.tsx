@@ -10,7 +10,7 @@ import type { Category, Product } from "@/lib/types"
 
 async function getCategories(): Promise<Category[]> {
   try {
-    const res = await fetch("/api/categories", {
+    const res = await fetch("http://localhost:3000/api/categories", {
       next: { revalidate: 3600 },
     })
     if (!res.ok) throw new Error("Failed to fetch categories")
@@ -23,7 +23,7 @@ async function getCategories(): Promise<Category[]> {
 
 async function getProducts(): Promise<Product[]> {
   try {
-    const res = await fetch("/api/products", {
+    const res = await fetch("http://localhost:3000/api/products", {
       next: { revalidate: 3600 },
     })
     if (!res.ok) throw new Error("Failed to fetch products")
