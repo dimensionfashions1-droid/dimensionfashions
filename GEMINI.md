@@ -62,6 +62,16 @@ This file is the **authoritative instruction manual** for **Antigravity AI / Gem
 
   * Magic UI / Aceternity UI (marketing sections only)
 
+
+### Reference website
+
+* https://dribbble.com/shots/18380246-Fashion-website
+* https://dribbble.com/shots/21609385-Fashion-E-Commerce-Landing-Page
+* https://dribbble.com/shots/26751485-Runvea-Fashion-Website-Design
+* https://dribbble.com/shots/20820372-Fashion-Brand-Landing-Page-Website
+
+
+
 ---
 
 ### Database, Auth & Storage

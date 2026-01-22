@@ -1,16 +1,27 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Cormorant_Upright, Jost } from "next/font/google"
+import { Unbounded, Manrope } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const cormorant = Cormorant_Upright({ weight: ["400", "500", "600", "700"], subsets: ["latin"] })
-const jost = Jost({ weight: ["300", "400", "500", "600", "700"], subsets: ["latin"] })
+const unbounded = Unbounded({
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  variable: "--font-unbounded",
+  display: "swap",
+})
+
+const manrope = Manrope({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
-  title: "Silkara - Luxury Sarees Online",
-  description: "Discover exquisite handcrafted sarees with timeless elegance and traditional craftsmanship",
-  generator: "v0.app",
+  title: "DIMENSIONS | Modern Menswear",
+  description: "Redefining modern menswear with minimal, confident, and premium designs.",
+  generator: "Next.js",
 }
 
 export default function RootLayout({
@@ -19,10 +30,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${jost.className} antialiased`}
-        style={{ "--font-serif": "var(--font-cormorant)" } as React.CSSProperties}
+        className={`${manrope.className} ${unbounded.variable} ${manrope.variable} antialiased bg-background text-foreground selection:bg-white selection:text-black`}
       >
         {children}
         <Analytics />
