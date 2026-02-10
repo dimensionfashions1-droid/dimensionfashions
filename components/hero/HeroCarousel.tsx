@@ -39,29 +39,29 @@ export function HeroCarousel() {
     const slides = [
         {
             id: 1,
-            image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop",
-            title: "New\nDimensions",
-            subtitle: "Elevate your everyday.",
-            link: "/new-arrivals"
+            image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=2000&auto=format&fit=crop",
+            title: "Nocturnal\nVision",
+            subtitle: "The Midnight Collection",
+            link: "/collections/midnight"
         },
         {
             id: 2,
-            image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2000&auto=format&fit=crop",
-            title: "Silent\nNoise",
-            subtitle: "The Monochrome Edit",
-            link: "/collections/monochrome"
+            image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=2000&auto=format&fit=crop",
+            title: "Sharp\nFocus",
+            subtitle: "Tailored Perfection",
+            link: "/collections/tailoring"
         },
         {
             id: 3,
-            image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=2000&auto=format&fit=crop",
-            title: "Urban\nUtility",
-            subtitle: "Function meets form.",
-            link: "/collections/utility"
+            image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=2000&auto=format&fit=crop",
+            title: "Essential\nForm",
+            subtitle: "Core Basics",
+            link: "/shop/essentials"
         }
     ]
 
     return (
-        <section className="relative h-[calc(100vh-56px)] w-full bg-white overflow-hidden border-b border-neutral-200 mt-[56px]">
+        <section className="relative h-[100vh] w-full bg-white overflow-hidden ">
             {/* LEFT SIDEBAR - SOCIALS (OVERLAY) */}
             <div className="absolute left-0 top-0 bottom-0 w-24 flex flex-col items-center justify-center gap-8 z-20 pointer-events-none">
                 <div className="pointer-events-auto flex flex-col gap-8 bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20">
@@ -100,14 +100,8 @@ export function HeroCarousel() {
                                         className="object-cover"
                                         priority
                                     />
-                                    {/* Light overlay for text visibility since buttons/dots are black now? No, dots are black, text is white? 
-                                        Wait, user asked for black pagination. Text was white. 
-                                        If dots are black, they need a light background or good contrast. The absolute bottom area usually has image.
-                                        Let's stick to White text for Hero Title (contrast) but Black buttons/dots if requested? 
-                                        Actually user said "white bg for side social nav looks bad", implies they want the image to extend.
-                                        Pagination color black: `bg-black`.
-                                    */}
-                                    <div className="absolute inset-0 bg-white/5" />
+                                    {/* Dark overlay for consistent black bg feel */}
+                                    <div className="absolute inset-0 bg-black/40" />
 
                                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center">
                                         <h2 className="font-heading font-black text-5xl md:text-8xl text-white drop-shadow-xl uppercase tracking-tighter leading-[0.9] whitespace-pre-line mb-6 animate-fade-in-up mix-blend-difference">

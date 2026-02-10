@@ -13,9 +13,9 @@ interface ProductListProps {
     products: Product[]
 }
 
-export function ProductList({ title, products }: ProductListProps) {
+export function ProductList({ title, products, className }: ProductListProps & { className?: string }) {
     return (
-        <section className="py-20 border-t border-border/40">
+        <section className={` ${className}`}>
             <div className="container mx-auto px-4 md:px-8">
                 <div className="flex items-end justify-between mb-12">
                     <h2 className="font-heading font-bold text-3xl md:text-5xl uppercase tracking-tighter">
