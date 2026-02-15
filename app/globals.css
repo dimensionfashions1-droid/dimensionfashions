@@ -105,6 +105,11 @@
     color: transparent;
   }
 
+  .stroke-text-sm {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.25);
+    color: transparent;
+  }
+
   /* Marquee Animation */
   .animate-marquee {
     animation: marquee 20s linear infinite;

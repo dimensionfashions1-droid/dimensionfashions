@@ -1,12 +1,4 @@
-import { ProductCard } from "./ProductCard"
-
-interface Product {
-    id: string
-    title: string
-    price: number
-    image: string
-    category: string
-}
+import { ProductCard, Product } from "./ProductCard"
 
 interface ProductListProps {
     title: string
@@ -28,7 +20,7 @@ export function ProductList({ title, products, className }: ProductListProps & {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                     {products.map((product) => (
-                        <ProductCard key={product.id} {...product} />
+                        <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
             </div>

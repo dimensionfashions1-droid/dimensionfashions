@@ -40,7 +40,7 @@ export function FeaturedDrop() {
                     {/* Visual */}
                     <div className="relative h-[600px] w-full order-1 lg:order-2 group">
                         <Image
-                            src="https://images.unsplash.com/photo-1604072374690-0e7d7b18f32a?q=80&w=2000&auto=format&fit=crop"
+                            src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=2000&auto=format&fit=crop"
                             alt="Cyber Construct"
                             fill
                             className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out"
