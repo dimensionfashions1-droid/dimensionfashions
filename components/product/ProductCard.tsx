@@ -13,6 +13,8 @@ export interface Product {
     discount?: number
     rating?: number
     inStock?: boolean
+    colors?: string[]
+    sizes?: string[]
 }
 
 interface ProductCardProps {
@@ -91,6 +93,33 @@ export function ProductCard({ product }: ProductCardProps) {
                         </>
                     ) : (
                         <span className="font-bold text-white text-lg">₹{product.price.toLocaleString()}</span>
+                    )}
+                </div>
+
+                {/* Color and Size Swatches */}
+                <div className="flex items-center justify-between pt-1">
+                    {product.colors && product.colors.length > 0 && (
+                        <div className="flex gap-1">
+                            {product.colors.slice(0, 4).map((color) => (
+                                <div
+                                    key={color}
+                                    className="w-3 h-3 rounded-full border border-neutral-700"
+                                    style={{ backgroundColor: color.toLowerCase() }}
+                                />
+                            ))}
+                            {product.colors.length > 4 && (
+                                <span className="text-[10px] text-neutral-500 ml-1">+{product.colors.length - 4}</span>
+                            )}
+                        </div>
+                    )}
+
+                    {product.sizes && product.sizes.length > 0 && (
+                        <div className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">
+                            {product.sizes.length > 3
+                                ? `${product.sizes.slice(0, 3).join(", ")} +${product.sizes.length - 3}`
+                                : product.sizes.join(", ")
+                            }
+                        </div>
                     )}
                 </div>
             </div>

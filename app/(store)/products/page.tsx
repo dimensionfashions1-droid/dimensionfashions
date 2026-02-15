@@ -13,30 +13,81 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
 
 // Mock Data
 const MOCK_PRODUCTS = [
-    { id: "1", title: "Oversized Structured Tee", price: 2499, category: "Tops", image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1964&auto=format&fit=crop", discount: 0, rating: 4.5, inStock: true },
-    { id: "2", title: "Wide Leg Pleated Trousers", price: 3999, category: "Bottoms", image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1887&auto=format&fit=crop", discount: 10, rating: 4.8, inStock: true },
-    { id: "3", title: "Utility Vest Black", price: 4599, category: "Outerwear", image: "https://images.unsplash.com/photo-1559582930-bb01987cf4dd?q=80&w=1762&auto=format&fit=crop", discount: 0, rating: 4.2, inStock: true },
-    { id: "4", title: "Boxy Fit Shirt", price: 2999, category: "Tops", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1888&auto=format&fit=crop", discount: 0, rating: 4.0, inStock: true },
-    { id: "5", title: "Tech Cargo Pants", price: 5499, category: "Bottoms", image: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=2000&auto=format&fit=crop", discount: 0, rating: 4.7, inStock: true },
-    { id: "6", title: "Minimalist Hoodie", price: 3499, category: "Tops", image: "https://images.unsplash.com/photo-1509942774463-acf339cf87d5?q=80&w=987&auto=format&fit=crop", discount: 15, rating: 4.6, inStock: true },
-    { id: "7", title: "Heavyweight Cotton Tee", price: 1999, category: "Tops", image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=987&auto=format&fit=crop", discount: 0, rating: 4.3, inStock: false },
-    { id: "8", title: "Puffer Jacket", price: 8999, category: "Outerwear", image: "https://images.unsplash.com/photo-1544022613-e87caebd27ae?q=80&w=2000&auto=format&fit=crop", discount: 0, rating: 4.9, inStock: true },
+    { id: "1", title: "Oversized Structured Tee", price: 2499, category: "Tops", image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1964&auto=format&fit=crop", discount: 0, rating: 4.5, inStock: true, colors: ["Black", "White", "Beige"], sizes: ["S", "M", "L", "XL"] },
+    { id: "2", title: "Wide Leg Pleated Trousers", price: 3999, category: "Bottoms", image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1887&auto=format&fit=crop", discount: 10, rating: 4.8, inStock: true, colors: ["Black", "Charcoal"], sizes: ["30", "32", "34", "36"] },
+    { id: "3", title: "Utility Vest Black", price: 4599, category: "Outerwear", image: "https://images.unsplash.com/photo-1559582930-bb01987cf4dd?q=80&w=1762&auto=format&fit=crop", discount: 0, rating: 4.2, inStock: true, colors: ["Black"], sizes: ["M", "L", "XL"] },
+    { id: "4", title: "Boxy Fit Shirt", price: 2999, category: "Tops", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1888&auto=format&fit=crop", discount: 0, rating: 4.0, inStock: true, colors: ["White", "Navy", "Olive"], sizes: ["S", "M", "L"] },
+    { id: "5", title: "Tech Cargo Pants", price: 5499, category: "Bottoms", image: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=2000&auto=format&fit=crop", discount: 0, rating: 4.7, inStock: true, colors: ["Black", "Olive", "Khaki"], sizes: ["S", "M", "L", "XL"] },
+    { id: "6", title: "Minimalist Hoodie", price: 3499, category: "Tops", image: "https://images.unsplash.com/photo-1509942774463-acf339cf87d5?q=80&w=987&auto=format&fit=crop", discount: 15, rating: 4.6, inStock: true, colors: ["Black", "Grey", "Navy"], sizes: ["S", "M", "L", "XL", "XXL"] },
+    { id: "7", title: "Heavyweight Cotton Tee", price: 1999, category: "Tops", image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=987&auto=format&fit=crop", discount: 0, rating: 4.3, inStock: false, colors: ["Black", "Beige"], sizes: ["S", "M", "L", "XL"] },
+    { id: "8", title: "Puffer Jacket", price: 8999, category: "Outerwear", image: "https://images.unsplash.com/photo-1544022613-e87caebd27ae?q=80&w=2000&auto=format&fit=crop", discount: 0, rating: 4.9, inStock: true, colors: ["Black", "Blue"], sizes: ["M", "L"] },
 ]
 
 export default function ProductsPage() {
     const [sort, setSort] = useState("featured")
     const [currentPage, setCurrentPage] = useState(1)
 
-    // In a real app, filtering/sorting would happen either on the server or with a more robust client-side hook
-    const sortedProducts = [...MOCK_PRODUCTS].sort((a, b) => {
+    // Filter State
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+    const [selectedSizes, setSelectedSizes] = useState<string[]>([])
+    const [selectedColors, setSelectedColors] = useState<string[]>([])
+    const [priceRange, setPriceRange] = useState([0, 10000])
+
+    const filteredProducts = MOCK_PRODUCTS.filter(product => {
+        // Category Filter
+        if (selectedCategories.length > 0 && !selectedCategories.includes("all") && !selectedCategories.includes(product.category.toLowerCase())) {
+            return false
+        }
+
+        // Price Filter
+        if (product.price < priceRange[0] || product.price > priceRange[1]) {
+            return false
+        }
+
+        // Size Filter
+        if (selectedSizes.length > 0) {
+            const hasSize = product.sizes?.some(size => selectedSizes.includes(size))
+            if (!hasSize) return false
+        }
+
+        // Color Filter
+        if (selectedColors.length > 0) {
+            const hasColor = product.colors?.some(color => selectedColors.includes(color))
+            if (!hasColor) return false
+        }
+
+        return true
+    })
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
         if (sort === "price-asc") return a.price - b.price
         if (sort === "price-desc") return b.price - a.price
         if (sort === "newest") return parseInt(b.id) - parseInt(a.id)
         return 0 // featured/default
     })
+
+    // Pagination Logic
+    const PRODUCTS_PER_PAGE = 8
+    const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE)
+    const paginatedProducts = sortedProducts.slice(
+        (currentPage - 1) * PRODUCTS_PER_PAGE,
+        currentPage * PRODUCTS_PER_PAGE
+    )
+
+    const filterProps = {
+        selectedCategories,
+        setSelectedCategories,
+        selectedSizes,
+        setSelectedSizes,
+        selectedColors,
+        setSelectedColors,
+        priceRange,
+        setPriceRange
+    }
 
     return (
         <div className="min-h-screen bg-background pt-24 pb-20">
@@ -64,7 +115,7 @@ export default function ProductsPage() {
 
                         </div>
                         <div className="flex items-center gap-4">
-                            <FiltersSidebar isMobile />
+                            <FiltersSidebar isMobile {...filterProps} />
                             <SortDropdown currentSort={sort} onSortChange={setSort} />
                         </div>
                     </div>
@@ -73,22 +124,44 @@ export default function ProductsPage() {
                 <div className="flex flex-col lg:flex-row gap-12">
                     {/* Sidebar (Desktop) */}
                     <aside className="hidden border-r pt-10 pr-4 lg:block w-64 flex-shrink-0">
-                        <FiltersSidebar />
+                        <FiltersSidebar {...filterProps} />
                     </aside>
 
                     {/* Main Content */}
                     <main className="flex-1 pt-10">
                         <div className="mb-6 text-sm text-neutral-500">
-                            Showing {sortedProducts.length} of {MOCK_PRODUCTS.length} products
+                            Showing {paginatedProducts.length} of {sortedProducts.length} products
                         </div>
 
-                        <ProductGrid products={sortedProducts} />
+                        {sortedProducts.length > 0 ? (
+                            <>
+                                <ProductGrid products={paginatedProducts} />
 
-                        <ProductPagination
-                            currentPage={currentPage}
-                            totalPages={Math.ceil(MOCK_PRODUCTS.length / 8)} // Mock total pages
-                            onPageChange={setCurrentPage}
-                        />
+                                {totalPages > 1 && (
+                                    <ProductPagination
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        onPageChange={setCurrentPage}
+                                    />
+                                )}
+                            </>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-20 text-neutral-500">
+                                <p className="text-lg">No products found matching your filters.</p>
+                                <Button
+                                    variant="link"
+                                    onClick={() => {
+                                        setSelectedCategories([])
+                                        setSelectedSizes([])
+                                        setSelectedColors([])
+                                        setPriceRange([0, 10000])
+                                    }}
+                                    className="text-white mt-4"
+                                >
+                                    Clear all filters
+                                </Button>
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>
