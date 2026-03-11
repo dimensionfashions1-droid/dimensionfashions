@@ -2,7 +2,7 @@
 
 ## 📌 Project Overview
 
-This project is a **low-budget, scalable eCommerce platform for a MEN’S WEAR business** operating **within India only**.
+This project is a **low-budget, scalable eCommerce platform for a WOMEN's WEAR business** operating **within India only**.
 
 The primary goals are:
 
@@ -50,7 +50,6 @@ This file is the **authoritative instruction manual** for **Antigravity AI / Gem
 * **TypeScript (strict mode)**
 * **Next.js Route Handlers** as backend APIs
 
-> ❗ No Express.js or NestJS in Phase‑1
 
 ---
 
@@ -65,10 +64,10 @@ This file is the **authoritative instruction manual** for **Antigravity AI / Gem
 
 ### Reference website
 
-* https://dribbble.com/shots/18380246-Fashion-website
-* https://dribbble.com/shots/21609385-Fashion-E-Commerce-Landing-Page
-* https://dribbble.com/shots/26751485-Runvea-Fashion-Website-Design
-* https://dribbble.com/shots/20820372-Fashion-Brand-Landing-Page-Website
+* https://sudathi.com/
+* https://www.prashantisarees.com/
+* https://www.kalyansilks.com/
+* https://kankatala.com/
 
 
 
@@ -82,7 +81,6 @@ This file is the **authoritative instruction manual** for **Antigravity AI / Gem
   * Supabase Auth (admin login only)
   * Supabase Storage (product images)
 
-> ❗ Neon is NOT used in Phase‑1
 
 ---
 
@@ -125,33 +123,6 @@ Next.js Route Handlers (API)
 Supabase (Postgres + Storage)
 ```
 
-### ❌ Explicitly Rejected (for now)
-
-* Hostinger Node hosting
-* Express.js standalone server
-* NestJS backend
-
-### Reasoning
-
-* Vercel has first‑class Next.js support
-* Free tier is sufficient for MVP
-* Zero DevOps overhead
-* Faster iteration speed
-
----
-
-## 🧠 When to Reconsider This Architecture
-
-ONLY consider NestJS / Express if:
-
-* Order volume grows significantly
-* Mobile apps are introduced
-* Multiple backend services are required
-* Team size increases
-
-Until then → **Next.js Route Handlers are mandatory**
-
----
 
 ## 📁 Folder Structure (STRICT)
 
