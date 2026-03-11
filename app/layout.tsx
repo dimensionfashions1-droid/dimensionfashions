@@ -1,26 +1,26 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Unbounded, Manrope } from "next/font/google"
+import { Playfair_Display, Lato } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const unbounded = Unbounded({
-  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+const playfair = Playfair_Display({
+  weight: ["400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
-  variable: "--font-unbounded",
+  variable: "--font-heading",
   display: "swap",
 })
 
-const manrope = Manrope({
-  weight: ["300", "400", "500", "600", "700"],
+const lato = Lato({
+  weight: ["300", "400", "700", "900"],
   subsets: ["latin"],
-  variable: "--font-manrope",
+  variable: "--font-sans",
   display: "swap",
 })
 
 export const metadata: Metadata = {
-  title: "DIMENSIONS | Modern Menswear",
-  description: "Redefining modern menswear with minimal, confident, and premium designs.",
+  title: "ANTIGRAVITY | Premium Indian Ethnic Wear",
+  description: "Handwoven sarees carefully handpicked. Discover the heritage of Kanjivaram and Banarasi silks.",
   generator: "Next.js",
 }
 
@@ -30,9 +30,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="light">
       <body
-        className={`${manrope.className} ${unbounded.variable} ${manrope.variable} antialiased bg-background text-foreground selection:bg-white selection:text-black`}
+        className={`${lato.className} ${playfair.variable} ${lato.variable} antialiased bg-background text-foreground`}
       >
         {children}
         <Analytics />

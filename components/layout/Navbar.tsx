@@ -23,10 +23,15 @@ export function Navbar() {
 
     return (
         <>
+            {/* Announcement Bar */}
+            <div className="bg-primary text-secondary text-xs font-sans font-medium text-center py-2 tracking-widest uppercase">
+                Free Shipping across India on orders above ₹2000
+            </div>
+
             <nav
                 className={cn(
-                    "fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-transparent h-20",
-                    isScrolled ? "bg-background/80 backdrop-blur-md border-border" : "bg-transparent"
+                    "sticky top-0 left-0 right-0 z-50 transition-all duration-300 border-b h-20 bg-background text-text-primary",
+                    isScrolled ? "shadow-sm border-border" : "border-transparent"
                 )}
             >
                 <div className="container mx-auto px-4 md:px-8 h-full flex items-center justify-between relative">
@@ -35,25 +40,24 @@ export function Navbar() {
                     <div className="flex items-center">
                         {/* Mobile Trigger */}
                         <button
-                            className="md:hidden text-foreground mr-4"
+                            className="md:hidden text-text-primary mr-4"
                             onClick={() => setIsMobileMenuOpen(true)}
                         >
-                            <Menu className="w-6 h-6" />
+                            <Menu className="w-6 h-6 stroke-1" />
                         </button>
 
-                        {/* Desktop Links - Hides on Scroll Down */}
                         <div className={cn(
                             "hidden md:flex items-center gap-8 transition-all duration-500",
                             hideOnScroll ? "opacity-0 -translate-x-4 pointer-events-none" : "opacity-100 translate-x-0"
                         )}>
-                            {["New Arrivals", "Tops", "Bottoms", "Outerwear"].map((item) => (
+                            {["New Arrivals", "Kanjivaram", "Banarasi", "Soft Silk", "Bridal"].map((item) => (
                                 <Link
                                     key={item}
                                     href={`/${item.toLowerCase().replace(" ", "-")}`}
-                                    className="text-xs font-bold tracking-[0.2em] hover:text-muted-foreground transition-colors uppercase relative group"
+                                    className="text-xs font-sans font-medium tracking-[0.1em] text-text-secondary hover:text-primary transition-colors uppercase relative group"
                                 >
                                     {item}
-                                    <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-foreground transition-all duration-300 group-hover:w-full" />
+                                    <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-full" />
                                 </Link>
                             ))}
                         </div>
@@ -63,25 +67,25 @@ export function Navbar() {
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                         <Link href="/" className="z-50">
                             <span className={cn(
-                                "font-heading font-black tracking-widest hover:opacity-80 transition-all duration-500 block whitespace-nowrap",
-                                hideOnScroll ? "text-2xl" : "text-3xl"
+                                "font-heading font-normal tracking-wide hover:opacity-80 transition-all duration-300 block whitespace-nowrap text-primary",
+                                hideOnScroll ? "text-2xl" : "text-3xl md:text-4xl"
                             )}>
-                                DIMENSIONS
+                                ANTIGRAVITY
                             </span>
                         </Link>
                     </div>
 
-                    {/* RIGHT: Actions - Hides on Scroll Down */}
+                    {/* RIGHT: Actions */}
                     <div className={cn(
-                        "flex items-center gap-4 md:gap-6 transition-all duration-500",
+                        "flex items-center gap-4 md:gap-6 transition-all duration-300",
                         hideOnScroll ? "opacity-0 translate-x-4 pointer-events-none" : "opacity-100 translate-x-0"
                     )}>
-                        <button className="text-foreground hover:text-muted-foreground transition-colors">
-                            <Search className="w-5 h-5" />
+                        <button className="text-text-primary hover:text-primary transition-colors">
+                            <Search className="w-5 h-5 stroke-1" />
                         </button>
-                        <Link href="/cart" className="relative text-foreground hover:text-muted-foreground transition-colors">
-                            <ShoppingBag className="w-5 h-5" />
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-foreground rounded-full" />
+                        <Link href="/cart" className="relative text-text-primary hover:text-primary transition-colors">
+                            <ShoppingBag className="w-5 h-5 stroke-1" />
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full" />
                         </Link>
                     </div>
                 </div>
@@ -90,25 +94,25 @@ export function Navbar() {
             {/* Mobile Menu Overlay */}
             <div
                 className={cn(
-                    "fixed inset-0 z-[60] bg-background transform transition-transform duration-500 ease-in-out md:hidden",
+                    "fixed inset-0 z-[60] bg-background text-text-primary transform transition-transform duration-500 ease-in-out md:hidden",
                     isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
                 <div className="p-6 h-full flex flex-col">
                     <div className="flex items-center justify-between mb-12">
-                        <span className="font-heading font-bold text-xl tracking-tighter">DIMENSIONS</span>
+                        <span className="font-heading font-normal text-2xl tracking-wide text-primary">ANTIGRAVITY</span>
                         <button onClick={() => setIsMobileMenuOpen(false)}>
-                            <X className="w-6 h-6" />
+                            <X className="w-6 h-6 stroke-1" />
                         </button>
                     </div>
 
                     <div className="flex flex-col gap-6 text-2xl font-heading font-medium">
-                        {["New Arrivals", "Apparel", "Accessories", "Collections", "About", "Contact"].map((item) => (
+                        {["New Arrivals", "Kanjivaram", "Banarasi", "Soft Silk", "Cotton & Linen", "Bridal"].map((item) => (
                             <Link
                                 key={item}
                                 href={`/${item.toLowerCase().replace(" ", "-")}`}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="hover:text-muted-foreground transition-colors"
+                                className="hover:text-primary transition-colors font-sans text-xl"
                             >
                                 {item}
                             </Link>
@@ -116,7 +120,7 @@ export function Navbar() {
                     </div>
 
                     <div className="mt-auto border-t border-border pt-6">
-                        <Link href="/login" className="text-lg font-medium">
+                        <Link href="/login" className="text-lg font-sans font-medium hover:text-primary transition-colors">
                             Account
                         </Link>
                     </div>

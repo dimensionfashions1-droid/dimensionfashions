@@ -1,37 +1,48 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+:root {
+  --color-primary: #61152a; /* Deep Maroon */
+  --color-secondary: #fdfbf7; /* Soft Ivory */
+  --color-accent: #cda05b; /* Muted Gold */
+  --color-background: #fdfbf7;
+  --color-surface: #ffffff;
+  --color-text-primary: #2a2a2a;
+  --color-text-secondary: #57534e;
+  --color-border: #e7e5e4;
+}
+
 @theme inline {
-  --font-sans: var(--font-manrope), "sans-serif";
-  --font-heading: var(--font-unbounded), "sans-serif";
+  --font-sans: var(--font-sans), "sans-serif";
+  --font-heading: var(--font-heading), "serif";
 
-  --color-background: #050505;
-  --color-foreground: #ffffff;
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-text-primary);
 
-  --color-card: #0a0a0a;
-  --color-card-foreground: #ffffff;
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-text-primary);
 
-  --color-popover: #0a0a0a;
-  --color-popover-foreground: #ffffff;
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-text-primary);
 
-  --color-primary: #ffffff;
-  --color-primary-foreground: #000000;
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: #ffffff;
 
-  --color-secondary: #1a1a1a;
-  --color-secondary-foreground: #ffffff;
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-text-primary);
 
-  --color-muted: #1a1a1a;
-  --color-muted-foreground: #a3a3a3;
+  --color-muted: #f5f5f4;
+  --color-muted-foreground: var(--color-text-secondary);
 
-  --color-accent: #262626;
-  --color-accent-foreground: #ffffff;
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-text-primary);
 
-  --color-destructive: #7f1d1d;
+  --color-destructive: #9f1239;
   --color-destructive-foreground: #ffffff;
 
-  --color-border: #262626;
-  --color-input: #262626;
-  --color-ring: #ffffff;
+  --color-border: var(--color-border);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-primary);
 
   --radius-sm: 0rem;
   --radius-md: 0rem;

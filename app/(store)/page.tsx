@@ -7,12 +7,11 @@ import { MarqueeSection } from "@/components/home/MarqueeSection"
 import { FeaturedDrop } from "@/components/home/FeaturedDrop"
 
 export default function Home() {
-    // Mock Data - CLOTHES ONLY
     const features = [
-        { id: "1", title: "Oversized Structured Tee", price: 2499, category: "Tops", image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1964&auto=format&fit=crop" },
-        { id: "2", title: "Wide Leg Pleated Trousers", price: 3999, category: "Bottoms", image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1887&auto=format&fit=crop" },
-        { id: "3", title: "Utility Vest Black", price: 4599, category: "Outerwear", image: "https://images.unsplash.com/photo-1559582930-bb01987cf4dd?q=80&w=1762&auto=format&fit=crop" },
-        { id: "4", title: "Boxy Fit Shirt", price: 2999, category: "Tops", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1888&auto=format&fit=crop" },
+        { id: "1", title: "Handwoven Kanjivaram Silk", price: 14499, category: "Kanjivaram", image: "https://images.unsplash.com/photo-1610189014168-96f7c8f49514?q=80&w=1500&auto=format&fit=crop" },
+        { id: "2", title: "Pure Banarasi Georgette", price: 11999, category: "Banarasi", image: "https://images.unsplash.com/photo-1583391265517-35bbdad01209?q=80&w=1500&auto=format&fit=crop" },
+        { id: "3", title: "Soft Silk Pastel Saree", price: 8599, category: "Soft Silk", image: "https://images.unsplash.com/photo-1617344933996-51d8b1e428e1?q=80&w=1500&auto=format&fit=crop" },
+        { id: "4", title: "Linen Handblock Print", price: 4299, category: "Linen", image: "https://images.unsplash.com/photo-1605518216954-d8916d16cc0a?q=80&w=1500&auto=format&fit=crop" },
     ]
 
     return (

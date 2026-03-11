@@ -1,33 +1,37 @@
-
 import Link from "next/link"
 import Image from "next/image"
+import { ArrowRight } from "lucide-react"
 
 export function EditorialSection() {
     return (
-        <section className="py-20    ">
+        <section className="bg-secondary text-text-primary">
             <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="relative h-[600px] md:h-screen w-full bg-neutral-900">
-                    <Image
-                        src="https://images.unsplash.com/photo-1536766820879-059fec98ec0a?q=80&w=1887&auto=format&fit=crop"
-                        alt="Editorial"
-                        fill
-                        className="object-cover grayscale hover:grayscale-0 transition-all duration-700 ease-in-out"
-                    />
+                <div className="relative h-[600px] md:h-[800px] w-full p-8 md:p-16 flex items-center justify-center">
+                    <div className="relative w-full h-full border border-primary/20 rounded-t-full overflow-hidden shadow-sm">
+                        <Image
+                            src="https://images.unsplash.com/photo-1596455113045-3129ba0ec15f?q=80&w=2000&auto=format&fit=crop"
+                            alt="Editorial"
+                            fill
+                            className="object-cover hover:scale-105 transition-transform duration-1000 ease-in-out"
+                        />
+                        <div className="absolute inset-0 border-[4px] border-background/20 rounded-t-full z-10 m-3 pointer-events-none"></div>
+                    </div>
                     <div className="absolute inset-0 bg-black/10" />
                 </div>
                 {/* BLACK CARD */}
-                <div className="flex flex-col justify-center p-8 md:p-24 space-y-8 bg-background text-foreground relative">
-                    <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest absolute top-8 left-8">001 — THE MONOCHROME EDIT</span>
+                <div className="flex flex-col justify-center p-8 md:p-24 space-y-8 bg-background relative border-l border-primary/10">
+                    <span className="font-sans text-xs text-accent uppercase tracking-[0.3em] font-bold">001 — THE KANJIVARAM EDIT</span>
 
-                    <h2 className="font-heading font-bold text-5xl md:text-7xl uppercase leading-[0.9] tracking-tighter text-foreground">
-                        Silent<br />Noise
+                    <h2 className="font-heading font-normal text-5xl md:text-7xl capitalize leading-[1.1] tracking-wide text-primary">
+                        Woven<br />Heritage
                     </h2>
-                    <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
-                        A collection defined by strict palettes and fluid silhouettes. We stripped away the unnecessary to reveal the essential structure of modern menswear.
+                    <p className="text-text-secondary text-lg leading-relaxed max-w-md font-sans">
+                        A collection defined by rich palettes and intricate zari detailing. We embraced tradition and masterful artistry to reveal the timeless grace of pure silk.
                     </p>
 
-                    <Link href="/collections/monochrome" className="inline-flex items-center gap-2 text-sm font-bold tracking-widest uppercase hover:underline underline-offset-4 text-foreground">
-                        View Lookbook <span>→</span>
+                    <Link href="/collections/monochrome" className="inline-flex items-center gap-2 text-sm font-bold tracking-[0.2em] uppercase text-primary hover:text-accent transition-colors group">
+                        EXPLORE THE EDIT
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2" />
                     </Link>
                 </div>
             </div>
