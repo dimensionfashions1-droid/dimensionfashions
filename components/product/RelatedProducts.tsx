@@ -8,10 +8,10 @@ interface RelatedProductsProps {
 
 // Mock Data
 const RELATED_PRODUCTS: Product[] = [
-    { id: "2", title: "Wide Leg Pleated Trousers", price: 3999, category: "Bottoms", image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1887&auto=format&fit=crop", discount: 10, rating: 4.8, inStock: true },
-    { id: "3", title: "Utility Vest Black", price: 4599, category: "Outerwear", image: "https://images.unsplash.com/photo-1559582930-bb01987cf4dd?q=80&w=1762&auto=format&fit=crop", discount: 0, rating: 4.2, inStock: true },
-    { id: "4", title: "Boxy Fit Shirt", price: 2999, category: "Tops", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1888&auto=format&fit=crop", discount: 0, rating: 4.0, inStock: true },
-    { id: "6", title: "Minimalist Hoodie", price: 3499, category: "Tops", image: "https://images.unsplash.com/photo-1509942774463-acf339cf87d5?q=80&w=987&auto=format&fit=crop", discount: 15, rating: 4.6, inStock: true },
+    { id: "2", title: "Royal Kanjivaram Silk", price: 12999, category: "Kanjivaram", image: "https://images.pexels.com/photos/10189112/pexels-photo-10189112.jpeg?auto=compress&cs=tinysrgb&w=800", discount: 10, rating: 4.8, inStock: true },
+    { id: "3", title: "Handwoven Banarasi Zari", price: 15499, category: "Banarasi", image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=800", discount: 0, rating: 4.2, inStock: true },
+    { id: "4", title: "Soft Silk Pastel Edit", price: 8999, category: "Soft Silk", image: "https://images.pexels.com/photos/10189113/pexels-photo-10189113.jpeg?auto=compress&cs=tinysrgb&w=800", discount: 0, rating: 4.0, inStock: true },
+    { id: "6", title: "Linen Cotton Handloom", price: 4599, category: "Cotton & Linen", image: "https://images.pexels.com/photos/10189106/pexels-photo-10189106.jpeg?auto=compress&cs=tinysrgb&w=800", discount: 15, rating: 4.6, inStock: true },
 ]
 
 export function RelatedProducts({ currentProductId }: RelatedProductsProps) {
@@ -19,8 +19,8 @@ export function RelatedProducts({ currentProductId }: RelatedProductsProps) {
     const productsToShow = RELATED_PRODUCTS.slice(0, 4)
 
     return (
-        <div className="py-20 border-t border-neutral-800">
-            <h2 className="font-heading font-bold text-3xl uppercase tracking-tight mb-12 text-white">You May Also Like</h2>
+        <div className="py-20 border-t border-border">
+            <h2 className="font-heading font-normal text-3xl uppercase tracking-wide mb-12 text-primary">You May Also Like</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10">
                 {productsToShow.map((product) => (

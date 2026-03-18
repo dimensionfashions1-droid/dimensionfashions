@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/sheet"
 import { Filter } from "lucide-react"
 
-// Mock Data for Categories
+// Saree Categories
 const categories = [
-    { id: "all", label: "All Products" },
-    { id: "tops", label: "Tops" },
-    { id: "bottoms", label: "Bottoms" },
-    { id: "outerwear", label: "Outerwear" },
-    { id: "accessories", label: "Accessories" },
+    { id: "kanjivaram", label: "Kanjivaram Silk" },
+    { id: "banarasi", label: "Banarasi Weaves" },
+    { id: "softsilk", label: "Soft Silk" },
+    { id: "linen", label: "Linen & Cotton" },
+    { id: "organza", label: "Organza" },
 ]
 
 interface FiltersSidebarProps {
@@ -78,26 +78,26 @@ export function FiltersSidebar({
         setSelectedCategories([])
         setSelectedSizes([])
         setSelectedColors([])
-        setPriceRange([0, 10000])
+        setPriceRange([0, 100000])
     }
 
     const FilterContent = () => (
-        <div className="space-y-12 ">
+        <div className="space-y-14">
             {/* Categories */}
-            <div className="space-y-6">
-                <h3 className="font-heading font-bold text-sm uppercase tracking-widest text-white border-b border-white/20 pb-2 inline-block">Categories</h3>
-                <div className="space-y-4 pt-2">
+            <div className="space-y-8">
+                <h3 className="font-heading font-normal text-sm uppercase tracking-[0.2em] text-primary border-b border-primary/5 pb-4 inline-block">By Weave</h3>
+                <div className="space-y-5 pt-2">
                     {categories.map((category) => (
-                        <div key={category.id} className="flex items-center space-x-3 group cursor-pointer">
+                        <div key={category.id} className="flex items-center space-x-4 group cursor-pointer">
                             <Checkbox
                                 id={category.id}
                                 checked={selectedCategories.includes(category.id)}
                                 onCheckedChange={() => handleCategoryChange(category.id)}
-                                className="rounded-full w-5 h-5 data-[state=checked]:bg-white data-[state=checked]:text-black data-[state=checked]:border-white border-neutral-700"
+                                className="rounded-none w-4 h-4 data-[state=checked]:bg-primary data-[state=checked]:text-white border-primary/10"
                             />
                             <Label
                                 htmlFor={category.id}
-                                className="text-base text-neutral-400 group-hover:text-white font-medium leading-none cursor-pointer transition-colors"
+                                className="text-[11px] uppercase tracking-[0.15em] text-primary/60 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
                             >
                                 {category.label}
                             </Label>
@@ -107,91 +107,44 @@ export function FiltersSidebar({
             </div>
 
             {/* Price Range */}
-            <div className="space-y-8">
+            <div className="space-y-10">
                 <div className="flex items-center justify-between">
-                    <h3 className="font-heading font-bold text-sm uppercase tracking-widest text-white border-b border-white/20 pb-2 inline-block">Price</h3>
-                    <span className="text-xs font-mono text-neutral-400 bg-neutral-900 px-3 py-1.5 rounded-full border border-neutral-800">
+                    <h3 className="font-heading font-normal text-sm uppercase tracking-[0.2em] text-primary border-b border-primary/5 pb-4 inline-block">Price Range</h3>
+                    <span className="text-[10px] font-bold text-primary bg-primary/5 px-4 py-2 border border-primary/5 font-sans">
                         ₹{priceRange[0]} - ₹{priceRange[1]}
                     </span>
                 </div>
                 <Slider
-                    defaultValue={[0, 10000]}
-                    max={10000}
-                    step={100}
+                    defaultValue={[0, 100000]}
+                    max={100000}
+                    step={1000}
                     value={priceRange}
                     onValueChange={setPriceRange}
                     className="py-4"
                 />
             </div>
 
-            {/* Size */}
-            <div className="space-y-6">
-                <h3 className="font-heading font-bold text-sm uppercase tracking-widest text-white border-b border-white/20 pb-2 inline-block">Size</h3>
-                <div className="grid grid-cols-3 gap-2 pt-2">
-                    {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
-                        <div key={size} className="relative group">
-                            <Checkbox
-                                id={`size-${size}`}
-                                className="peer sr-only"
-                                checked={selectedSizes.includes(size)}
-                                onCheckedChange={() => handleSizeChange(size)}
-                            />
-                            <Label
-                                htmlFor={`size-${size}`}
-                                className="flex items-center justify-center w-full h-10 border border-neutral-800 rounded-lg text-neutral-400 font-medium cursor-pointer hover:border-white hover:text-white peer-data-[state=checked]:bg-white peer-data-[state=checked]:text-black peer-data-[state=checked]:border-white transition-all"
-                            >
-                                {size}
-                            </Label>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
             {/* Colors */}
-            <div className="space-y-6">
-                <h3 className="font-heading font-bold text-sm uppercase tracking-widest text-white border-b border-white/20 pb-2 inline-block">Color</h3>
-                <div className="space-y-3 pt-2">
-                    {["Black", "White", "Navy", "Beige", "Olive", "Grey"].map((color) => (
-                        <div key={color} className="flex items-center space-x-3 group cursor-pointer">
+            <div className="space-y-8">
+                <h3 className="font-heading font-normal text-sm uppercase tracking-[0.2em] text-primary border-b border-primary/5 pb-4 inline-block">Color Palette</h3>
+                <div className="grid grid-cols-2 gap-y-6 pt-2">
+                    {["Maroon", "Gold", "Ivory", "Emerald", "RoyalBlue", "Black"].map((color) => (
+                        <div key={color} className="flex items-center space-x-4 group cursor-pointer">
                             <Checkbox
                                 id={`color-${color}`}
                                 checked={selectedColors.includes(color)}
                                 onCheckedChange={() => handleColorChange(color)}
-                                className="rounded-full w-5 h-5 data-[state=checked]:bg-white data-[state=checked]:text-black data-[state=checked]:border-white border-neutral-700"
+                                className="rounded-full w-4 h-4 data-[state=checked]:bg-primary data-[state=checked]:text-white border-primary/10"
                             />
                             <Label
                                 htmlFor={`color-${color}`}
-                                className="flex items-center justify-between w-full text-base text-neutral-400 group-hover:text-white font-medium leading-none cursor-pointer transition-colors"
+                                className="flex items-center gap-3 text-[11px] uppercase tracking-[0.1em] text-primary/60 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
                             >
-                                <span>{color}</span>
                                 <div
-                                    className="w-3 h-3 rounded-full border border-neutral-800"
+                                    className="w-3 h-3 rounded-full border border-primary/10"
                                     style={{ backgroundColor: color.toLowerCase() }}
                                 />
-                            </Label>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Rating */}
-            <div className="space-y-6">
-                <h3 className="font-heading font-bold text-sm uppercase tracking-widest text-white border-b border-white/20 pb-2 inline-block">Rating</h3>
-                <div className="space-y-4 pt-2">
-                    {[4, 3, 2, 1].map((rating) => (
-                        <div key={rating} className="flex items-center space-x-3 group cursor-pointer">
-                            <Checkbox id={`rating-${rating}`} className="rounded-full w-5 h-5 data-[state=checked]:bg-white data-[state=checked]:text-black data-[state=checked]:border-white border-neutral-700" />
-                            <Label
-                                htmlFor={`rating-${rating}`}
-                                className="text-base font-medium leading-none cursor-pointer flex items-center group-hover:text-white text-neutral-400 transition-colors"
-                            >
-                                {Array.from({ length: rating }).map((_, i) => (
-                                    <span key={i} className="text-white">★</span>
-                                ))}
-                                {Array.from({ length: 5 - rating }).map((_, i) => (
-                                    <span key={i} className="text-neutral-800">★</span>
-                                ))}
-                                <span className="ml-3 text-neutral-500 text-xs uppercase tracking-widest font-bold translate-y-[1px]">& Up</span>
+                                <span>{color}</span>
                             </Label>
                         </div>
                     ))}
@@ -201,10 +154,10 @@ export function FiltersSidebar({
             {/* Clear Filters */}
             <Button
                 variant="outline"
-                className="w-full rounded-full border-neutral-800 text-neutral-400 hover:bg-white hover:text-black hover:border-white uppercase tracking-widest text-xs font-bold py-7 transition-all duration-300 mt-8"
+                className="w-full rounded-full border-primary/10 text-primary hover:bg-primary hover:text-white uppercase tracking-[0.25em] text-[10px] font-bold py-8 transition-all duration-700 mt-10 hover:shadow-lg"
                 onClick={clearAllFilters}
             >
-                Clear All Filters
+                Clear All Selection
             </Button>
         </div>
     )
@@ -213,19 +166,19 @@ export function FiltersSidebar({
         return (
             <Sheet>
                 <SheetTrigger asChild>
-                    <Button variant="outline" className="lg:hidden rounded-full border-neutral-800 text-white hover:bg-white hover:text-black">
+                    <Button variant="outline" className="lg:hidden rounded-none border-primary/20 text-primary hover:bg-primary hover:text-white transition-all px-8">
                         <Filter className="w-4 h-4 mr-2" />
-                        Filters
+                        Refine
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] sm:w-[400px] border-neutral-800 bg-[#050505] overflow-y-auto">
-                    <SheetHeader>
-                        <SheetTitle className="font-heading font-bold uppercase tracking-wide text-white">Filters</SheetTitle>
-                        <SheetDescription className="text-neutral-400">
-                            Refine your search to find the perfect piece.
+                <SheetContent side="left" className="w-[300px] border-primary/10 bg-surface overflow-y-auto">
+                    <SheetHeader className="text-left pb-8 border-b border-primary/5">
+                        <SheetTitle className="font-heading font-normal text-2xl tracking-wide text-primary">Filters</SheetTitle>
+                        <SheetDescription className="text-text-secondary/70 font-sans text-xs uppercase tracking-widest pt-1">
+                            Refine your search for the perfect drape
                         </SheetDescription>
                     </SheetHeader>
-                    <div className="py-6">
+                    <div className="py-10">
                         <FilterContent />
                     </div>
                 </SheetContent>

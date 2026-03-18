@@ -1,20 +1,19 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Playfair_Display, Lato } from "next/font/google"
+import { Playfair_Display, Montserrat } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const playfair = Playfair_Display({
-  weight: ["400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
-  variable: "--font-heading",
+  variable: "--font-playfair",
   display: "swap",
 })
 
-const lato = Lato({
-  weight: ["300", "400", "700", "900"],
+const montserrat = Montserrat({
+  weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-montserrat",
   display: "swap",
 })
 
@@ -32,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body
-        className={`${lato.className} ${playfair.variable} ${lato.variable} antialiased bg-background text-foreground`}
+        className={`${montserrat.variable} ${playfair.variable} antialiased bg-background text-foreground font-sans`}
       >
         {children}
         <Analytics />

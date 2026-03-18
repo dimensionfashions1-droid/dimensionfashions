@@ -1,20 +1,29 @@
+"use client";
+
+import { useScrollDirection } from "@/hooks/use-scroll-direction"
 
 export function MarqueeSection() {
+    const scrollDirection = useScrollDirection()
+    
     return (
-        <section className="py-8 bg-primary border-y border-primary/10 overflow-hidden relative z-10 flex items-center">
-            <div className="flex whitespace-nowrap animate-marquee">
-                <span className="text-sm md:text-base font-sans font-medium uppercase tracking-[0.3em] text-secondary px-8 flex items-center gap-8">
-                    Pure Silk Sarees <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Handwoven Heritage <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Bridal Curations <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Festive Elegance
-                </span>
-                <span className="text-sm md:text-base font-sans font-medium uppercase tracking-[0.3em] text-secondary px-8 flex items-center gap-8">
-                    Pure Silk Sarees <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Handwoven Heritage <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Bridal Curations <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Festive Elegance
-                </span>
-                <span className="text-sm md:text-base font-sans font-medium uppercase tracking-[0.3em] text-secondary px-8 flex items-center gap-8">
-                    Pure Silk Sarees <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Handwoven Heritage <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Bridal Curations <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Festive Elegance
-                </span>
-                <span className="text-sm md:text-base font-sans font-medium uppercase tracking-[0.3em] text-secondary px-8 flex items-center gap-8">
-                    Pure Silk Sarees <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Handwoven Heritage <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Bridal Curations <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> Festive Elegance
-                </span>
+        <section className="py-16 bg-primary/5 overflow-hidden border-y border-primary/5">
+            <div className="relative flex whitespace-nowrap overflow-hidden">
+                <div className="animate-marquee flex gap-12 items-center py-4">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                        <span key={i} className="font-heading italic text-4xl md:text-6xl text-primary/10 tracking-widest uppercase flex items-center gap-12">
+                            Handwoven Heritage
+                            <span className="w-2 h-2 rounded-full bg-accent opacity-30" />
+                        </span>
+                    ))}
+                </div>
+                <div className="animate-marquee flex gap-12 items-center py-4 absolute top-0 left-full">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                        <span key={i} className="font-heading italic text-4xl md:text-6xl text-primary/10 tracking-widest uppercase flex items-center gap-12">
+                            Handwoven Heritage
+                            <span className="w-2 h-2 rounded-full bg-accent opacity-30" />
+                        </span>
+                    ))}
+                </div>
             </div>
         </section>
     )

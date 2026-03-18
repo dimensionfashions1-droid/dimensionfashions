@@ -62,15 +62,6 @@ This file is the **authoritative instruction manual** for **Antigravity AI / Gem
   * Magic UI / Aceternity UI (marketing sections only)
 
 
-### Reference website
-
-* https://sudathi.com/
-* https://www.prashantisarees.com/
-* https://www.kalyansilks.com/
-* https://kankatala.com/
-
-
-
 ---
 
 ### Database, Auth & Storage

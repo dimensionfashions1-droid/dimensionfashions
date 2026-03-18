@@ -8,6 +8,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
+import { cn } from "@/lib/utils"
 
 interface ProductPaginationProps {
     currentPage: number
@@ -39,8 +40,8 @@ export function ProductPagination({ currentPage, totalPages, onPageChange }: Pro
     if (totalPages <= 1) return null
 
     return (
-        <Pagination className="mt-12">
-            <PaginationContent>
+        <Pagination className="mt-20 border-t border-primary/10 pt-12">
+            <PaginationContent className="gap-2">
                 <PaginationItem>
                     <PaginationPrevious
                         href="#"
@@ -48,14 +49,17 @@ export function ProductPagination({ currentPage, totalPages, onPageChange }: Pro
                             e.preventDefault()
                             if (currentPage > 1) onPageChange(currentPage - 1)
                         }}
-                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        className={cn(
+                            "rounded-none border-primary/20 text-primary hover:bg-primary hover:text-white transition-all uppercase tracking-widest text-[10px] font-bold px-6",
+                            currentPage === 1 ? "pointer-events-none opacity-30" : "cursor-pointer"
+                        )}
                     />
                 </PaginationItem>
 
                 {getPageNumbers().map((page, index) => (
                     <PaginationItem key={index}>
                         {page === '...' ? (
-                            <PaginationEllipsis />
+                            <PaginationEllipsis className="text-primary/40" />
                         ) : (
                             <PaginationLink
                                 href="#"
@@ -64,6 +68,12 @@ export function ProductPagination({ currentPage, totalPages, onPageChange }: Pro
                                     e.preventDefault()
                                     onPageChange(page as number)
                                 }}
+                                className={cn(
+                                    "rounded-none w-10 h-10 flex items-center justify-center font-sans text-xs font-bold transition-all",
+                                    currentPage === page 
+                                        ? "bg-primary text-white border-primary" 
+                                        : "border-primary/10 text-text-secondary hover:border-primary/40 hover:text-primary"
+                                )}
                             >
                                 {page}
                             </PaginationLink>
@@ -78,7 +88,10 @@ export function ProductPagination({ currentPage, totalPages, onPageChange }: Pro
                             e.preventDefault()
                             if (currentPage < totalPages) onPageChange(currentPage + 1)
                         }}
-                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        className={cn(
+                            "rounded-none border-primary/20 text-primary hover:bg-primary hover:text-white transition-all uppercase tracking-widest text-[10px] font-bold px-6",
+                            currentPage === totalPages ? "pointer-events-none opacity-30" : "cursor-pointer"
+                        )}
                     />
                 </PaginationItem>
             </PaginationContent>

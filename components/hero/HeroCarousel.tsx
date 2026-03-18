@@ -3,14 +3,8 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Facebook, Instagram, Twitter } from "lucide-react"
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    type CarouselApi,
-} from "@/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
 import { cn } from "@/lib/utils"
 
@@ -20,77 +14,55 @@ export function HeroCarousel() {
     const [count, setCount] = React.useState(0)
 
     const plugin = React.useRef(
-        Autoplay({ delay: 5000, stopOnInteraction: false })
+        Autoplay({ delay: 6000, stopOnInteraction: false })
     )
 
     React.useEffect(() => {
-        if (!api) {
-            return
-        }
-
+        if (!api) return
         setCount(api.scrollSnapList().length)
         setCurrent(api.selectedScrollSnap())
-
-        api.on("select", () => {
-            setCurrent(api.selectedScrollSnap())
-        })
+        api.on("select", () => setCurrent(api.selectedScrollSnap()))
     }, [api])
 
     const slides = [
         {
             id: 1,
-            image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=2000&auto=format&fit=crop",
-            title: "Bridal\nHeritage",
-            subtitle: "The Kanjivaram Edit",
-            link: "/collections/kanjivaram"
+            image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1600",
+            title: "The Silk\nAnthology",
+            subtitle: "Exquisite Handwoven Kanjivarams",
+            link: "/collections/kanjivaram",
+            tag: "New Arrivals"
         },
         {
             id: 2,
-            image: "https://images.unsplash.com/photo-1583391733959-b1587d54b815?q=80&w=2000&auto=format&fit=crop",
-            title: "Festive\nGrander",
-            subtitle: "Pure Banarasi Silks",
-            link: "/collections/banarasi"
+            image: "https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=1600",
+            title: "Midnight\nOrganza",
+            subtitle: "Sheer Sophistication & Grace",
+            link: "/collections/organza",
+            tag: "Contemporary"
         },
         {
             id: 3,
-            image: "https://images.unsplash.com/photo-1589467380922-38e9ab51cbff?q=80&w=2000&auto=format&fit=crop",
-            title: "Everyday\nElegance",
-            subtitle: "Soft Silks & Linens",
-            link: "/shop/soft-silk"
+            image: "https://images.pexels.com/photos/8437013/pexels-photo-8437013.jpeg?auto=compress&cs=tinysrgb&w=1600",
+            title: "Heritage\nBanaras",
+            subtitle: "Timeless Craftsmanship",
+            link: "/collections/banarasi",
+            tag: "Classic"
         }
     ]
 
     return (
-        <section className="relative h-[90vh] md:h-screen w-full bg-background overflow-hidden ">
-            {/* LEFT SIDEBAR - SOCIALS (OVERLAY) */}
-            <div className="hidden lg:flex absolute left-0 top-0 bottom-0 w-24 flex-col items-center justify-center gap-8 z-20 pointer-events-none">
-                <div className="pointer-events-auto flex flex-col gap-8 bg-background/40 backdrop-blur-md p-4 rounded-full border border-primary/20">
-                    <Link href="#" className="p-2 hover:bg-primary hover:text-white rounded-full transition-colors text-primary bg-background/80 shadow-sm">
-                        <Facebook className="w-5 h-5 stroke-1" />
-                    </Link>
-                    <Link href="#" className="p-2 hover:bg-primary hover:text-white rounded-full transition-colors text-primary bg-background/80 shadow-sm">
-                        <Instagram className="w-5 h-5 stroke-1" />
-                    </Link>
-                    <Link href="#" className="p-2 hover:bg-primary hover:text-white rounded-full transition-colors text-primary bg-background/80 shadow-sm">
-                        <Twitter className="w-5 h-5 stroke-1" />
-                    </Link>
-                </div>
-            </div>
-
-            {/* CENTER - CAROUSEL */}
-            <div className="w-full h-full relative group bg-neutral-100">
+        <section className="relative w-full bg-background pt-32 pb-12">
+            <div className="max-w-[1280px] mx-auto px-4">
                 <Carousel
                     setApi={setApi}
                     plugins={[plugin.current]}
-                    className="w-full h-full"
-                    opts={{
-                        loop: true,
-                        align: "start",
-                    }}
+                    className="w-full h-[400px] md:h-[500px] overflow-hidden rounded-[2rem] shadow-2xl"
+                    opts={{ loop: true }}
                 >
-                    <CarouselContent className="h-full">
+                    <CarouselContent className="h-full ml-0">
                         {slides.map((slide) => (
-                            <CarouselItem key={slide.id} className="relative h-full w-full pl-0">
+                            <CarouselItem key={slide.id} className="relative h-[400px] md:h-[500px] w-full pl-0">
                                 <div className="relative h-full w-full">
                                     <Image
                                         src={slide.image}
@@ -99,20 +71,27 @@ export function HeroCarousel() {
                                         className="object-cover"
                                         priority
                                     />
-                                    <div className="absolute inset-0 bg-primary/30 mix-blend-multiply" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
-
-                                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4">
-                                        <div className="border border-white/30 p-8 md:p-16 backdrop-blur-sm bg-black/10 flex flex-col items-center">
-                                            <p className="text-secondary uppercase tracking-[0.4em] text-xs md:text-sm mb-6 font-sans font-medium animate-fade-in-up">
-                                                {slide.subtitle}
-                                            </p>
-                                            <h2 className="font-heading font-normal text-5xl md:text-7xl lg:text-8xl text-secondary drop-shadow-2xl capitalize tracking-wide leading-[1.1] whitespace-pre-line mb-10 animate-fade-in-up">
+                                    {/* Moodier Overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent" />
+                                    
+                                    <div className="absolute inset-0 z-10 flex flex-col items-start justify-center text-left px-12 md:px-20">
+                                        <div className="max-w-2xl space-y-6">
+                                            <div className="flex flex-col items-start gap-2">
+                                                <span className="text-[10px] text-accent uppercase tracking-[0.4em] font-sans font-bold">
+                                                    {slide.tag}
+                                                </span>
+                                            </div>
+                                            <h2 className="font-heading font-normal text-4xl md:text-6xl text-white leading-tight tracking-tight">
                                                 {slide.title}
                                             </h2>
-                                            <Button asChild className="rounded-none border-border bg-background text-primary hover:bg-primary hover:text-white hover:border-primary font-sans font-medium text-xs md:text-sm tracking-[0.2em] uppercase px-10 py-6 animate-fade-in-scale transition-all duration-300">
-                                                <Link href={slide.link}>Explore Collection</Link>
-                                            </Button>
+                                            <div className="pt-4">
+                                                <Link 
+                                                    href={slide.link}
+                                                    className="group inline-flex items-center gap-4 text-white text-[10px] md:text-xs font-sans font-bold uppercase tracking-[0.3em] bg-white/10 hover:bg-white hover:text-primary backdrop-blur-md px-6 py-3 border border-white/20 transition-all duration-500 rounded-full"
+                                                >
+                                                    Shop Collection
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -120,16 +99,18 @@ export function HeroCarousel() {
                         ))}
                     </CarouselContent>
 
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 z-30">
+                    {/* Navigation Indicators */}
+                    <div className="absolute bottom-10 left-10 flex items-center gap-4 z-30">
                         {Array.from({ length: count }).map((_, index) => (
-                            <button
+                            <Button
                                 key={index}
+                                variant="ghost"
+                                suppressHydrationWarning
                                 className={cn(
-                                    "w-16 md:w-24 h-[1px] transition-all duration-500",
-                                    current === index ? "bg-accent scale-y-[2]" : "bg-white/40 hover:bg-white/80"
+                                    "p-0 h-[2px] w-12 rounded-none transition-all duration-1000 hover:bg-transparent",
+                                    current === index ? "bg-white" : "bg-white/20"
                                 )}
                                 onClick={() => api?.scrollTo(index)}
-                                aria-label={`Go to slide ${index + 1}`}
                             />
                         ))}
                     </div>

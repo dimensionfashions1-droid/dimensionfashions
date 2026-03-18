@@ -17,14 +17,14 @@ import { Button } from "@/components/ui/button"
 
 // Mock Data
 const MOCK_PRODUCTS = [
-    { id: "1", title: "Oversized Structured Tee", price: 2499, category: "Tops", image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1964&auto=format&fit=crop", discount: 0, rating: 4.5, inStock: true, colors: ["Black", "White", "Beige"], sizes: ["S", "M", "L", "XL"] },
-    { id: "2", title: "Wide Leg Pleated Trousers", price: 3999, category: "Bottoms", image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1887&auto=format&fit=crop", discount: 10, rating: 4.8, inStock: true, colors: ["Black", "Charcoal"], sizes: ["30", "32", "34", "36"] },
-    { id: "3", title: "Utility Vest Black", price: 4599, category: "Outerwear", image: "https://images.unsplash.com/photo-1559582930-bb01987cf4dd?q=80&w=1762&auto=format&fit=crop", discount: 0, rating: 4.2, inStock: true, colors: ["Black"], sizes: ["M", "L", "XL"] },
-    { id: "4", title: "Boxy Fit Shirt", price: 2999, category: "Tops", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=1888&auto=format&fit=crop", discount: 0, rating: 4.0, inStock: true, colors: ["White", "Navy", "Olive"], sizes: ["S", "M", "L"] },
-    { id: "5", title: "Tech Cargo Pants", price: 5499, category: "Bottoms", image: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=2000&auto=format&fit=crop", discount: 0, rating: 4.7, inStock: true, colors: ["Black", "Olive", "Khaki"], sizes: ["S", "M", "L", "XL"] },
-    { id: "6", title: "Minimalist Hoodie", price: 3499, category: "Tops", image: "https://images.unsplash.com/photo-1509942774463-acf339cf87d5?q=80&w=987&auto=format&fit=crop", discount: 15, rating: 4.6, inStock: true, colors: ["Black", "Grey", "Navy"], sizes: ["S", "M", "L", "XL", "XXL"] },
-    { id: "7", title: "Heavyweight Cotton Tee", price: 1999, category: "Tops", image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=987&auto=format&fit=crop", discount: 0, rating: 4.3, inStock: false, colors: ["Black", "Beige"], sizes: ["S", "M", "L", "XL"] },
-    { id: "8", title: "Puffer Jacket", price: 8999, category: "Outerwear", image: "https://images.unsplash.com/photo-1544022613-e87caebd27ae?q=80&w=2000&auto=format&fit=crop", discount: 0, rating: 4.9, inStock: true, colors: ["Black", "Blue"], sizes: ["M", "L"] },
+    { id: "1", title: "Royal Maroon Kanjivaram", price: 24999, category: "Kanjivaram", image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.5, inStock: true, colors: ["Maroon", "Gold"], sizes: ["Standard"] },
+    { id: "2", title: "Antique Gold Banarasi", price: 28999, category: "Banarasi", image: "https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 10, rating: 4.8, inStock: true, colors: ["Red", "Gold"], sizes: ["Standard"] },
+    { id: "3", title: "Mint Whisper Soft Silk", price: 8599, category: "Soft Silk", image: "https://images.pexels.com/photos/8437013/pexels-photo-8437013.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.2, inStock: true, colors: ["Mint", "Silver"], sizes: ["Standard"] },
+    { id: "4", title: "Linen Handblock Heritage", price: 5999, category: "Linen", image: "https://images.pexels.com/photos/9323985/pexels-photo-9323985.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.0, inStock: true, colors: ["Beige", "Black"], sizes: ["Standard"] },
+    { id: "5", title: "Imperial Mysore Silk", price: 14499, category: "Silk", image: "https://images.pexels.com/photos/10189110/pexels-photo-10189110.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.7, inStock: true, colors: ["Purple", "Green"], sizes: ["Standard"] },
+    { id: "6", title: "Chanderi Bloom Delight", price: 7499, category: "Chanderi", image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 15, rating: 4.6, inStock: true, colors: ["Peach", "Cream"], sizes: ["Standard"] },
+    { id: "7", title: "Earthy Tussar Handloom", price: 11999, category: "Silk", image: "https://images.pexels.com/photos/10189112/pexels-photo-10189112.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.3, inStock: false, colors: ["Brown", "Beige"], sizes: ["Standard"] },
+    { id: "8", title: "Wedding Vow Pattu", price: 48999, category: "Bridal", image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.9, inStock: true, colors: ["Gold", "Red"], sizes: ["Standard"] },
 ]
 
 export default function ProductsPage() {
@@ -90,47 +90,46 @@ export default function ProductsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background pt-24 pb-20">
-            <div className="container mx-auto px-4 md:px-8">
+        <div className="min-h-screen bg-background pt-32 pb-16">
+            <div className="max-w-[1280px] mx-auto px-4">
                 {/* Header */}
-                <div className="flex flex-col gap-8  border-b pb-8">
+                <div className="flex flex-col gap-8 border-b border-primary/10 pb-8">
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
-                                <BreadcrumbLink href="/" className="uppercase text-xs tracking-widest text-neutral-400 hover:text-white transition-colors">Home</BreadcrumbLink>
+                                <BreadcrumbLink href="/" className="uppercase text-[10px] tracking-[0.2em] text-text-secondary hover:text-primary transition-colors font-sans font-bold">Home</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-neutral-600" />
+                            <BreadcrumbSeparator className="text-accent/40" />
                             <BreadcrumbItem>
-                                <BreadcrumbPage className="uppercase text-xs tracking-widest font-bold text-white">Products</BreadcrumbPage>
+                                <BreadcrumbPage className="uppercase text-[10px] tracking-[0.2em] font-bold text-primary font-sans">Products</BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
 
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
                         <div className="space-y-4">
-                            <h1 className="text-5xl  md:text-7xl font-heading font-black uppercase tracking-tighter leading-[0.9]">
-                                All {"  "}
-                                <span className="text-transparent stroke-text-sm md:stroke-text">Collection</span>
+                            <span className="text-accent uppercase tracking-[0.3em] text-xs font-bold font-sans">Handloom Heritage</span>
+                            <h1 className="text-5xl md:text-7xl font-heading font-normal leading-[0.95] tracking-tight text-primary">
+                                All <span className="italic">Collections</span>
                             </h1>
-
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-6">
                             <FiltersSidebar isMobile {...filterProps} />
                             <SortDropdown currentSort={sort} onSortChange={setSort} />
                         </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-12">
+                <div className="flex flex-col lg:flex-row gap-16">
                     {/* Sidebar (Desktop) */}
-                    <aside className="hidden border-r pt-10 pr-4 lg:block w-64 flex-shrink-0">
+                    <aside className="hidden border-r border-primary/10 pt-8 pr-10 lg:block w-72 flex-shrink-0">
                         <FiltersSidebar {...filterProps} />
                     </aside>
 
                     {/* Main Content */}
-                    <main className="flex-1 pt-10">
-                        <div className="mb-6 text-sm text-neutral-500">
-                            Showing {paginatedProducts.length} of {sortedProducts.length} products
+                    <main className="flex-1 pt-8">
+                        <div className="mb-8 text-[11px] text-text-secondary uppercase tracking-[0.2em] font-sans font-bold opacity-60">
+                            Showing {paginatedProducts.length} of {sortedProducts.length} luxury drapes
                         </div>
 
                         {sortedProducts.length > 0 ? (
@@ -146,17 +145,17 @@ export default function ProductsPage() {
                                 )}
                             </>
                         ) : (
-                            <div className="flex flex-col items-center justify-center py-20 text-neutral-500">
-                                <p className="text-lg">No products found matching your filters.</p>
+                            <div className="flex flex-col items-center justify-center py-32 text-text-secondary space-y-8">
+                                <p className="text-xl font-heading italic tracking-wide">No exquisite drapes match your current selection.</p>
                                 <Button
-                                    variant="link"
+                                    variant="outline"
                                     onClick={() => {
                                         setSelectedCategories([])
                                         setSelectedSizes([])
                                         setSelectedColors([])
-                                        setPriceRange([0, 10000])
+                                        setPriceRange([0, 100000])
                                     }}
-                                    className="text-white mt-4"
+                                    className="rounded-full border-primary/20 text-primary hover:bg-primary hover:text-white transition-all uppercase tracking-widest text-xs px-10 py-6"
                                 >
                                     Clear all filters
                                 </Button>

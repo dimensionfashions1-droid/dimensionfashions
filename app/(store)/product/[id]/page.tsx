@@ -14,22 +14,22 @@ import { useParams } from "next/navigation"
 // Mock Data (In a real app, this would be fetched based on params.id)
 const MOCK_PRODUCT = {
     id: "1",
-    title: "Oversized Structured Tee",
-    price: 2499,
-    category: "Tops",
-    description: "Engineered for the modern urban landscape. This piece combines functional utility with avant-garde aesthetics. Crafted from premium heavyweight cotton for durability and comfort. Features reinforced stitching and a relaxed fit.",
+    title: "Royal Maroon Kanjivaram",
+    price: 24999,
+    category: "Kanjivaram",
+    description: "A masterpiece of traditional craftsmanship. This handwoven Kanjivaram silk saree features intricate gold zari work and a rich maroon body. Perfect for weddings and auspicious occasions. Breathable, durable, and exuding timeless grace.",
     images: [
-        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1964&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=987&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1780&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1503341455253-b2e72333dbdb?q=80&w=1920&auto=format&fit=crop"
+        "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/8437013/pexels-photo-8437013.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/9323985/pexels-photo-9323985.jpeg?auto=compress&cs=tinysrgb&w=1200"
     ],
-    image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=1964&auto=format&fit=crop",
-    rating: 4.5,
+    image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    rating: 4.8,
     inStock: true,
-    discount: 0,
-    colors: ["Black", "White", "Beige"],
-    sizes: ["S", "M", "L", "XL"]
+    discount: 5,
+    colors: ["Maroon", "Gold", "Ivory"],
+    sizes: ["Standard"]
 }
 
 export default function ProductPage() {
@@ -52,22 +52,21 @@ export default function ProductPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background pt-24 pb-24 relative">
-            <div className="container mx-auto px-4 md:px-8">
-                {/* Breadcrumb */}
-                <div className="mb-8">
+        <div className="min-h-screen bg-background pt-32 pb-24 relative">
+            <div className="max-w-[1280px] mx-auto px-4">
+                <div className="mb-12">
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
-                                <BreadcrumbLink href="/" className="uppercase text-xs tracking-widest text-neutral-400 hover:text-white transition-colors">Home</BreadcrumbLink>
+                                <BreadcrumbLink href="/" className="uppercase text-[10px] tracking-[0.2em] text-primary/40 hover:text-primary transition-colors font-sans font-bold">Home</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-neutral-600" />
+                            <BreadcrumbSeparator className="text-secondary-foreground/20" />
                             <BreadcrumbItem>
-                                <BreadcrumbLink href="/products" className="uppercase text-xs tracking-widest text-neutral-400 hover:text-white transition-colors">Products</BreadcrumbLink>
+                                <BreadcrumbLink href="/products" className="uppercase text-[10px] tracking-[0.2em] text-primary/40 hover:text-primary transition-colors font-sans font-bold">Products</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-neutral-600" />
+                            <BreadcrumbSeparator className="text-secondary-foreground/20" />
                             <BreadcrumbItem>
-                                <BreadcrumbPage className="uppercase text-xs tracking-widest font-bold text-white">{MOCK_PRODUCT.title}</BreadcrumbPage>
+                                <BreadcrumbPage className="uppercase text-[10px] tracking-[0.2em] font-sans font-bold text-primary">{MOCK_PRODUCT.title}</BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
@@ -93,24 +92,24 @@ export default function ProductPage() {
                             setSelectedSize={setSelectedSize}
                         />
 
-                        <div className="mt-12 pt-12 border-t border-neutral-800">
-                            <h3 className="font-heading font-bold text-lg uppercase tracking-wide mb-6 text-white">Specifications</h3>
-                            <div className="space-y-4 text-sm text-neutral-400">
-                                <div className="grid grid-cols-2 py-2 border-b border-neutral-800">
-                                    <span className="font-medium text-white">Material</span>
-                                    <span>100% Heavyweight Cotton</span>
+                        <div className="mt-16 pt-16 border-t border-primary/5">
+                            <h3 className="font-heading font-normal text-2xl tracking-tight mb-8 text-primary">Specifications</h3>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 py-4 border-b border-primary/5">
+                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 font-sans">Material</span>
+                                    <span className="text-xs font-bold text-primary font-sans uppercase tracking-widest">100% Pure Handwoven Silk</span>
                                 </div>
-                                <div className="grid grid-cols-2 py-2 border-b border-neutral-800">
-                                    <span className="font-medium text-white">Fit</span>
-                                    <span>Oversized / Relaxed</span>
+                                <div className="grid grid-cols-2 py-4 border-b border-primary/5">
+                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 font-sans">Craft</span>
+                                    <span className="text-xs font-bold text-primary font-sans uppercase tracking-widest">Kanjivaram Zari Work</span>
                                 </div>
-                                <div className="grid grid-cols-2 py-2 border-b border-neutral-800">
-                                    <span className="font-medium text-white">Care</span>
-                                    <span>Machine wash cold, tumble dry low</span>
+                                <div className="grid grid-cols-2 py-4 border-b border-primary/5">
+                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 font-sans">Care</span>
+                                    <span className="text-xs font-bold text-primary font-sans uppercase tracking-widest">Dry clean only</span>
                                 </div>
-                                <div className="grid grid-cols-2 py-2 border-b border-neutral-800">
-                                    <span className="font-medium text-white">Origin</span>
-                                    <span>Made in India</span>
+                                <div className="grid grid-cols-2 py-4 border-b border-primary/5">
+                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 font-sans">Origin</span>
+                                    <span className="text-xs font-bold text-primary font-sans uppercase tracking-widest">Made in India</span>
                                 </div>
                             </div>
                         </div>
@@ -125,13 +124,13 @@ export default function ProductPage() {
             </div>
 
             {/* Sticky Mobile Add to Cart */}
-            <div className="fixed bottom-0 left-0 right-0 bg-neutral-900 border-t border-neutral-800 p-4 lg:hidden z-50">
+            <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-primary/5 p-6 lg:hidden z-50">
                 <Button
-                    className="w-full h-12 bg-white hover:bg-neutral-200 text-black rounded-full uppercase tracking-widest font-bold text-sm shadow-lg"
+                    className="w-full h-14 bg-primary hover:bg-primary/90 text-white rounded-full uppercase tracking-[0.2em] font-bold text-[10px] shadow-xl transition-all duration-500"
                     onClick={addToCart}
                 >
-                    <ShoppingBag className="w-4 h-4 mr-2" />
-                    Add to Cart - ₹{(MOCK_PRODUCT.price * quantity).toLocaleString()}
+                    <ShoppingBag className="w-4 h-4 mr-3" />
+                    Add to Bag - ₹{(MOCK_PRODUCT.price * quantity).toLocaleString()}
                 </Button>
             </div>
         </div>

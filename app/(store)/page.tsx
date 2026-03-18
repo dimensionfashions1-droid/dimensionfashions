@@ -1,31 +1,33 @@
-import { ProductList } from "@/components/product/ProductList"
+
 import { HeroCarousel } from "@/components/hero/HeroCarousel"
-import { CategorySection } from "@/components/home/CategorySection"
-import { IntroSection } from "@/components/home/IntroSection"
-import { EditorialSection } from "@/components/home/EditorialSection"
+import { AzaCategoryCircles } from "@/components/home/AzaCategoryCircles"
+import { AzaTrendingTabs } from "@/components/home/AzaTrendingTabs"
+import { AzaVisualGrid } from "@/components/home/AzaVisualGrid"
+import { AzaDesignerSpotlight } from "@/components/home/AzaDesignerSpotlight"
+import { AzaTrustMarkers } from "@/components/home/AzaTrustMarkers"
 import { MarqueeSection } from "@/components/home/MarqueeSection"
-import { FeaturedDrop } from "@/components/home/FeaturedDrop"
 
 export default function Home() {
-    const features = [
-        { id: "1", title: "Handwoven Kanjivaram Silk", price: 14499, category: "Kanjivaram", image: "https://images.unsplash.com/photo-1610189014168-96f7c8f49514?q=80&w=1500&auto=format&fit=crop" },
-        { id: "2", title: "Pure Banarasi Georgette", price: 11999, category: "Banarasi", image: "https://images.unsplash.com/photo-1583391265517-35bbdad01209?q=80&w=1500&auto=format&fit=crop" },
-        { id: "3", title: "Soft Silk Pastel Saree", price: 8599, category: "Soft Silk", image: "https://images.unsplash.com/photo-1617344933996-51d8b1e428e1?q=80&w=1500&auto=format&fit=crop" },
-        { id: "4", title: "Linen Handblock Print", price: 4299, category: "Linen", image: "https://images.unsplash.com/photo-1605518216954-d8916d16cc0a?q=80&w=1500&auto=format&fit=crop" },
+    const products = [
+        { id: "1", title: "Midnight Bloom Kanjivaram", price: 18499, category: "Kanjivaram", image: "https://images.pexels.com/photos/10189110/pexels-photo-10189110.jpeg?auto=compress&cs=tinysrgb&w=1200" },
+        { id: "2", title: "Zari Weave Banarasi Silk", price: 22999, category: "Banarasi", image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=1200" },
+        { id: "3", title: "Pastel Grace Silk Saree", price: 9599, category: "Soft Silk", image: "https://images.pexels.com/photos/10189112/pexels-photo-10189112.jpeg?auto=compress&cs=tinysrgb&w=1200" },
+        { id: "4", title: "Handblock Linen Heritage", price: 5299, category: "Linen", image: "https://images.pexels.com/photos/10189113/pexels-photo-10189113.jpeg?auto=compress&cs=tinysrgb&w=1200" },
+        { id: "5", title: "Emerald Silk Drapery", price: 14299, category: "Soft Silk", image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200" },
+        { id: "6", title: "Crimson Banarasi", price: 21000, category: "Banarasi", image: "https://images.pexels.com/photos/10189028/pexels-photo-10189028.jpeg?auto=compress&cs=tinysrgb&w=1200" },
+        { id: "7", title: "Golden Ochre Silk", price: 18500, category: "Kanjivaram", image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200" },
+        { id: "8", title: "Sage Green Banarasi", price: 19500, category: "Banarasi", image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=1200" },
     ]
 
     return (
-        <>
+        <main className="bg-white">
             <HeroCarousel />
-            <IntroSection />
-            <ProductList title="Latest Drops" products={features} className="bg-background text-foreground py-20" />
+            <AzaCategoryCircles />
+            <AzaTrendingTabs products={products} />
             <MarqueeSection />
-
-            <EditorialSection />
-            <FeaturedDrop />
-
-            <CategorySection />
-
-        </>
+            <AzaVisualGrid />
+            <AzaDesignerSpotlight />
+            <AzaTrustMarkers />
+        </main>
     )
 }

@@ -57,16 +57,16 @@ export function SortDropdown({ onSortChange, currentSort }: SortDropdownProps) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[200px] justify-between rounded-full border-neutral-800 text-white hover:bg-white hover:text-black transition-colors"
+                    className="w-[200px] justify-between rounded-none border-primary/20 text-primary hover:bg-primary hover:text-white transition-all uppercase tracking-[0.2em] text-[10px] font-bold h-11 px-6 font-sans"
                 >
                     {currentSort
                         ? sortOptions.find((option) => option.value === currentSort)?.label
                         : "Sort by..."}
-                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
-                <Command>
+            <PopoverContent className="w-[200px] p-0 rounded-none border-primary/10 bg-surface shadow-2xl">
+                <Command className="bg-transparent">
                     <CommandList>
                         <CommandGroup>
                             {sortOptions.map((option) => (
@@ -77,10 +77,11 @@ export function SortDropdown({ onSortChange, currentSort }: SortDropdownProps) {
                                         onSortChange(currentValue === currentSort ? "" : currentValue)
                                         setOpen(false)
                                     }}
+                                    className="cursor-pointer py-3 aria-selected:bg-primary/5 aria-selected:text-primary font-sans text-xs uppercase tracking-widest"
                                 >
                                     <Check
                                         className={cn(
-                                            "mr-2 h-4 w-4",
+                                            "mr-2 h-3 w-3 text-accent",
                                             currentSort === option.value ? "opacity-100" : "opacity-0"
                                         )}
                                     />

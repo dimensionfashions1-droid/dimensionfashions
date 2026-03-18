@@ -21,22 +21,22 @@ const MOCK_CART_ITEMS: CartItemType[] = [
     {
         id: "1",
         productId: "prod-1",
-        title: "Oversized Heavyweight T-Shirt",
-        price: 1499,
-        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1780&auto=format&fit=crop",
+        title: "Regal Kanjivaram Silk",
+        price: 24999,
+        image: "https://images.pexels.com/photos/10189110/pexels-photo-10189110.jpeg?auto=compress&cs=tinysrgb&w=800",
         quantity: 1,
-        size: "L",
-        color: "Black"
+        size: "Standard",
+        color: "Maroon"
     },
     {
         id: "2",
         productId: "prod-2",
-        title: "Tactical Cargo Pants",
-        price: 2999,
-        image: "https://images.unsplash.com/photo-1517445312882-fa99b53d13ee?q=80&w=1780&auto=format&fit=crop",
-        quantity: 2,
-        size: "32",
-        color: "Olive"
+        title: "Handwoven Banarasi Zari",
+        price: 18999,
+        image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=800",
+        quantity: 1,
+        size: "Standard",
+        color: "Royal Blue"
     }
 ]
 
