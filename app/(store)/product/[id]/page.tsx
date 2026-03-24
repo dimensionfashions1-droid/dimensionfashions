@@ -52,7 +52,7 @@ export default function ProductPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background pt-32 pb-24 relative">
+        <div className="min-h-screen bg-background pt-13 pb-8 relative">
             <div className="max-w-[1280px] mx-auto px-4">
                 <div className="mb-12">
                     <Breadcrumb>

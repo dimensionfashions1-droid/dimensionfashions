@@ -15,13 +15,15 @@ import {
 } from "@/components/ui/sheet"
 import { Filter } from "lucide-react"
 
-// Saree Categories
 const categories = [
-    { id: "kanjivaram", label: "Kanjivaram Silk" },
-    { id: "banarasi", label: "Banarasi Weaves" },
-    { id: "softsilk", label: "Soft Silk" },
-    { id: "linen", label: "Linen & Cotton" },
-    { id: "organza", label: "Organza" },
+    { id: "sarees", label: "Sarees" },
+    { id: "lehengas", label: "Lehengas" },
+    { id: "kurta-sets", label: "Kurta Sets" },
+    { id: "dresses", label: "Dresses" },
+    { id: "coords", label: "Co-ords" },
+    { id: "gowns", label: "Gowns" },
+    { id: "tops", label: "Tops" },
+    { id: "loungewear", label: "Loungewear" }
 ]
 
 interface FiltersSidebarProps {
@@ -85,7 +87,7 @@ export function FiltersSidebar({
         <div className="space-y-14">
             {/* Categories */}
             <div className="space-y-8">
-                <h3 className="font-heading font-normal text-sm uppercase tracking-[0.2em] text-primary border-b border-primary/5 pb-4 inline-block">By Weave</h3>
+                <h3 className="font-heading font-normal text-[11px] uppercase tracking-[0.25em] text-primary border-b border-primary/5 pb-4 inline-block">Collection</h3>
                 <div className="space-y-5 pt-2">
                     {categories.map((category) => (
                         <div key={category.id} className="flex items-center space-x-4 group cursor-pointer">
@@ -109,7 +111,7 @@ export function FiltersSidebar({
             {/* Price Range */}
             <div className="space-y-10">
                 <div className="flex items-center justify-between">
-                    <h3 className="font-heading font-normal text-sm uppercase tracking-[0.2em] text-primary border-b border-primary/5 pb-4 inline-block">Price Range</h3>
+                    <h3 className="font-heading font-normal text-[11px] uppercase tracking-[0.25em] text-primary border-b border-primary/5 pb-4 inline-block">Price Range</h3>
                     <span className="text-[10px] font-bold text-primary bg-primary/5 px-4 py-2 border border-primary/5 font-sans">
                         ₹{priceRange[0]} - ₹{priceRange[1]}
                     </span>
@@ -126,7 +128,7 @@ export function FiltersSidebar({
 
             {/* Colors */}
             <div className="space-y-8">
-                <h3 className="font-heading font-normal text-sm uppercase tracking-[0.2em] text-primary border-b border-primary/5 pb-4 inline-block">Color Palette</h3>
+                <h3 className="font-heading font-normal text-[11px] uppercase tracking-[0.25em] text-primary border-b border-primary/5 pb-4 inline-block">Color Palette</h3>
                 <div className="grid grid-cols-2 gap-y-6 pt-2">
                     {["Maroon", "Gold", "Ivory", "Emerald", "RoyalBlue", "Black"].map((color) => (
                         <div key={color} className="flex items-center space-x-4 group cursor-pointer">
@@ -153,8 +155,7 @@ export function FiltersSidebar({
 
             {/* Clear Filters */}
             <Button
-                variant="outline"
-                className="w-full rounded-full border-primary/10 text-primary hover:bg-primary hover:text-white uppercase tracking-[0.25em] text-[10px] font-bold py-8 transition-all duration-700 mt-10 hover:shadow-lg"
+                className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] py-6 transition-all duration-500 hover:bg-black mt-10"
                 onClick={clearAllFilters}
             >
                 Clear All Selection
@@ -175,7 +176,7 @@ export function FiltersSidebar({
                     <SheetHeader className="text-left pb-8 border-b border-primary/5">
                         <SheetTitle className="font-heading font-normal text-2xl tracking-wide text-primary">Filters</SheetTitle>
                         <SheetDescription className="text-text-secondary/70 font-sans text-xs uppercase tracking-widest pt-1">
-                            Refine your search for the perfect drape
+                            Refine your search for the perfect look
                         </SheetDescription>
                     </SheetHeader>
                     <div className="py-10">

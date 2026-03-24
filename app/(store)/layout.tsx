@@ -1,4 +1,4 @@
-import { AzaNavbar } from "@/components/layout/AzaNavbar"
+import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 
 export default function StoreLayout({
@@ -8,8 +8,8 @@ export default function StoreLayout({
 }) {
     return (
         <div className="min-h-screen flex flex-col">
-            <AzaNavbar />
-            <main className="flex-1">
+            <Navbar />
+            <main className="flex-1 pt-[140px]">
                 {children}
             </main>
             <Footer />

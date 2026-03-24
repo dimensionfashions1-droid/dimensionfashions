@@ -18,8 +18,8 @@ const montserrat = Montserrat({
 })
 
 export const metadata: Metadata = {
-  title: "ANTIGRAVITY | Premium Indian Ethnic Wear",
-  description: "Handwoven sarees carefully handpicked. Discover the heritage of Kanjivaram and Banarasi silks.",
+  title: "DIMENSIONS | Premium Women's Wear",
+  description: "A curated collection of contemporary and ethnic women's wear designed for elegance and comfort.",
   generator: "Next.js",
 }
 

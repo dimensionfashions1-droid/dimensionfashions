@@ -17,14 +17,14 @@ import { Button } from "@/components/ui/button"
 
 // Mock Data
 const MOCK_PRODUCTS = [
-    { id: "1", title: "Royal Maroon Kanjivaram", price: 24999, category: "Kanjivaram", image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.5, inStock: true, colors: ["Maroon", "Gold"], sizes: ["Standard"] },
-    { id: "2", title: "Antique Gold Banarasi", price: 28999, category: "Banarasi", image: "https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 10, rating: 4.8, inStock: true, colors: ["Red", "Gold"], sizes: ["Standard"] },
-    { id: "3", title: "Mint Whisper Soft Silk", price: 8599, category: "Soft Silk", image: "https://images.pexels.com/photos/8437013/pexels-photo-8437013.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.2, inStock: true, colors: ["Mint", "Silver"], sizes: ["Standard"] },
-    { id: "4", title: "Linen Handblock Heritage", price: 5999, category: "Linen", image: "https://images.pexels.com/photos/9323985/pexels-photo-9323985.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.0, inStock: true, colors: ["Beige", "Black"], sizes: ["Standard"] },
-    { id: "5", title: "Imperial Mysore Silk", price: 14499, category: "Silk", image: "https://images.pexels.com/photos/10189110/pexels-photo-10189110.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.7, inStock: true, colors: ["Purple", "Green"], sizes: ["Standard"] },
-    { id: "6", title: "Chanderi Bloom Delight", price: 7499, category: "Chanderi", image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 15, rating: 4.6, inStock: true, colors: ["Peach", "Cream"], sizes: ["Standard"] },
-    { id: "7", title: "Earthy Tussar Handloom", price: 11999, category: "Silk", image: "https://images.pexels.com/photos/10189112/pexels-photo-10189112.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.3, inStock: false, colors: ["Brown", "Beige"], sizes: ["Standard"] },
-    { id: "8", title: "Wedding Vow Pattu", price: 48999, category: "Bridal", image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200", discount: 0, rating: 4.9, inStock: true, colors: ["Gold", "Red"], sizes: ["Standard"] },
+    { id: "1", title: "Midnight Bloom Kanjivaram", price: 18499, category: "Sarees", image: "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600", discount: 0, rating: 4.8, inStock: true, colors: ["Maroon", "Gold"], sizes: ["Standard"] },
+    { id: "2", title: "Zari Weave Lehenga", price: 24999, category: "Lehengas", image: "https://www.sourcesplash.com/i/random?q=lehenga,indian-wedding,bridal&w=1200&h=1600", discount: 10, rating: 4.9, inStock: true, colors: ["Maroon", "Gold"], sizes: ["S", "M", "L"] },
+    { id: "3", title: "Pastel Kurta Set", price: 4999, category: "Kurta Sets", image: "https://www.sourcesplash.com/i/random?q=kurti,set,indian-fashion&w=1200&h=1600", discount: 0, rating: 4.5, inStock: true, colors: ["Ivory", "Emerald"], sizes: ["XS", "S", "M", "L", "XL"] },
+    { id: "4", title: "Floral Summer Dress", price: 2999, category: "Dresses", image: "https://www.sourcesplash.com/i/random?q=women-dress,floral,fashion&w=1200&h=1600", discount: 0, rating: 4.2, inStock: true, colors: ["Ivory", "RoyalBlue"], sizes: ["S", "M", "L"] },
+    { id: "5", title: "Chic Co-ord Set", price: 3999, category: "Co-ords", image: "https://www.sourcesplash.com/i/random?q=co-ord,set,women-fashion&w=1200&h=1600", discount: 0, rating: 4.7, inStock: true, colors: ["Black", "Ivory"], sizes: ["S", "M", "L"] },
+    { id: "6", title: "Evening Glam Gown", price: 8999, category: "Gowns", image: "https://www.sourcesplash.com/i/random?q=evening-gown,party,model&w=1200&h=1600", discount: 15, rating: 4.6, inStock: true, colors: ["Emerald", "Black"], sizes: ["S", "M", "L"] },
+    { id: "7", title: "Minimal Cotton Top", price: 1499, category: "Tops", image: "https://www.sourcesplash.com/i/random?q=women-top,minimal,fashion&w=1200&h=1600", discount: 0, rating: 4.3, inStock: false, colors: ["Ivory", "Black"], sizes: ["XS", "S", "M", "L"] },
+    { id: "8", title: "Soft Lounge Set", price: 1999, category: "Loungewear", image: "https://www.sourcesplash.com/i/random?q=loungewear,women,homewear&w=1200&h=1600", discount: 0, rating: 4.9, inStock: true, colors: ["RoyalBlue", "Ivory"], sizes: ["S", "M", "L", "XL"] },
 ]
 
 export default function ProductsPage() {
@@ -90,10 +90,10 @@ export default function ProductsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background pt-32 pb-16">
+        <div className="min-h-screen bg-white pt-8 pb-8">
             <div className="max-w-[1280px] mx-auto px-4">
                 {/* Header */}
-                <div className="flex flex-col gap-8 border-b border-primary/10 pb-8">
+                <div className="flex flex-col gap-8 border-b border-primary/10 pb-16 pt-8">
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
@@ -108,9 +108,9 @@ export default function ProductsPage() {
 
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
                         <div className="space-y-4">
-                            <span className="text-accent uppercase tracking-[0.3em] text-xs font-bold font-sans">Handloom Heritage</span>
+                            <span className="text-accent uppercase tracking-[0.4em] text-[10px] font-bold font-sans">Explore Dimensions</span>
                             <h1 className="text-5xl md:text-7xl font-heading font-normal leading-[0.95] tracking-tight text-primary">
-                                All <span className="italic">Collections</span>
+                                The <span className="italic">Collection</span>
                             </h1>
                         </div>
                         <div className="flex items-center gap-6">
@@ -129,7 +129,7 @@ export default function ProductsPage() {
                     {/* Main Content */}
                     <main className="flex-1 pt-8">
                         <div className="mb-8 text-[11px] text-text-secondary uppercase tracking-[0.2em] font-sans font-bold opacity-60">
-                            Showing {paginatedProducts.length} of {sortedProducts.length} luxury drapes
+                            Showing {paginatedProducts.length} of {sortedProducts.length} contemporary pieces
                         </div>
 
                         {sortedProducts.length > 0 ? (
@@ -146,7 +146,7 @@ export default function ProductsPage() {
                             </>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-32 text-text-secondary space-y-8">
-                                <p className="text-xl font-heading italic tracking-wide">No exquisite drapes match your current selection.</p>
+                                <p className="text-xl font-heading italic tracking-wide">No exquisite pieces match your current selection.</p>
                                 <Button
                                     variant="outline"
                                     onClick={() => {
@@ -155,7 +155,7 @@ export default function ProductsPage() {
                                         setSelectedColors([])
                                         setPriceRange([0, 100000])
                                     }}
-                                    className="rounded-full border-primary/20 text-primary hover:bg-primary hover:text-white transition-all uppercase tracking-widest text-xs px-10 py-6"
+                                    className="inline-flex items-center justify-center bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] px-10 py-4 flex-shrink-0 h-12 rounded-full transition-all duration-500 hover:bg-black"
                                 >
                                     Clear all filters
                                 </Button>

@@ -1,33 +1,87 @@
 
 import { HeroCarousel } from "@/components/hero/HeroCarousel"
-import { AzaCategoryCircles } from "@/components/home/AzaCategoryCircles"
-import { AzaTrendingTabs } from "@/components/home/AzaTrendingTabs"
-import { AzaVisualGrid } from "@/components/home/AzaVisualGrid"
-import { AzaDesignerSpotlight } from "@/components/home/AzaDesignerSpotlight"
-import { AzaTrustMarkers } from "@/components/home/AzaTrustMarkers"
+import { CategoryCircles } from "@/components/home/CategoryCircles"
+import { TrendingTabs } from "@/components/home/TrendingTabs"
+import { EditorialGrid } from "@/components/home/EditorialGrid"
+import { TrustMarkers } from "@/components/home/TrustMarkers"
 import { MarqueeSection } from "@/components/home/MarqueeSection"
+import { FeaturedDrop } from "@/components/home/FeaturedDrop"
+import { IntroSection } from "@/components/home/IntroSection"
+import { OfferBanner } from "@/components/home/OfferBanner"
+import { CtaSection } from "@/components/home/CtaSection"
 
 export default function Home() {
     const products = [
-        { id: "1", title: "Midnight Bloom Kanjivaram", price: 18499, category: "Kanjivaram", image: "https://images.pexels.com/photos/10189110/pexels-photo-10189110.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-        { id: "2", title: "Zari Weave Banarasi Silk", price: 22999, category: "Banarasi", image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-        { id: "3", title: "Pastel Grace Silk Saree", price: 9599, category: "Soft Silk", image: "https://images.pexels.com/photos/10189112/pexels-photo-10189112.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-        { id: "4", title: "Handblock Linen Heritage", price: 5299, category: "Linen", image: "https://images.pexels.com/photos/10189113/pexels-photo-10189113.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-        { id: "5", title: "Emerald Silk Drapery", price: 14299, category: "Soft Silk", image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-        { id: "6", title: "Crimson Banarasi", price: 21000, category: "Banarasi", image: "https://images.pexels.com/photos/10189028/pexels-photo-10189028.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-        { id: "7", title: "Golden Ochre Silk", price: 18500, category: "Kanjivaram", image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-        { id: "8", title: "Sage Green Banarasi", price: 19500, category: "Banarasi", image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-    ]
+        {
+            id: "1",
+            title: "Midnight Bloom Kanjivaram",
+            price: 18499,
+            category: "Sarees",
+            image: "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600"
+        },
+        {
+            id: "2",
+            title: "Zari Weave Lehenga",
+            price: 24999,
+            category: "Lehengas",
+            image: "https://www.sourcesplash.com/i/random?q=lehenga,indian-wedding,bridal&w=1200&h=1600"
+        },
+        {
+            id: "3",
+            title: "Pastel Kurta Set",
+            price: 4999,
+            category: "Kurta Sets",
+            image: "https://www.sourcesplash.com/i/random?q=kurti,set,indian-fashion&w=1200&h=1600"
+        },
+        {
+            id: "4",
+            title: "Floral Summer Dress",
+            price: 2999,
+            category: "Dresses",
+            image: "https://www.sourcesplash.com/i/random?q=women-dress,floral,fashion&w=1200&h=1600"
+        },
+        {
+            id: "5",
+            title: "Chic Co-ord Set",
+            price: 3999,
+            category: "Co-ords",
+            image: "https://www.sourcesplash.com/i/random?q=co-ord,set,women-fashion&w=1200&h=1600"
+        },
+        {
+            id: "6",
+            title: "Evening Glam Gown",
+            price: 8999,
+            category: "Gowns",
+            image: "https://www.sourcesplash.com/i/random?q=evening-gown,party,model&w=1200&h=1600"
+        },
+        {
+            id: "7",
+            title: "Minimal Cotton Top",
+            price: 1499,
+            category: "Tops",
+            image: "https://www.sourcesplash.com/i/random?q=women-top,minimal,fashion&w=1200&h=1600"
+        },
+        {
+            id: "8",
+            title: "Soft Lounge Set",
+            price: 1999,
+            category: "Loungewear",
+            image: "https://www.sourcesplash.com/i/random?q=loungewear,women,homewear&w=1200&h=1600"
+        }
+    ];
 
     return (
         <main className="bg-white">
             <HeroCarousel />
-            <AzaCategoryCircles />
-            <AzaTrendingTabs products={products} />
+            <CategoryCircles />
+            <TrendingTabs products={products} />
             <MarqueeSection />
-            <AzaVisualGrid />
-            <AzaDesignerSpotlight />
-            <AzaTrustMarkers />
+            <EditorialGrid />
+            <FeaturedDrop />
+            <IntroSection />
+            <OfferBanner />
+            <CtaSection />
+            <TrustMarkers />
         </main>
     )
 }
