@@ -7,19 +7,20 @@ import { Button } from "@/components/ui/button"
 
 export function EmptyCart() {
     return (
-        <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
-            <div className="h-24 w-24 bg-neutral-900 rounded-full flex items-center justify-center border border-neutral-800">
-                <ShoppingBag className="h-10 w-10 text-neutral-500" />
+        <div className="flex flex-col items-center justify-center py-32 text-center space-y-10">
+            <div className="h-32 w-32 bg-primary/5 rounded-full flex items-center justify-center border border-primary/10 relative">
+                <ShoppingBag className="h-12 w-12 text-primary/20" />
+                <div className="absolute inset-0 bg-accent/5 rounded-full animate-ping opacity-20" />
             </div>
 
-            <div className="space-y-2">
-                <h2 className="font-heading font-bold text-2xl text-white">Your cart is empty</h2>
-                <p className="text-neutral-400 max-w-sm mx-auto">
-                    Looks like you haven't added anything to your cart yet. Explore our collection to find something you love.
+            <div className="space-y-4">
+                <h2 className="font-heading font-normal text-3xl text-primary uppercase tracking-widest">Your Bag is <span className="italic">Empty</span></h2>
+                <p className="text-primary/60 max-w-sm mx-auto font-sans font-medium text-sm leading-relaxed tracking-wide">
+                    The prompt for elegance awaits within our curated collections. Discover pieces that speak your style.
                 </p>
             </div>
 
-            <Button className="bg-white text-black hover:bg-neutral-200 font-bold uppercase tracking-widest text-sm h-14 px-10 rounded-full" asChild>
+            <Button className="bg-primary text-secondary hover:bg-black font-sans font-bold uppercase tracking-[0.25em] text-[10px] h-14 px-12 rounded-full transition-all duration-500 shadow-xl shadow-primary/5" asChild>
                 <Link href="/products">
                     Start Shopping
                 </Link>

@@ -56,7 +56,7 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
                         onClick={() => setMainImage(image)}
                         className={cn(
                             "relative aspect-[3/4] overflow-hidden rounded-lg bg-neutral-100 transition-all duration-200",
-                            mainImage === image ? "ring-2 ring-black ring-offset-2" : "hover:opacity-80 opacity-60"
+                            mainImage === image ? "ring-2 ring-accent ring-offset-2" : "hover:opacity-80 opacity-60"
                         )}
                     >
                         <Image

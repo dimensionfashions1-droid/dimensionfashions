@@ -180,7 +180,7 @@ export function Navbar() {
                                 <Input
                                     type="text"
                                     placeholder="Search for sarees, lehengas..."
-                                    className="w-full h-9 pl-10 pr-4 rounded-l-none rounded-r-full border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-accent text-[8px] font-sans bg-gray-50/50 shadow-none"
+                                    className="w-full h-9 pl-10 pr-4 rounded-l-none rounded-r-full border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-accent text-[8px] font-sans bg-gray-50/50 shadow-none placeholder-primary/50"
                                 />
                                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                             </div>
@@ -210,10 +210,10 @@ export function Navbar() {
                         {/* Burger Menu / Mega Menu */}
                         <div className="group relative">
                             <button
-                                className="flex items-center gap-2 text-[11px] font-sans font-bold text-white hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
+                                className="flex items-center gap-2 text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
                                 suppressHydrationWarning
                             >
-                                <Menu className="w-4 h-4" />
+                                <Menu className="w-4 h-4 text-primary" />
                                 All Categories
                             </button>
                             {/* Mega Menu Dropdown */}
@@ -284,17 +284,17 @@ export function Navbar() {
                             <Link
                                 key={cat.name}
                                 href={cat.href}
-                                className="text-[11px] font-sans font-bold text-white hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
+                                className="text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
                             >
                                 {cat.name}
                             </Link>
                         ))}
 
-                        <div className="h-4 w-px bg-white/20 mx-2" />
+                        <div className="h-4 w-px bg-primary/10 mx-2" />
 
-                        <Link href="#" className="text-[11px] font-sans font-bold text-white hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Best Sellers</Link>
-                        <Link href="#" className="text-[11px] font-sans font-bold text-white hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Latest Arrivals</Link>
-                        <Link href="#" className="text-[11px] font-sans font-bold text-white hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Contact Us</Link>
+                        <Link href="#" className="text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Best Sellers</Link>
+                        <Link href="#" className="text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Latest Arrivals</Link>
+                        <Link href="#" className="text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Contact Us</Link>
                     </nav>
                 </div>
             </div>

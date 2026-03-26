@@ -14,6 +14,11 @@ export interface Product {
     category: string
     image: string
     colors?: string[]
+    discount?: number
+    rating?: number
+    inStock?: boolean
+    description?: string
+    sizes?: string[]
 }
 
 interface ProductCardProps {
@@ -101,7 +106,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     </h3>
                 </Link>
 
-                <p className="text-[10px] font-sans font-medium uppercase tracking-[0.2em] text-primary/40">
+                <p className="text-[10px] font-sans font-medium uppercase tracking-[0.2em] text-primary/80">
                     {product.category}
                 </p>
 

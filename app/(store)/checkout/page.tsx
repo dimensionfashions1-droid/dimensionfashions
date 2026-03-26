@@ -17,23 +17,23 @@ import { CartItem } from "@/types"
 const MOCK_CART_ITEMS: CartItem[] = [
     {
         id: "1",
-        productId: "prod-1",
-        title: "Regal Kanjivaram Silk",
-        price: 24999,
-        image: "https://images.pexels.com/photos/10189110/pexels-photo-10189110.jpeg?auto=compress&cs=tinysrgb&w=800",
+        productId: "1",
+        title: "Midnight Bloom Kanjivaram",
+        price: 18499,
+        image: "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600",
         quantity: 1,
         size: "Standard",
         color: "Maroon"
     },
     {
         id: "2",
-        productId: "prod-2",
-        title: "Handwoven Banarasi Zari",
-        price: 18999,
-        image: "https://images.pexels.com/photos/10189025/pexels-photo-10189025.jpeg?auto=compress&cs=tinysrgb&w=800",
+        productId: "2",
+        title: "Zari Weave Lehenga",
+        price: 24999,
+        image: "https://www.sourcesplash.com/i/random?q=lehenga,indian-wedding,bridal&w=1200&h=1600",
         quantity: 1,
         size: "Standard",
-        color: "Royal Blue"
+        color: "Gold"
     }
 ]
 
@@ -42,32 +42,32 @@ export default function CheckoutPage() {
     const subtotal = MOCK_CART_ITEMS.reduce((acc, item) => acc + (item.price * item.quantity), 0)
 
     return (
-        <div className="min-h-screen bg-background pt-24 pb-20">
-            <div className="container mx-auto px-4 md:px-8">
+        <div className="min-h-screen bg-white pt-10 pb-20">
+            <div className="max-w-[1280px] mx-auto px-4 md:px-8">
                 {/* Header */}
-                <div className="mb-8">
-                    <Breadcrumb className="mb-4">
+                <div className="mb-12 border-b border-primary/10 pb-8">
+                    <Breadcrumb className="mb-6">
                         <BreadcrumbList>
                             <BreadcrumbItem>
-                                <BreadcrumbLink href="/" className="uppercase text-xs tracking-widest text-neutral-400 hover:text-white transition-colors">Home</BreadcrumbLink>
+                                <BreadcrumbLink href="/" className="uppercase text-[10px] tracking-[0.2em] text-primary/60 hover:text-primary transition-colors font-sans font-bold">Home</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-neutral-600" />
+                            <BreadcrumbSeparator className="text-accent/40" />
                             <BreadcrumbItem>
-                                <BreadcrumbLink href="/cart" className="uppercase text-xs tracking-widest text-neutral-400 hover:text-white transition-colors">Cart</BreadcrumbLink>
+                                <BreadcrumbLink href="/cart" className="uppercase text-[10px] tracking-[0.2em] text-primary/60 hover:text-primary transition-colors font-sans font-bold">Bag</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-neutral-600" />
+                            <BreadcrumbSeparator className="text-accent/40" />
                             <BreadcrumbItem>
-                                <BreadcrumbPage className="uppercase text-xs tracking-widest font-bold text-white">Checkout</BreadcrumbPage>
+                                <BreadcrumbPage className="uppercase text-[10px] tracking-[0.2em] font-bold text-primary font-sans">Checkout</BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
-                    <h1 className="font-heading font-bold text-3xl md:text-4xl text-white">Checkout</h1>
+                    <h1 className="font-heading font-normal text-2xl md:text-4xl text-primary uppercase tracking-[0.05em]">Secure <span className="italic">Checkout</span></h1>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
                     {/* Left Section: Checkout Form */}
                     <div className="lg:col-span-2">
-                        <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 md:p-8 backdrop-blur-sm">
+                        <div className="bg-white border border-accent/20 rounded-[2.5rem] p-6 md:p-10 shadow-lg shadow-accent/5">
                             <CheckoutForm />
                         </div>
                     </div>

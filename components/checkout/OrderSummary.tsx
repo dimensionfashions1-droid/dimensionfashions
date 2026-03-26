@@ -16,63 +16,65 @@ export function OrderSummary({ items, subtotal, shipping = 0, discount = 0 }: Or
     const total = subtotal + shipping - discount
 
     return (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 sticky top-24 space-y-6">
-            <h2 className="font-heading font-bold text-xl text-white">Order Summary</h2>
+        <div className="bg-accent/10 border border-accent/5 rounded-[2.5rem] p-8 md:p-10 sticky top-28 space-y-8 shadow-sm shadow-accent/5">
+            <h2 className="font-heading font-medium text-2xl text-primary uppercase tracking-[0.1em]">Order Summary</h2>
 
             {/* Scrollable list of items if many */}
             {/* Scrollable list of items if many */}
-            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
+            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
                 {items.map((item) => (
-                    <div key={item.id} className="flex gap-4 items-start group">
-                        <div className="relative h-20 w-16 flex-shrink-0 bg-neutral-800 rounded-lg overflow-hidden border border-neutral-700">
+                    <div key={item.id} className="flex gap-5 items-start">
+                        <div className="relative h-20 w-16 flex-shrink-0 bg-white rounded-xl overflow-hidden border border-primary/5">
                             <Image
                                 src={item.image}
                                 alt={item.title}
                                 fill
                                 className="object-cover"
                             />
-                            <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 rounded-full bg-white text-black text-[10px] border-0 font-bold">
+                            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 rounded-full bg-primary text-secondary text-[9px] border-0 font-bold shadow-md">
                                 {item.quantity}
                             </Badge>
                         </div>
-                        <div className="flex-1 min-w-0 space-y-1">
-                            <p className="text-sm font-bold text-white truncate leading-tight">{item.title}</p>
-                            <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
-                                {item.size && <span>Size: <span className="text-neutral-300">{item.size}</span></span>}
-                                {item.color && <span>Color: <span className="text-neutral-300">{item.color}</span></span>}
+                        <div className="flex-1 min-w-0 space-y-1 py-1">
+                            <p className="text-[11px] font-sans font-bold text-primary uppercase tracking-widest truncate leading-tight">{item.title}</p>
+                            <div className="flex flex-wrap gap-3 text-[9px] uppercase tracking-[0.1em] text-primary/40 font-bold font-sans">
+                                {item.size && <span>{item.size}</span>}
+                                {item.color && <span>• {item.color}</span>}
                             </div>
                         </div>
-                        <p className="text-sm font-bold text-white">₹{(item.price * item.quantity).toLocaleString()}</p>
+                        <p className="text-[11px] font-sans font-bold text-primary py-1 tracking-widest">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
                     </div>
                 ))}
             </div>
 
-            <Separator className="bg-neutral-800" />
+            <Separator className="bg-primary/10" />
 
-            <div className="space-y-4 text-sm">
-                <div className="flex justify-between text-neutral-400">
+            <div className="space-y-5 text-[12px] font-sans font-bold uppercase tracking-[0.2em]">
+                <div className="flex justify-between text-primary/50">
                     <span>Subtotal</span>
-                    <span className="text-white font-medium">₹{subtotal.toLocaleString()}</span>
+                    <span className="text-primary text-[14px]">₹{subtotal.toLocaleString("en-IN")}</span>
                 </div>
                 {discount > 0 && (
-                    <div className="flex justify-between text-green-500">
+                    <div className="flex justify-between text-accent">
                         <span>Discount</span>
-                        <span className="font-medium">-₹{discount.toLocaleString()}</span>
+                        <span className="">-₹{discount.toLocaleString("en-IN")}</span>
                     </div>
                 )}
-                <div className="flex justify-between text-neutral-400">
-                    <span>Shipping</span>
-                    <span className="text-white font-medium">
-                        {shipping === 0 ? "Free" : `₹${shipping.toLocaleString()}`}
-                    </span>
-                </div>
+                {shipping !== 0 && (
+                    <div className="flex justify-between text-primary/50">
+                        <span>Shipping</span>
+                        <span className="text-primary lowercase">
+                            ₹{shipping.toLocaleString("en-IN")}
+                        </span>
+                    </div>
+                )}
             </div>
 
-            <Separator className="bg-neutral-800" />
+            <Separator className="bg-primary/10" />
 
-            <div className="flex justify-between items-end">
-                <span className="font-heading font-bold text-lg text-white">Total</span>
-                <span className="font-heading font-bold text-2xl text-white">₹{total.toLocaleString()}</span>
+            <div className="flex justify-between items-end pt-2">
+                <span className="font-heading font-semibold text-[16px] text-primary/90 uppercase tracking-[0.2em]">Total Amount</span>
+                <span className="font-sans font-semibold text-xl text-accent tracking-tighter">₹{total.toLocaleString("en-IN")}</span>
             </div>
         </div>
     )

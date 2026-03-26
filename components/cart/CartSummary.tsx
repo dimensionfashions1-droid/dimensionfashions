@@ -16,45 +16,45 @@ export function CartSummary({ subtotal, shipping = 0, discount = 0 }: CartSummar
     const total = subtotal + shipping - discount
 
     return (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 sticky top-24 space-y-6">
-            <h2 className="font-heading font-bold text-xl text-white">Order Summary</h2>
+        <div className="bg-accent/10 border border-accent/5 rounded-[2.5rem] p-8 md:p-10 sticky top-28 space-y-8 shadow-sm shadow-accent/5">
+            <h2 className="font-heading font-medium text-2xl text-primary uppercase tracking-[0.1em]">Order Summary</h2>
 
-            <div className="space-y-4 text-sm">
-                <div className="flex justify-between text-neutral-400">
+            <div className="space-y-5 text-[12px] font-sans font-bold uppercase tracking-[0.2em]">
+                <div className="flex justify-between text-primary/50">
                     <span>Subtotal</span>
-                    <span className="text-white font-medium">₹{subtotal.toLocaleString()}</span>
+                    <span className="text-primary text-[14px]">₹{subtotal.toLocaleString("en-IN")}</span>
                 </div>
                 {discount > 0 && (
-                    <div className="flex justify-between text-green-500">
+                    <div className="flex justify-between text-accent">
                         <span>Discount</span>
-                        <span className="font-medium">-₹{discount.toLocaleString()}</span>
+                        <span className="">-₹{discount.toLocaleString("en-IN")}</span>
                     </div>
                 )}
-                <div className="flex justify-between text-neutral-400">
+                {shipping !== 0 && (<div className="flex justify-between text-primary/50">
                     <span>Shipping</span>
-                    <span className="text-white font-medium">
-                        {shipping === 0 ? "Free" : `₹${shipping.toLocaleString()}`}
+                    <span className="text-primary lowercase">
+                        `₹${shipping.toLocaleString("en-IN")}`
                     </span>
-                </div>
+                </div>)}
             </div>
 
-            <Separator className="bg-neutral-800" />
+            <Separator className="bg-primary/10" />
 
-            <div className="flex justify-between items-end">
-                <span className="font-heading font-bold text-lg text-white">Total</span>
-                <span className="font-heading font-bold text-2xl text-white">₹{total.toLocaleString()}</span>
+            <div className="flex justify-between items-end pt-2">
+                <span className="font-heading font-semibold text-[16px] text-primary/90 uppercase tracking-[0.2em]">Total Amount</span>
+                <span className="font-sans font-semibold text-xl text-accent tracking-tighter">₹{total.toLocaleString("en-IN")}</span>
             </div>
 
-            <Button className="w-full bg-white text-black hover:bg-neutral-200 font-bold uppercase tracking-widest text-sm h-14 rounded-full" asChild>
+            <Button className="w-full bg-accent text-white hover:bg-accent/90 font-sans font-bold uppercase tracking-[0.3em] text-[12px] h-14 rounded-full transition-all duration-500 shadow-lg shadow-accent/20" asChild>
                 <Link href="/checkout">
-                    Proceed to Checkout
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    Checkout Now
+                    <ArrowRight className="ml-3 h-3.5 w-3.5" />
                 </Link>
             </Button>
 
             <div className="text-center">
-                <Link href="/products" className="text-xs font-bold uppercase tracking-widest text-neutral-500 hover:text-white transition-colors inline-flex items-center gap-2">
-                    <ShoppingBag className="h-3 w-3" />
+                <Link href="/products" className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-primary/40 hover:text-accent transition-all duration-300 inline-flex items-center gap-2 group/shopping">
+                    <ShoppingBag className="h-3.5 w-3.5 group-hover/shopping:scale-110 transition-transform" />
                     Continue Shopping
                 </Link>
             </div>

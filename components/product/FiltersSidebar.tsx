@@ -87,7 +87,7 @@ export function FiltersSidebar({
         <div className="space-y-14">
             {/* Categories */}
             <div className="space-y-8">
-                <h3 className="font-heading font-normal text-[11px] uppercase tracking-[0.25em] text-primary border-b border-primary/5 pb-4 inline-block">Collection</h3>
+                <h3 className="font-heading font-bold text-[14px] uppercase tracking-[0.25em] text-primary border-b border-primary/10 pb-4 block">Collection</h3>
                 <div className="space-y-5 pt-2">
                     {categories.map((category) => (
                         <div key={category.id} className="flex items-center space-x-4 group cursor-pointer">
@@ -99,7 +99,7 @@ export function FiltersSidebar({
                             />
                             <Label
                                 htmlFor={category.id}
-                                className="text-[11px] uppercase tracking-[0.15em] text-primary/60 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
+                                className="text-[11px] uppercase tracking-[0.15em] text-primary/80 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
                             >
                                 {category.label}
                             </Label>
@@ -109,26 +109,27 @@ export function FiltersSidebar({
             </div>
 
             {/* Price Range */}
-            <div className="space-y-10">
-                <div className="flex items-center justify-between">
-                    <h3 className="font-heading font-normal text-[11px] uppercase tracking-[0.25em] text-primary border-b border-primary/5 pb-4 inline-block">Price Range</h3>
-                    <span className="text-[10px] font-bold text-primary bg-primary/5 px-4 py-2 border border-primary/5 font-sans">
-                        ₹{priceRange[0]} - ₹{priceRange[1]}
-                    </span>
+            <div className="space-y-6">
+                <h3 className="font-heading font-bold text-[14px] uppercase tracking-[0.25em] text-primary border-b border-primary/10 pb-4 block">Price Range</h3>
+                <div className="space-y-4 pt-4">
+                    <Slider
+                        defaultValue={[0, 100000]}
+                        max={100000}
+                        step={1000}
+                        value={priceRange}
+                        onValueChange={setPriceRange}
+                        className="py-4"
+                    />
+                    <div className="flex items-center justify-between text-[10px] font-bold text-primary px-1 font-sans opacity-60 uppercase tracking-widest">
+                        <span>₹{priceRange[0]}</span>
+                        <span>₹{priceRange[1]}</span>
+                    </div>
                 </div>
-                <Slider
-                    defaultValue={[0, 100000]}
-                    max={100000}
-                    step={1000}
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    className="py-4"
-                />
             </div>
 
             {/* Colors */}
             <div className="space-y-8">
-                <h3 className="font-heading font-normal text-[11px] uppercase tracking-[0.25em] text-primary border-b border-primary/5 pb-4 inline-block">Color Palette</h3>
+                <h3 className="font-heading font-bold text-[14px] uppercase tracking-[0.25em] text-primary border-b border-primary/10 pb-4 block">Color Palette</h3>
                 <div className="grid grid-cols-2 gap-y-6 pt-2">
                     {["Maroon", "Gold", "Ivory", "Emerald", "RoyalBlue", "Black"].map((color) => (
                         <div key={color} className="flex items-center space-x-4 group cursor-pointer">
@@ -140,7 +141,7 @@ export function FiltersSidebar({
                             />
                             <Label
                                 htmlFor={`color-${color}`}
-                                className="flex items-center gap-3 text-[11px] uppercase tracking-[0.1em] text-primary/60 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
+                                className="flex items-center gap-3 text-[11px] uppercase tracking-[0.1em] text-primary/80 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
                             >
                                 <div
                                     className="w-3 h-3 rounded-full border border-primary/10"

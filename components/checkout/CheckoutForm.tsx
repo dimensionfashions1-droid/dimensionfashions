@@ -61,8 +61,8 @@ export function CheckoutForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
                 {/* Contact Information */}
-                <div className="space-y-4">
-                    <h3 className="font-heading font-bold text-lg text-white">Contact Information</h3>
+                <div className="space-y-6">
+                    <h2 className="font-heading font-medium text-xl text-primary uppercase tracking-[0.1em] border-b border-primary/5 pb-4">Contact Information</h2>
                     <div className="grid grid-cols-1 gap-4">
                         <FormField
                             control={form.control}
@@ -93,11 +93,11 @@ export function CheckoutForm() {
                     </div>
                 </div>
 
-                <Separator className="bg-neutral-800" />
+                <Separator className="bg-primary/10" />
 
                 {/* Shipping Address */}
-                <div className="space-y-4">
-                    <h3 className="font-heading font-bold text-lg text-white">Shipping Address</h3>
+                <div className="space-y-6">
+                    <h2 className="font-heading font-medium text-xl text-primary uppercase tracking-[0.1em] border-b border-primary/5 pb-4">Shipping Address</h2>
                     <div className="grid grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
@@ -182,11 +182,11 @@ export function CheckoutForm() {
                     />
                 </div>
 
-                <Separator className="bg-neutral-800" />
+                <Separator className="bg-primary/10" />
 
                 {/* Payment Method */}
-                <div className="space-y-4">
-                    <h3 className="font-heading font-bold text-lg text-white">Payment Method</h3>
+                <div className="space-y-6">
+                    <h2 className="font-heading font-medium text-xl text-primary uppercase tracking-[0.1em] border-b border-primary/5 pb-4">Payment Method</h2>
                     <FormField
                         control={form.control}
                         name="paymentMethod"
@@ -204,13 +204,15 @@ export function CheckoutForm() {
                                             </FormControl>
                                             <Label
                                                 htmlFor="upi"
-                                                className="flex flex-col items-center justify-between rounded-xl border-2 border-neutral-800 bg-neutral-900 p-4 hover:bg-neutral-800 hover:text-white peer-data-[state=checked]:border-white peer-data-[state=checked]:text-white [&:has([data-state=checked])]:border-white"
+                                                className="flex flex-col items-center justify-between rounded-[1.5rem] border border-accent/10 bg-white p-5 hover:bg-accent/5 cursor-pointer peer-data-[state=checked]:border-accent peer-data-[state=checked]:bg-accent/5 transition-all duration-300"
                                             >
-                                                <div className="flex w-full items-center gap-4">
-                                                    <Wallet className="h-6 w-6" />
+                                                <div className="flex w-full items-center gap-5">
+                                                    <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                                                        <Wallet className="h-6 w-6" />
+                                                    </div>
                                                     <div className="flex flex-col">
-                                                        <span className="font-bold text-base">UPI / Netbanking</span>
-                                                        <span className="text-xs text-neutral-400">Google Pay, PhonePe, Paytm</span>
+                                                        <span className="font-sans font-bold text-sm uppercase tracking-widest text-primary">UPI / Netbanking</span>
+                                                        <span className="text-[10px] text-primary/40 font-sans uppercase tracking-[0.1em] font-bold">Google Pay, PhonePe, Paytm</span>
                                                     </div>
                                                 </div>
                                             </Label>
@@ -221,13 +223,15 @@ export function CheckoutForm() {
                                             </FormControl>
                                             <Label
                                                 htmlFor="card"
-                                                className="flex flex-col items-center justify-between rounded-xl border-2 border-neutral-800 bg-neutral-900 p-4 hover:bg-neutral-800 hover:text-white peer-data-[state=checked]:border-white peer-data-[state=checked]:text-white [&:has([data-state=checked])]:border-white"
+                                                className="flex flex-col items-center justify-between rounded-[1.5rem] border border-accent/10 bg-white p-5 hover:bg-accent/5 cursor-pointer peer-data-[state=checked]:border-accent peer-data-[state=checked]:bg-accent/5 transition-all duration-300"
                                             >
-                                                <div className="flex w-full items-center gap-4">
-                                                    <CreditCard className="h-6 w-6" />
+                                                <div className="flex w-full items-center gap-5">
+                                                    <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                                                        <CreditCard className="h-6 w-6" />
+                                                    </div>
                                                     <div className="flex flex-col">
-                                                        <span className="font-bold text-base">Card Payment</span>
-                                                        <span className="text-xs text-neutral-400">Visa, Mastercard, RuPay</span>
+                                                        <span className="font-sans font-bold text-sm uppercase tracking-widest text-primary">Card Payment</span>
+                                                        <span className="text-[10px] text-primary/40 font-sans uppercase tracking-[0.1em] font-bold">Visa, Mastercard, RuPay</span>
                                                     </div>
                                                 </div>
                                             </Label>
@@ -238,13 +242,15 @@ export function CheckoutForm() {
                                             </FormControl>
                                             <Label
                                                 htmlFor="cod"
-                                                className="flex flex-col items-center justify-between rounded-xl border-2 border-neutral-800 bg-neutral-900 p-4 hover:bg-neutral-800 hover:text-white peer-data-[state=checked]:border-white peer-data-[state=checked]:text-white [&:has([data-state=checked])]:border-white"
+                                                className="flex flex-col items-center justify-between rounded-[1.5rem] border border-accent/10 bg-white p-5 hover:bg-accent/5 cursor-pointer peer-data-[state=checked]:border-accent peer-data-[state=checked]:bg-accent/5 transition-all duration-300"
                                             >
-                                                <div className="flex w-full items-center gap-4">
-                                                    <Truck className="h-6 w-6" />
+                                                <div className="flex w-full items-center gap-5">
+                                                    <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                                                        <Truck className="h-6 w-6" />
+                                                    </div>
                                                     <div className="flex flex-col">
-                                                        <span className="font-bold text-base">Cash on Delivery</span>
-                                                        <span className="text-xs text-neutral-400">Pay when you receive the order</span>
+                                                        <span className="font-sans font-bold text-sm uppercase tracking-widest text-primary">Cash on Delivery</span>
+                                                        <span className="text-[10px] text-primary/40 font-sans uppercase tracking-[0.1em] font-bold">Pay when you receive the order</span>
                                                     </div>
                                                 </div>
                                             </Label>
@@ -257,7 +263,7 @@ export function CheckoutForm() {
                     />
                 </div>
 
-                <Button type="submit" className="w-full h-14 bg-white text-black hover:bg-neutral-200 font-bold uppercase tracking-widest text-sm rounded-full shadow-lg shadow-white/10">
+                <Button type="submit" className="w-full h-16 bg-accent text-white hover:bg-accent/90 font-sans font-bold uppercase tracking-[0.3em] text-[12px] rounded-full transition-all duration-500 shadow-xl shadow-accent/20">
                     Place Order
                 </Button>
             </form>

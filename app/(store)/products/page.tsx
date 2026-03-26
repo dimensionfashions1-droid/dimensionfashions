@@ -93,11 +93,11 @@ export default function ProductsPage() {
         <div className="min-h-screen bg-white pt-8 pb-8">
             <div className="max-w-[1280px] mx-auto px-4">
                 {/* Header */}
-                <div className="flex flex-col gap-8 border-b border-primary/10 pb-16 pt-8">
+                <div className="flex flex-col gap-4 border-b border-primary/30 pb-4">
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
-                                <BreadcrumbLink href="/" className="uppercase text-[10px] tracking-[0.2em] text-text-secondary hover:text-primary transition-colors font-sans font-bold">Home</BreadcrumbLink>
+                                <BreadcrumbLink href="/" className="uppercase text-[10px] tracking-[0.2em] text-primary/60 hover:text-primary transition-colors font-sans font-bold">Home</BreadcrumbLink>
                             </BreadcrumbItem>
                             <BreadcrumbSeparator className="text-accent/40" />
                             <BreadcrumbItem>
@@ -106,12 +106,10 @@ export default function ProductsPage() {
                         </BreadcrumbList>
                     </Breadcrumb>
 
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
                         <div className="space-y-4">
-                            <span className="text-accent uppercase tracking-[0.4em] text-[10px] font-bold font-sans">Explore Dimensions</span>
-                            <h1 className="text-5xl md:text-7xl font-heading font-normal leading-[0.95] tracking-tight text-primary">
-                                The <span className="italic">Collection</span>
-                            </h1>
+                            <span className="text-accent uppercase tracking-[0.4em] text-[12px] font-bold font-sans">Explore our Products</span>
+
                         </div>
                         <div className="flex items-center gap-6">
                             <FiltersSidebar isMobile {...filterProps} />
@@ -122,13 +120,13 @@ export default function ProductsPage() {
 
                 <div className="flex flex-col lg:flex-row gap-16">
                     {/* Sidebar (Desktop) */}
-                    <aside className="hidden border-r border-primary/10 pt-8 pr-10 lg:block w-72 flex-shrink-0">
+                    <aside className="hidden border-r border-primary/30 pt-8 pr-10 lg:block w-72 flex-shrink-0">
                         <FiltersSidebar {...filterProps} />
                     </aside>
 
                     {/* Main Content */}
                     <main className="flex-1 pt-8">
-                        <div className="mb-8 text-[11px] text-text-secondary uppercase tracking-[0.2em] font-sans font-bold opacity-60">
+                        <div className="mb-8 text-[11px] text-primary uppercase tracking-[0.2em] font-sans font-bold opacity-80">
                             Showing {paginatedProducts.length} of {sortedProducts.length} contemporary pieces
                         </div>
 

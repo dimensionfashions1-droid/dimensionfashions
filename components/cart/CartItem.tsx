@@ -15,14 +15,14 @@ interface CartItemProps {
 
 export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
     return (
-        <div className="flex gap-6 p-6 bg-neutral-900 border border-neutral-800 rounded-xl transition-all duration-300 hover:border-neutral-700 group">
+        <div className="flex gap-6 p-6 bg-white border border-primary/5 rounded-2xl transition-all duration-300 hover:border-accent/20 group">
             {/* Image */}
-            <div className="relative aspect-[3/4] w-28 sm:w-36 flex-shrink-0 overflow-hidden rounded-lg bg-neutral-800">
+            <div className="relative aspect-[3/4] w-28 sm:w-36 flex-shrink-0 overflow-hidden rounded-xl bg-primary/5">
                 <Image
                     src={item.image}
                     alt={item.title}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
             </div>
 
@@ -30,23 +30,23 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
             <div className="flex flex-1 flex-col justify-between py-1">
                 <div className="flex justify-between items-start gap-4">
                     <div className="space-y-3">
-                        <h3 className="font-heading font-bold text-lg sm:text-xl text-white leading-tight">
-                            <Link href={`/product/${item.productId}`} className="hover:text-neutral-300 transition-colors">
+                        <h3 className="font-heading font-normal text-lg sm:text-xl text-primary tracking-tight leading-tight">
+                            <Link href={`/product/${item.productId}`} className="hover:text-accent transition-colors">
                                 {item.title}
                             </Link>
                         </h3>
 
-                        <div className="flex flex-wrap gap-4 text-sm text-neutral-400">
+                        <div className="flex flex-wrap gap-6 text-sm">
                             {item.size && (
-                                <div className="flex items-center gap-2">
-                                    <span className="font-heading font-bold uppercase text-xs tracking-widest text-neutral-500">Size</span>
-                                    <span className="text-white font-medium">{item.size}</span>
+                                <div className="flex flex-col gap-1">
+                                    <span className="font-sans font-bold uppercase text-[9px] tracking-[0.2em] text-primary/40">Size</span>
+                                    <span className="text-primary font-sans font-bold text-xs uppercase tracking-wider">{item.size}</span>
                                 </div>
                             )}
                             {item.color && (
-                                <div className="flex items-center gap-2">
-                                    <span className="font-heading font-bold uppercase text-xs tracking-widest text-neutral-500">Color</span>
-                                    <span className="text-white font-medium">{item.color}</span>
+                                <div className="flex flex-col gap-1">
+                                    <span className="font-sans font-bold uppercase text-[9px] tracking-[0.2em] text-primary/40">Color</span>
+                                    <span className="text-primary font-sans font-bold text-xs uppercase tracking-wider">{item.color}</span>
                                 </div>
                             )}
                             {item.variant && (
@@ -54,29 +54,29 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
                             )}
                         </div>
                     </div>
-                    <p className="font-bold text-white text-xl">
-                        ₹{(item.price * item.quantity).toLocaleString()}
+                    <p className="font-sans font-bold text-primary text-lg tracking-widest">
+                        ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                     </p>
                 </div>
 
                 <div className="flex justify-between items-end mt-4">
                     {/* Quantity Selector - Styled like ProductInfo */}
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center bg-neutral-900 rounded-full px-1 py-1 border border-neutral-800">
+                        <div className="flex items-center bg-white rounded-full px-1 py-1 border border-primary/10">
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 rounded-full hover:bg-neutral-800 text-neutral-400 hover:text-white"
+                                className="h-8 w-8 rounded-full hover:bg-primary/5 text-primary"
                                 onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
                                 disabled={item.quantity <= 1}
                             >
                                 <Minus className="h-3 w-3" />
                             </Button>
-                            <span className="w-8 text-center text-sm font-medium text-white">{item.quantity}</span>
+                            <span className="w-8 text-center text-xs font-bold font-sans text-primary">{item.quantity}</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 rounded-full hover:bg-neutral-800 text-neutral-400 hover:text-white"
+                                className="h-8 w-8 rounded-full hover:bg-primary/5 text-primary"
                                 onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
                             >
                                 <Plus className="h-3 w-3" />
@@ -88,11 +88,11 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 transition-colors h-9 px-3 rounded-full"
+                        className="text-primary/40 hover:text-red-500 hover:bg-red-500/5 transition-all duration-300 h-9 px-4 rounded-full group/remove"
                         onClick={() => onRemove(item.id)}
                     >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        <span className="text-xs font-bold uppercase tracking-widest">Remove</span>
+                        <Trash2 className="h-3.5 w-3.5 mr-2 group-hover/remove:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] font-sans">Remove</span>
                     </Button>
                 </div>
             </div>

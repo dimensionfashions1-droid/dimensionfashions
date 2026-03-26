@@ -14,21 +14,21 @@ import { useParams } from "next/navigation"
 // Mock Data (In a real app, this would be fetched based on params.id)
 const MOCK_PRODUCT = {
     id: "1",
-    title: "Royal Maroon Kanjivaram",
-    price: 24999,
-    category: "Kanjivaram",
-    description: "A masterpiece of traditional craftsmanship. This handwoven Kanjivaram silk saree features intricate gold zari work and a rich maroon body. Perfect for weddings and auspicious occasions. Breathable, durable, and exuding timeless grace.",
+    title: "Midnight Silk Kanjivaram",
+    price: 18499,
+    category: "Sarees",
+    description: "A masterpiece of traditional craftsmanship. This handwoven Kanjivaram silk saree features intricate gold zari work and a rich midnight silk body. Perfect for weddings and auspicious occasions. Breathable, durable, and exuding timeless grace.",
     images: [
-        "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200",
-        "https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=1200",
-        "https://images.pexels.com/photos/8437013/pexels-photo-8437013.jpeg?auto=compress&cs=tinysrgb&w=1200",
-        "https://images.pexels.com/photos/9323985/pexels-photo-9323985.jpeg?auto=compress&cs=tinysrgb&w=1200"
+        "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600",
+        "https://www.sourcesplash.com/i/random?q=saree,fabric,detail&w=1200&h=1600",
+        "https://www.sourcesplash.com/i/random?q=indian-woman,saree&w=1200&h=1600",
+        "https://www.sourcesplash.com/i/random?q=saree,weaving&w=1200&h=1600"
     ],
-    image: "https://images.pexels.com/photos/14545235/pexels-photo-14545235.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    image: "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600",
     rating: 4.8,
     inStock: true,
     discount: 5,
-    colors: ["Maroon", "Gold", "Ivory"],
+    colors: ["Midnight", "Gold", "Ivory"],
     sizes: ["Standard"]
 }
 
@@ -52,7 +52,7 @@ export default function ProductPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background pt-13 pb-8 relative">
+        <div className="min-h-screen bg-white pt-12 pb-24 relative">
             <div className="max-w-[1280px] mx-auto px-4">
                 <div className="mb-12">
                     <Breadcrumb>
@@ -60,11 +60,11 @@ export default function ProductPage() {
                             <BreadcrumbItem>
                                 <BreadcrumbLink href="/" className="uppercase text-[10px] tracking-[0.2em] text-primary/40 hover:text-primary transition-colors font-sans font-bold">Home</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-secondary-foreground/20" />
+                            <BreadcrumbSeparator className="text-primary/10" />
                             <BreadcrumbItem>
                                 <BreadcrumbLink href="/products" className="uppercase text-[10px] tracking-[0.2em] text-primary/40 hover:text-primary transition-colors font-sans font-bold">Products</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-secondary-foreground/20" />
+                            <BreadcrumbSeparator className="text-primary/10" />
                             <BreadcrumbItem>
                                 <BreadcrumbPage className="uppercase text-[10px] tracking-[0.2em] font-sans font-bold text-primary">{MOCK_PRODUCT.title}</BreadcrumbPage>
                             </BreadcrumbItem>
@@ -93,23 +93,23 @@ export default function ProductPage() {
                         />
 
                         <div className="mt-16 pt-16 border-t border-primary/5">
-                            <h3 className="font-heading font-normal text-2xl tracking-tight mb-8 text-primary">Specifications</h3>
+                            <h3 className="font-heading font-normal text-2xl tracking-tight mb-8 text-primary uppercase tracking-[0.1em]">Details & <span className="italic px-1">Care</span></h3>
                             <div className="space-y-4">
-                                <div className="grid grid-cols-2 py-4 border-b border-primary/5">
-                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 font-sans">Material</span>
-                                    <span className="text-xs font-bold text-primary font-sans uppercase tracking-widest">100% Pure Handwoven Silk</span>
+                                <div className="grid grid-cols-2 py-5 border-b border-primary/5 items-center">
+                                    <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-primary/40 font-sans">Material</span>
+                                    <span className="text-[10px] font-bold text-primary font-sans uppercase tracking-[0.15em]">100% Pure Handwoven Silk</span>
                                 </div>
-                                <div className="grid grid-cols-2 py-4 border-b border-primary/5">
-                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 font-sans">Craft</span>
-                                    <span className="text-xs font-bold text-primary font-sans uppercase tracking-widest">Kanjivaram Zari Work</span>
+                                <div className="grid grid-cols-2 py-5 border-b border-primary/5 items-center">
+                                    <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-primary/40 font-sans">Craft</span>
+                                    <span className="text-[10px] font-bold text-primary font-sans uppercase tracking-[0.15em]">Kanjivaram Zari Work</span>
                                 </div>
-                                <div className="grid grid-cols-2 py-4 border-b border-primary/5">
-                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 font-sans">Care</span>
-                                    <span className="text-xs font-bold text-primary font-sans uppercase tracking-widest">Dry clean only</span>
+                                <div className="grid grid-cols-2 py-5 border-b border-primary/5 items-center">
+                                    <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-primary/40 font-sans">Care</span>
+                                    <span className="text-[10px] font-bold text-primary font-sans uppercase tracking-[0.15em]">Dry clean only</span>
                                 </div>
-                                <div className="grid grid-cols-2 py-4 border-b border-primary/5">
-                                    <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/40 font-sans">Origin</span>
-                                    <span className="text-xs font-bold text-primary font-sans uppercase tracking-widest">Made in India</span>
+                                <div className="grid grid-cols-2 py-5 border-b border-primary/5 items-center">
+                                    <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-primary/40 font-sans">Origin</span>
+                                    <span className="text-[10px] font-bold text-primary font-sans uppercase tracking-[0.15em]">Made in India</span>
                                 </div>
                             </div>
                         </div>

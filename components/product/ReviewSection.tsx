@@ -38,35 +38,35 @@ const MOCK_REVIEWS = [
 export function ReviewSection() {
     return (
         <div className="py-16">
-            <h2 className="font-heading font-bold text-3xl uppercase tracking-tight mb-8 text-white">Customer Reviews</h2>
+            <h2 className="font-heading font-normal text-3xl md:text-4xl uppercase tracking-[0.1em] mb-12 text-primary">Customer <span className="italic">Reviews</span></h2>
 
             <div className="grid md:grid-cols-12 gap-12">
                 {/* Summary */}
                 <div className="md:col-span-4 space-y-8">
-                    <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl text-center space-y-4">
-                        <div className="text-6xl font-black font-heading text-white">4.8</div>
-                        <div className="flex justify-center text-yellow-500">
+                    <div className="bg-primary/5 border border-primary/5 p-10 rounded-2xl text-center space-y-4">
+                        <div className="text-7xl font-black font-heading text-primary leading-none">4.8</div>
+                        <div className="flex justify-center text-accent">
                             {Array.from({ length: 5 }).map((_, i) => (
                                 <Star key={i} className="w-5 h-5 fill-current" />
                             ))}
                         </div>
-                        <p className="text-neutral-400 font-medium">Based on 128 Reviews</p>
+                        <p className="text-primary/60 font-medium uppercase tracking-widest text-[10px] font-sans">Based on 128 Reviews</p>
                     </div>
 
                     <div className="space-y-3">
                         {[5, 4, 3, 2, 1].map((rating) => (
                             <div key={rating} className="flex items-center gap-4">
-                                <span className="text-sm font-bold w-3 text-white">{rating}</span>
-                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                <Progress value={rating === 5 ? 75 : rating === 4 ? 20 : 5} className="h-2 bg-neutral-800" />
-                                <span className="text-sm text-neutral-400 w-8 text-right">
+                                <span className="text-sm font-bold w-3 text-primary">{rating}</span>
+                                <Star className="w-4 h-4 text-accent fill-current" />
+                                <Progress value={rating === 5 ? 75 : rating === 4 ? 20 : 5} className="h-1.5 bg-primary/10" />
+                                <span className="text-[10px] text-primary/40 font-bold w-8 text-right font-sans">
                                     {rating === 5 ? '75%' : rating === 4 ? '20%' : '5%'}
                                 </span>
                             </div>
                         ))}
                     </div>
 
-                    <Button className="w-full rounded-full h-12 uppercase font-bold tracking-widest bg-white text-black border border-white hover:bg-neutral-200 transition-colors">
+                    <Button className="w-full rounded-full h-14 uppercase font-sans font-bold tracking-[0.25em] text-[10px] bg-primary text-secondary hover:bg-black transition-all duration-500 mt-4">
                         Write a Review
                     </Button>
                 </div>
@@ -77,12 +77,12 @@ export function ReviewSection() {
                         <div key={review.id} className="space-y-4">
                             <div className="flex justify-between items-start">
                                 <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <h4 className="font-bold text-white">{review.author}</h4>
-                                        <span className="text-xs text-green-500 bg-green-950/30 border border-green-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Verified Buyer</span>
+                                    <div className="flex items-center gap-3">
+                                        <h4 className="font-bold text-primary font-sans text-sm uppercase tracking-wider">{review.author}</h4>
+                                        <span className="text-[8px] text-accent bg-accent/5 border border-accent/10 px-3 py-1 rounded-full font-bold uppercase tracking-[0.2em] font-sans">Verified Buyer</span>
                                     </div>
-                                    <div className="flex items-center gap-3 text-sm text-neutral-500">
-                                        <div className="flex text-yellow-500">
+                                    <div className="flex items-center gap-3 text-[10px] text-primary/40 font-sans font-bold uppercase tracking-widest">
+                                        <div className="flex text-accent">
                                             {Array.from({ length: review.rating }).map((_, i) => (
                                                 <Star key={i} className="w-3 h-3 fill-current" />
                                             ))}
@@ -93,20 +93,20 @@ export function ReviewSection() {
                                 </div>
                             </div>
 
-                            <h5 className="font-bold text-lg text-neutral-200">{review.title}</h5>
-                            <p className="text-neutral-400 leading-relaxed text-sm">{review.content}</p>
+                            <h5 className="font-bold text-base text-primary font-sans uppercase tracking-[0.05em]">{review.title}</h5>
+                            <p className="text-primary/70 leading-relaxed text-[13px] font-sans">{review.content}</p>
 
                             <div className="flex items-center gap-4">
-                                <button className="flex items-center gap-2 text-sm text-neutral-500 hover:text-white transition-colors">
-                                    <ThumbsUp className="w-4 h-4" />
+                                <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary/40 hover:text-primary transition-colors font-sans group">
+                                    <ThumbsUp className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                                     <span>Helpful ({review.helpful})</span>
                                 </button>
                             </div>
-                            <Separator className="bg-neutral-800" />
+                            <Separator className="bg-primary/5" />
                         </div>
                     ))}
 
-                    <Button variant="link" className="text-white font-bold uppercase tracking-widest pl-0 hover:text-neutral-300">
+                    <Button variant="link" className="text-primary font-bold uppercase tracking-[0.2em] text-[10px] font-sans pl-0 hover:text-accent transition-colors">
                         Load More Reviews
                     </Button>
                 </div>
