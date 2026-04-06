@@ -38,7 +38,7 @@ const MOCK_REVIEWS = [
 export function ReviewSection() {
     return (
         <div className="py-16">
-            <h2 className="font-heading font-normal text-3xl md:text-4xl uppercase tracking-[0.1em] mb-12 text-primary">Customer <span className="italic">Reviews</span></h2>
+            <h2 className="font-heading font-normal text-3xl md:text-4xl uppercase tracking-[0.1em] mb-12 text-primary">Customer <span>Reviews</span></h2>
 
             <div className="grid md:grid-cols-12 gap-12">
                 {/* Summary */}

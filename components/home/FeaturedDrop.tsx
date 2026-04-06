@@ -35,7 +35,7 @@ export function FeaturedDrop() {
                                     The Summer Edit
                                 </span>
                                 <h2 className="font-heading font-normal text-3xl md:text-4xl text-primary tracking-tight">
-                                    Contemporary <span className="italic">Dresses</span>
+                                    Contemporary <span>Dresses</span>
                                 </h2>
                             </div>
 

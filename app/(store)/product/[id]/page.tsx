@@ -93,7 +93,7 @@ export default function ProductPage() {
                         />
 
                         <div className="mt-16 pt-16 border-t border-primary/5">
-                            <h3 className="font-heading font-normal text-2xl tracking-tight mb-8 text-primary uppercase tracking-[0.1em]">Details & <span className="italic px-1">Care</span></h3>
+                            <h3 className="font-heading font-normal text-2xl tracking-tight mb-8 text-primary uppercase tracking-[0.1em]">Details & <span className="px-1">Care</span></h3>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 py-5 border-b border-primary/5 items-center">
                                     <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-primary/40 font-sans">Material</span>

@@ -15,7 +15,7 @@ export function BrandCarousel() {
                         {BRANDS.map((brand) => (
                             <span 
                                 key={brand} 
-                                className="font-heading italic text-xl md:text-2xl text-primary tracking-wider whitespace-nowrap"
+                                className="font-heading text-xl md:text-2xl text-primary tracking-wider whitespace-nowrap"
                             >
                                 {brand}
                             </span>

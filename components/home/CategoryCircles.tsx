@@ -63,7 +63,7 @@ export function CategoryCircles() {
                         Explore Collections
                     </span>
                     <h2 className="font-heading font-normal text-3xl md:text-4xl text-primary tracking-tight">
-                        Shop By <span className="italic">Category</span>
+                        Shop By <span className="">Category</span>
                     </h2>
                 </div>
 

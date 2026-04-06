@@ -14,7 +14,7 @@ export function EmptyCart() {
             </div>
 
             <div className="space-y-4">
-                <h2 className="font-heading font-normal text-3xl text-primary uppercase tracking-widest">Your Bag is <span className="italic">Empty</span></h2>
+                <h2 className="font-heading font-normal text-3xl text-primary uppercase tracking-widest">Your Bag is <span>Empty</span></h2>
                 <p className="text-primary/60 max-w-sm mx-auto font-sans font-medium text-sm leading-relaxed tracking-wide">
                     The prompt for elegance awaits within our curated collections. Discover pieces that speak your style.
                 </p>

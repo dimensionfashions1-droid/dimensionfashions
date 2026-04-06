@@ -69,7 +69,7 @@ This file is the **authoritative instruction manual** for **Antigravity AI / Gem
 * **Supabase (Free Tier)**
 
   * PostgreSQL database (~500MB)
-  * Supabase Auth (admin login only)
+  * Supabase Auth (admin + customer login)
   * Supabase Storage (product images)
 
 

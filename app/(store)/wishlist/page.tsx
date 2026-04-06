@@ -66,7 +66,7 @@ export default function WishlistPage() {
                     </Breadcrumb>
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div className="space-y-2">
-                            <h1 className="font-heading font-normal text-2xl md:text-4xl text-primary uppercase tracking-[0.05em]">Your <span className="italic text-accent">Wishlist</span></h1>
+                            <h1 className="font-heading font-normal text-2xl md:text-4xl text-primary uppercase tracking-[0.05em]">Your <span className="text-accent">Wishlist</span></h1>
                             <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-primary/40">{wishlistItems.length} exquisite pieces saved</p>
                         </div>
                     </div>

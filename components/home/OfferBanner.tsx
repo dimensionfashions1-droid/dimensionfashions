@@ -9,7 +9,7 @@ export function OfferBanner() {
                         End of Season Sale
                     </span>
                     <h2 className="font-heading font-normal text-3xl md:text-4xl lg:text-5xl leading-tight">
-                        Up to <span className="italic text-accent">50% Off</span> on Heritage Silks
+                        Up to <span className="text-accent">50% Off</span> on Heritage Silks
                     </h2>
                     <p className="font-sans text-secondary/70 text-sm tracking-wide">
                         Refresh your festive wardrobe with our carefully curated clearance collection. Limited time only.

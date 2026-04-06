@@ -6,7 +6,7 @@ export function CtaSection() {
             <div className="max-w-xl mx-auto px-4 text-center space-y-8">
                 <div className="space-y-4">
                     <h2 className="font-heading font-normal text-3xl md:text-4xl text-primary tracking-tight">
-                        Join the <span className="italic">Inner Circle</span>
+                        Join the <span>Inner Circle</span>
                     </h2>
                     <p className="font-sans text-primary/60 text-sm tracking-wide">
                         Subscribe to receive exclusive access to new drops, styling tips, and private sale events.

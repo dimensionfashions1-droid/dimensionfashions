@@ -20,7 +20,7 @@ export function RelatedProducts({ currentProductId }: RelatedProductsProps) {
 
     return (
         <div className="py-0 border-t border-primary/5">
-            <h2 className="font-heading font-normal text-3xl md:text-4xl uppercase tracking-[0.1em] mb-16 text-primary">You May Also <span className="italic">Like</span></h2>
+            <h2 className="font-heading font-normal text-3xl md:text-4xl uppercase tracking-[0.1em] mb-16 text-primary">You May Also <span>Like</span></h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
                 {productsToShow.map((product) => (

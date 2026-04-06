@@ -38,7 +38,7 @@ export function Footer() {
                         <div className="lg:col-span-5 space-y-10">
                             <div className="space-y-4">
                                 <h4 className="font-sans font-medium uppercase tracking-[0.3em] text-[10px] text-secondary/40">The Collective</h4>
-                                <p className="text-base font-heading text-secondary italic tracking-wide">
+                                <p className="text-base font-heading text-secondary tracking-wide">
                                     Receive exclusive access to new arrivals and private collection previews.
                                 </p>
                             </div>

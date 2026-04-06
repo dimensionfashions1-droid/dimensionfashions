@@ -8,7 +8,7 @@ export function IntroSection() {
                         Our Philosophy
                     </span>
                     <h2 className="font-heading font-normal text-3xl md:text-4xl text-primary tracking-tight max-w-3xl mx-auto">
-                        Celebrating the <span className="italic text-accent">multifaceted</span> woman through every drape.
+                        Celebrating the <span className="text-accent">multifaceted</span> woman through every drape.
                     </h2>
                 </div>
 

@@ -204,16 +204,16 @@ export function Navbar() {
             </div>
 
             {/* Tier 3: Navigation Bar (Desktop only) */}
-            <div className="bg-accent hidden lg:block border-t border-gray-100">
+            <div className="bg-primary hidden lg:block border-t border-gray-100">
                 <div className="max-w-[1280px] mx-auto px-4">
                     <nav className="flex items-center justify-center gap-8 py-3">
                         {/* Burger Menu / Mega Menu */}
                         <div className="group relative">
                             <button
-                                className="flex items-center gap-2 text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
+                                className="flex items-center gap-2 text-[11px] font-sans font-bold text-white hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
                                 suppressHydrationWarning
                             >
-                                <Menu className="w-4 h-4 text-primary" />
+                                <Menu className="w-4 h-4 text-white" />
                                 All Categories
                             </button>
                             {/* Mega Menu Dropdown */}
@@ -284,17 +284,17 @@ export function Navbar() {
                             <Link
                                 key={cat.name}
                                 href={cat.href}
-                                className="text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
+                                className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
                             >
                                 {cat.name}
                             </Link>
                         ))}
 
-                        <div className="h-4 w-px bg-primary/10 mx-2" />
+                        <div className="h-4 w-px bg-white mx-2" />
 
-                        <Link href="#" className="text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Best Sellers</Link>
-                        <Link href="#" className="text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Latest Arrivals</Link>
-                        <Link href="#" className="text-[11px] font-sans font-bold text-primary/80 hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Contact Us</Link>
+                        <Link href="#" className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Best Sellers</Link>
+                        <Link href="#" className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Latest Arrivals</Link>
+                        <Link href="#" className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Contact Us</Link>
                     </nav>
                 </div>
             </div>

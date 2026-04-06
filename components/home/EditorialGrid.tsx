@@ -43,7 +43,7 @@ export function EditorialGrid() {
                         Just In
                     </span>
                     <h2 className="font-heading font-normal text-3xl md:text-4xl text-primary tracking-tight">
-                        Latest <span className="italic">Arrivals</span>
+                        Latest <span>Arrivals</span>
                     </h2>
                 </div>
 

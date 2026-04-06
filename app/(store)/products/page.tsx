@@ -144,7 +144,7 @@ export default function ProductsPage() {
                             </>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-32 text-text-secondary space-y-8">
-                                <p className="text-xl font-heading italic tracking-wide">No exquisite pieces match your current selection.</p>
+                                <p className="text-xl font-heading tracking-wide">No exquisite pieces match your current selection.</p>
                                 <Button
                                     variant="outline"
                                     onClick={() => {

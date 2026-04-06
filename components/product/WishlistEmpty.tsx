@@ -17,7 +17,7 @@ export function WishlistEmpty() {
             </div>
             
             <div className="space-y-3 max-w-xs">
-                <h2 className="font-heading font-normal text-2xl text-primary uppercase tracking-wide italic">Your Wishlist is <span className="text-accent">Empty</span></h2>
+                <h2 className="font-heading font-normal text-2xl text-primary uppercase tracking-wide">Your Wishlist is <span className="text-accent">Empty</span></h2>
                 <p className="text-[11px] font-sans font-bold uppercase tracking-[0.2em] text-primary/40 leading-relaxed px-4">
                     Save your favorite pieces to find them easily later and stay updated on their availability.
                 </p>

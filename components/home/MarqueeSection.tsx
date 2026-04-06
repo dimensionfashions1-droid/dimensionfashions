@@ -18,7 +18,7 @@ export function MarqueeSection() {
                     {items.map((text, i) => (
                         <span
                             key={`a-${i}`}
-                            className="font-heading italic text-2xl md:text-4xl text-white tracking-[0.2em] uppercase whitespace-nowrap px-8 md:px-12 flex items-center gap-8 md:gap-12"
+                            className="font-heading text-2xl md:text-4xl text-white tracking-[0.2em] uppercase whitespace-nowrap px-8 md:px-12 flex items-center gap-8 md:gap-12"
                         >
                             {text}
                             <span className="w-2 h-2 rounded-full bg-accent  shrink-0" />
@@ -31,7 +31,7 @@ export function MarqueeSection() {
                     {items.map((text, i) => (
                         <span
                             key={`b-${i}`}
-                            className="font-heading italic text-2xl md:text-4xl text-white tracking-[0.2em] uppercase whitespace-nowrap px-8 md:px-12 flex items-center gap-8 md:gap-12"
+                            className="font-heading text-2xl md:text-4xl text-white tracking-[0.2em] uppercase whitespace-nowrap px-8 md:px-12 flex items-center gap-8 md:gap-12"
                         >
                             {text}
                             <span className="w-2 h-2 rounded-full bg-accent shrink-0" />

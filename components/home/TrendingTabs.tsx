@@ -23,7 +23,7 @@ export function TrendingTabs({ products }: TrendingTabsProps) {
                                 Curated For You
                             </span>
                             <h2 className="font-heading font-normal text-3xl md:text-4xl text-primary tracking-tight">
-                                The <span className="italic">Silk</span> Edit
+                                The <span>Silk</span> Edit
                             </h2>
                         </div>
 
