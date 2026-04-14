@@ -1,16 +1,30 @@
+'use client'
+
+import React, { useState } from 'react'
 import { login } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowRight, Lock } from 'lucide-react'
+import { ArrowRight, Lock, Loader2 } from 'lucide-react'
+import { useToast } from "@/hooks/use-toast"
 
-export const metadata = {
-  title: 'Admin Login | Dimensions',
-}
+export default function AdminLoginPage() {
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
 
-export default async function AdminLoginPage(props: { searchParams?: Promise<any> | any }) {
-  const resolvedParams = await props.searchParams
-  const error = resolvedParams?.error
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setIsLoading(true)
+    const formData = new FormData(e.currentTarget)
+    const result = await login(formData)
+    setIsLoading(false)
+    if (result?.error) {
+      toast({
+        variant: "destructive",
+        description: result.error,
+      })
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
@@ -30,13 +44,7 @@ export default async function AdminLoginPage(props: { searchParams?: Promise<any
           </p>
         </div>
 
-        {error && (
-          <div className="mb-6 p-3 bg-red-50 text-red-600 text-sm font-medium rounded-lg text-center">
-            {error}
-          </div>
-        )}
-
-        <form action={login} className="space-y-5">
+        <form onSubmit={onSubmit} className="space-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</Label>
             <Input 
@@ -62,9 +70,15 @@ export default async function AdminLoginPage(props: { searchParams?: Promise<any
             />
           </div>
 
-          <Button type="submit" className="w-full h-11 text-base font-medium rounded-md shadow-sm bg-black hover:bg-gray-900 transition-all group">
-            Sign In to Dashboard
-            <ArrowRight className="h-4 w-4 ml-2 opacity-70 group-hover:translate-x-1 transition-transform" />
+          <Button disabled={isLoading} type="submit" className="w-full h-11 text-base font-medium rounded-md shadow-sm bg-black hover:bg-gray-900 transition-all group">
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                Sign In to Dashboard
+                <ArrowRight className="h-4 w-4 ml-2 opacity-70 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </Button>
         </form>
       </div>

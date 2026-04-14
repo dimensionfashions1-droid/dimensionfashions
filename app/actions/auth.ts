@@ -15,8 +15,7 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    const isStore = formData.get('is_store') === 'true'
-    redirect(`${isStore ? '/login' : '/admin/login'}?error=${encodeURIComponent(error.message)}`)
+    return { error: error.message }
   }
 
   // Determine where to redirect based on the user's role
@@ -39,10 +38,13 @@ export async function signup(formData: FormData) {
   const First = formData.get('first_name') as string
   const Last = formData.get('last_name') as string
 
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
     options: {
+        emailRedirectTo: `${origin}/auth/callback`,
         data: {
             first_name: First,
             last_name: Last
@@ -53,10 +55,10 @@ export async function signup(formData: FormData) {
   const { error } = await supabase.auth.signUp(data)
 
   if (error) {
-    redirect(`/register?error=${encodeURIComponent(error.message)}`)
+    return { error: error.message }
   }
 
-  redirect('/login?message=Check your email to confirm your account')
+  return { success: true }
 }
 
 export async function logout() {

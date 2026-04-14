@@ -32,12 +32,26 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Redirect logged in users away from auth pages
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/profile'
+      return NextResponse.redirect(url)
+  }
+
   // Protect Admin Routes
-  if (request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')) {
-    if (!user) {
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!user && !request.nextUrl.pathname.startsWith('/admin/login')) {
       // no user, redirect to login
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
+      return NextResponse.redirect(url)
+    }
+    
+    // Restrict admin login if already logged in
+    if (user && request.nextUrl.pathname.startsWith('/admin/login')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin/dashboard'
       return NextResponse.redirect(url)
     }
   }
@@ -45,11 +59,11 @@ export async function updateSession(request: NextRequest) {
   // Protect protected Store Routes (e.g., checkout/profile) if needed
   if (request.nextUrl.pathname.startsWith('/checkout') || request.nextUrl.pathname.startsWith('/profile')) {
     if (!user) {
-       // redirect to login with a ?next= query param
-       const url = request.nextUrl.clone()
-       url.pathname = '/login'
-       url.searchParams.set('next', request.nextUrl.pathname)
-       return NextResponse.redirect(url)
+      // redirect to login with a ?next= query param
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('next', request.nextUrl.pathname)
+      return NextResponse.redirect(url)
     }
   }
 
