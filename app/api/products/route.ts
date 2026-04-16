@@ -1,123 +1,118 @@
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { ProductRow } from '@/types'
+
+// Interfaces for strict type safety
+interface JoinedProductAttribute {
+  attribute_definitions: {
+    slug: string
+  } | null
+  attribute_options: {
+    value: string
+  } | null
+}
+
+interface FetchedProduct extends Omit<ProductRow, 'category_id' | 'subcategory_id'> {
+  categories?: {
+    slug: string
+  } | null
+  product_attributes?: JoinedProductAttribute[]
+}
+
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const category = searchParams.get("category")
+  try {
+    const { searchParams } = new URL(request.url)
+    const category = searchParams.get('category')
+    const search = searchParams.get('search')
+    
+    const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : null
+    const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : null
+    
+    // E.g., colors=Red,Gold&sizes=S,M
+    const colors = searchParams.get('colors')?.split(',').filter(Boolean)
+    const sizes = searchParams.get('sizes')?.split(',').filter(Boolean)
 
-  const allProducts = [
-    {
-      id: 1,
-      name: "Royal Silk Saree",
-      category: "silk-sarees",
-      price: 4999,
-      originalPrice: 6999,
-      rating: 4.8,
-      reviews: 234,
-      image: "https://images.unsplash.com/photo-1583391733975-6664ea615c0a?auto=format&fit=crop&q=80&w=800",
-      description: "Exquisite royal silk saree with intricate golden borders",
-      colors: ["Gold", "Maroon", "Navy"],
-      fabric: "Pure Silk",
-      featured: true,
-    },
-    {
-      id: 2,
-      name: "Bridal Elegance",
-      category: "bridal-sarees",
-      price: 8999,
-      originalPrice: 12999,
-      rating: 4.9,
-      reviews: 189,
-      image: "https://images.unsplash.com/photo-1604580864964-0462f5d5b1a8?auto=format&fit=crop&q=80&w=800",
-      description: "Stunning bridal saree with hand-embroidered details",
-      colors: ["Red", "Maroon"],
-      fabric: "Silk with Zari",
-      featured: true,
-    },
-    {
-      id: 3,
-      name: "Cotton Comfort",
-      category: "cotton-sarees",
-      price: 1999,
-      originalPrice: 2499,
-      rating: 4.6,
-      reviews: 412,
-      image: "https://images.unsplash.com/photo-1595777457583-95e059f581eb?auto=format&fit=crop&q=80&w=800",
-      description: "Breathable cotton saree perfect for daily wear",
-      colors: ["White", "Cream", "Blue"],
-      fabric: "Pure Cotton",
-      featured: true,
-    },
-    {
-      id: 4,
-      name: "Modern Fusion",
-      category: "designer-sarees",
-      price: 5999,
-      originalPrice: 7999,
-      rating: 4.7,
-      reviews: 156,
-      image: "https://images.unsplash.com/photo-1555529771-331e84ae5b86?auto=format&fit=crop&q=80&w=800",
-      description: "Contemporary design with traditional elements",
-      colors: ["Black", "Gray", "Wine"],
-      fabric: "Blend",
-      featured: false,
-    },
-    {
-      id: 5,
-      name: "Silk Heritage",
-      category: "silk-sarees",
-      price: 3999,
-      originalPrice: 5499,
-      rating: 4.7,
-      reviews: 267,
-      image: "https://images.unsplash.com/photo-1594917172018-9366eecf46f4?auto=format&fit=crop&q=80&w=800",
-      description: "Traditional patterns on premium silk",
-      colors: ["Green", "Purple", "Gold"],
-      fabric: "Pure Silk",
-      featured: false,
-    },
-    {
-      id: 6,
-      name: "Festival Dreams",
-      category: "cotton-sarees",
-      price: 2499,
-      originalPrice: 3299,
-      rating: 4.5,
-      reviews: 328,
-      image: "https://images.unsplash.com/photo-1580828369619-b414fccc41da?auto=format&fit=crop&q=80&w=800",
-      description: "Colorful saree for festive celebrations",
-      colors: ["Orange", "Red", "Pink"],
-      fabric: "Pure Cotton",
-      featured: false,
-    },
-    {
-      id: 7,
-      name: "Silk Dreams",
-      category: "silk-sarees",
-      price: 4499,
-      originalPrice: 6299,
-      rating: 4.8,
-      reviews: 201,
-      image: "https://images.unsplash.com/photo-1617265882583-b5419d280b2a?auto=format&fit=crop&q=80&w=800",
-      description: "Soft pastels on luxurious silk",
-      colors: ["Peach", "Cream", "Lavender"],
-      fabric: "Pure Silk",
-      featured: false,
-    },
-    {
-      id: 8,
-      name: "Designer Elegance",
-      category: "designer-sarees",
-      price: 6999,
-      originalPrice: 9499,
-      rating: 4.9,
-      reviews: 145,
-      image: "https://images.unsplash.com/photo-1599839619722-39751411ea63?auto=format&fit=crop&q=80&w=800",
-      description: "Haute couture designer saree",
-      colors: ["Black", "Gold", "Silver"],
-      fabric: "Premium Blend",
-      featured: true,
-    },
-  ]
+    const supabase = await createClient()
 
-  const filteredProducts = category ? allProducts.filter((p) => p.category === category) : allProducts
+    let query = supabase
+      .from('products')
+      .select(`
+        *,
+        categories!inner(slug),
+        product_attributes(
+          attribute_definitions!inner(slug),
+          attribute_options!inner(value)
+        )
+      `)
 
-  return Response.json(filteredProducts)
+    if (category) {
+      query = query.eq('categories.slug', category)
+    }
+
+    if (search) {
+      query = query.ilike('title', `%${search}%`)
+    }
+
+    if (minPrice !== null && !isNaN(minPrice)) {
+      query = query.gte('price', minPrice)
+    }
+
+    if (maxPrice !== null && !isNaN(maxPrice)) {
+      query = query.lte('price', maxPrice)
+    }
+
+    const { data: rawProducts, error } = await query
+
+    if (error) throw error
+    
+    const products = rawProducts as unknown as FetchedProduct[]
+
+    // Post-filter logic for complex M:N relationships
+    let filtered = products
+
+    if (colors && colors.length > 0) {
+      filtered = filtered.filter((p) => {
+        return p.product_attributes?.some((pa) => 
+          pa.attribute_definitions?.slug === 'color' && 
+          pa.attribute_options?.value &&
+          colors.includes(pa.attribute_options.value)
+        )
+      })
+    }
+
+    if (sizes && sizes.length > 0) {
+      filtered = filtered.filter((p) => {
+        return p.product_attributes?.some((pa) => 
+          pa.attribute_definitions?.slug === 'size' && 
+          pa.attribute_options?.value &&
+          sizes.includes(pa.attribute_options.value)
+        )
+      })
+    }
+
+    // Clean up response: remove heavy joined tables for the list view
+    const cleanData = filtered.map((p) => {
+        // Destructure to remove product_attributes and categories from the response
+        const { product_attributes, categories, ...rest } = p
+        
+        return { 
+          ...rest, 
+          category: categories?.slug,
+          // Extract an array of colors and sizes strictly for the frontend pill/filter display
+          colors: product_attributes
+            ?.filter((pa) => pa.attribute_definitions?.slug === 'color' && pa.attribute_options?.value)
+            .map((pa) => pa.attribute_options!.value) || [],
+          sizes: product_attributes
+            ?.filter((pa) => pa.attribute_definitions?.slug === 'size' && pa.attribute_options?.value)
+            .map((pa) => pa.attribute_options!.value) || [],
+        }
+    })
+
+    return NextResponse.json({ data: cleanData })
+
+  } catch (error: unknown) {
+    console.error('API /products GET error:', error)
+    const err = error as Error
+    return NextResponse.json({ error: err.message || 'Failed to fetch' }, { status: 500 })
+  }
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
@@ -15,16 +15,25 @@ import {
 } from "@/components/ui/sheet"
 import { Filter } from "lucide-react"
 
-const categories = [
-    { id: "sarees", label: "Sarees" },
-    { id: "lehengas", label: "Lehengas" },
-    { id: "kurta-sets", label: "Kurta Sets" },
-    { id: "dresses", label: "Dresses" },
-    { id: "coords", label: "Co-ords" },
-    { id: "gowns", label: "Gowns" },
-    { id: "tops", label: "Tops" },
-    { id: "loungewear", label: "Loungewear" }
-]
+interface FetchedCategory {
+    id: string
+    name: string
+    slug: string
+}
+
+interface FetchedAttributeOption {
+    id: string
+    value: string
+    hex_code?: string
+}
+
+interface FetchedAttribute {
+    id: string
+    name: string
+    slug: string
+    is_filterable: boolean
+    options: FetchedAttributeOption[]
+}
 
 interface FiltersSidebarProps {
     className?: string
@@ -51,6 +60,40 @@ export function FiltersSidebar({
     priceRange,
     setPriceRange
 }: FiltersSidebarProps) {
+    const [categories, setCategories] = useState<FetchedCategory[]>([])
+    const [colors, setColors] = useState<FetchedAttributeOption[]>([])
+    const [sizes, setSizes] = useState<FetchedAttributeOption[]>([])
+
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const [catRes, attrRes] = await Promise.all([
+                    fetch('/api/categories'),
+                    fetch('/api/attributes')
+                ])
+
+                if (catRes.ok) {
+                    const catData = await catRes.json()
+                    setCategories(catData.data || [])
+                }
+
+                if (attrRes.ok) {
+                    const attrData = await attrRes.json()
+                    const attrs: FetchedAttribute[] = attrData.data || []
+                    
+                    const colorAttr = attrs.find(a => a.slug === 'color')
+                    if (colorAttr) setColors(colorAttr.options)
+                    
+                    const sizeAttr = attrs.find(a => a.slug === 'size')
+                    if (sizeAttr) setSizes(sizeAttr.options)
+                }
+            } catch (error) {
+                console.error("Failed to fetch filters:", error)
+            }
+        }
+        
+        fetchFilters()
+    }, [])
 
     const handleCategoryChange = (categoryId: string) => {
         if (selectedCategories.includes(categoryId)) {
@@ -101,7 +144,7 @@ export function FiltersSidebar({
                                 htmlFor={category.id}
                                 className="text-[11px] uppercase tracking-[0.15em] text-primary/80 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
                             >
-                                {category.label}
+                                {category.name}
                             </Label>
                         </div>
                     ))}
@@ -131,23 +174,23 @@ export function FiltersSidebar({
             <div className="space-y-8">
                 <h3 className="font-heading font-bold text-[14px] uppercase tracking-[0.25em] text-primary border-b border-primary/10 pb-4 block">Color Palette</h3>
                 <div className="grid grid-cols-2 gap-y-6 pt-2">
-                    {["Maroon", "Gold", "Ivory", "Emerald", "RoyalBlue", "Black"].map((color) => (
-                        <div key={color} className="flex items-center space-x-4 group cursor-pointer">
+                    {colors.map((color) => (
+                        <div key={color.value} className="flex items-center space-x-4 group cursor-pointer">
                             <Checkbox
-                                id={`color-${color}`}
-                                checked={selectedColors.includes(color)}
-                                onCheckedChange={() => handleColorChange(color)}
+                                id={`color-${color.value}`}
+                                checked={selectedColors.includes(color.value)}
+                                onCheckedChange={() => handleColorChange(color.value)}
                                 className="rounded-full w-4 h-4 data-[state=checked]:bg-primary data-[state=checked]:text-white border-primary/10"
                             />
                             <Label
-                                htmlFor={`color-${color}`}
+                                htmlFor={`color-${color.value}`}
                                 className="flex items-center gap-3 text-[11px] uppercase tracking-[0.1em] text-primary/80 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
                             >
                                 <div
                                     className="w-3 h-3 rounded-full border border-primary/10"
-                                    style={{ backgroundColor: color.toLowerCase() }}
+                                    style={{ backgroundColor: color.hex_code || color.value.toLowerCase() }}
                                 />
-                                <span>{color}</span>
+                                <span>{color.value}</span>
                             </Label>
                         </div>
                     ))}

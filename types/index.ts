@@ -17,13 +17,112 @@ export interface Product {
     originalPrice?: number
 }
 
-export interface Category {
+// DB Table Interfaces
+
+export interface CategoryRow {
     id: string
     name: string
-    description: string
-    image: string
     slug: string
+    image_url?: string
+    created_at: string
 }
+
+export interface SubcategoryRow {
+    id: string
+    category_id: string
+    name: string
+    slug: string
+    created_at: string
+}
+
+export type AttributeType = 'select' | 'multi_select' | 'text' | 'color'
+
+export interface AttributeDefinitionRow {
+    id: string
+    name: string
+    slug: string
+    type: AttributeType
+    is_filterable: boolean
+    is_variant: boolean
+    display_order: number
+    created_at: string
+}
+
+export interface AttributeOptionRow {
+    id: string
+    attribute_id: string
+    value: string
+    display_value?: string
+    hex_code?: string
+    display_order: number
+}
+
+export interface ProductRow {
+    id: string
+    title: string
+    slug: string
+    description?: string
+    price: number
+    original_price?: number
+    discount: number
+    category_id?: string
+    subcategory_id?: string
+    images: string[]
+    rating: number
+    reviews_count: number
+    stock_count: number
+    is_in_stock: boolean
+    is_featured: boolean
+    is_best_seller: boolean
+    created_at: string
+}
+
+export interface ReviewRow {
+    id: string
+    product_id: string
+    author_name: string
+    author_email?: string
+    rating: number
+    title?: string
+    content?: string
+    helpful_count: number
+    is_verified: boolean
+    created_at: string
+}
+
+export interface BannerRow {
+    id: string
+    title: string
+    subtitle?: string
+    image_url: string
+    link_url?: string
+    placement: string
+    display_order: number
+    is_active: boolean
+    starts_at?: string
+    ends_at?: string
+    created_at: string
+}
+
+export interface ContactSubmissionRow {
+    id: string
+    name: string
+    email: string
+    phone?: string
+    subject?: string
+    message: string
+    is_read: boolean
+    created_at: string
+}
+
+export interface NewsletterSubscriberRow {
+    id: string
+    email: string
+    is_active: boolean
+    created_at: string
+}
+
+// Frontend Render Interfaces
 
 export interface CartItem {
     id: string

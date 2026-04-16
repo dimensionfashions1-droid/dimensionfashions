@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { FiltersSidebar } from "@/components/product/FiltersSidebar"
 import { ProductGrid } from "@/components/product/ProductGrid"
 import { SortDropdown } from "@/components/product/SortDropdown"
@@ -15,17 +14,15 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 
-// Mock Data
-const MOCK_PRODUCTS = [
-    { id: "1", title: "Midnight Bloom Kanjivaram", price: 18499, category: "Sarees", image: "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600", discount: 0, rating: 4.8, inStock: true, colors: ["Maroon", "Gold"], sizes: ["Standard"] },
-    { id: "2", title: "Zari Weave Lehenga", price: 24999, category: "Lehengas", image: "https://www.sourcesplash.com/i/random?q=lehenga,indian-wedding,bridal&w=1200&h=1600", discount: 10, rating: 4.9, inStock: true, colors: ["Maroon", "Gold"], sizes: ["S", "M", "L"] },
-    { id: "3", title: "Pastel Kurta Set", price: 4999, category: "Kurta Sets", image: "https://www.sourcesplash.com/i/random?q=kurti,set,indian-fashion&w=1200&h=1600", discount: 0, rating: 4.5, inStock: true, colors: ["Ivory", "Emerald"], sizes: ["XS", "S", "M", "L", "XL"] },
-    { id: "4", title: "Floral Summer Dress", price: 2999, category: "Dresses", image: "https://www.sourcesplash.com/i/random?q=women-dress,floral,fashion&w=1200&h=1600", discount: 0, rating: 4.2, inStock: true, colors: ["Ivory", "RoyalBlue"], sizes: ["S", "M", "L"] },
-    { id: "5", title: "Chic Co-ord Set", price: 3999, category: "Co-ords", image: "https://www.sourcesplash.com/i/random?q=co-ord,set,women-fashion&w=1200&h=1600", discount: 0, rating: 4.7, inStock: true, colors: ["Black", "Ivory"], sizes: ["S", "M", "L"] },
-    { id: "6", title: "Evening Glam Gown", price: 8999, category: "Gowns", image: "https://www.sourcesplash.com/i/random?q=evening-gown,party,model&w=1200&h=1600", discount: 15, rating: 4.6, inStock: true, colors: ["Emerald", "Black"], sizes: ["S", "M", "L"] },
-    { id: "7", title: "Minimal Cotton Top", price: 1499, category: "Tops", image: "https://www.sourcesplash.com/i/random?q=women-top,minimal,fashion&w=1200&h=1600", discount: 0, rating: 4.3, inStock: false, colors: ["Ivory", "Black"], sizes: ["XS", "S", "M", "L"] },
-    { id: "8", title: "Soft Lounge Set", price: 1999, category: "Loungewear", image: "https://www.sourcesplash.com/i/random?q=loungewear,women,homewear&w=1200&h=1600", discount: 0, rating: 4.9, inStock: true, colors: ["RoyalBlue", "Ivory"], sizes: ["S", "M", "L", "XL"] },
-]
+import { useEffect, useState, useCallback, useMemo } from "react"
+import { ProductRow, Product } from "@/types"
+
+// Frontend-friendly Product interface extending the DB row
+interface FilteredProduct extends Omit<ProductRow, 'category_id' | 'subcategory_id'> {
+    category?: string
+    colors?: string[]
+    sizes?: string[]
+}
 
 export default function ProductsPage() {
     const [sort, setSort] = useState("featured")
@@ -37,38 +34,66 @@ export default function ProductsPage() {
     const [selectedColors, setSelectedColors] = useState<string[]>([])
     const [priceRange, setPriceRange] = useState([0, 10000])
 
-    const filteredProducts = MOCK_PRODUCTS.filter(product => {
-        // Category Filter
-        if (selectedCategories.length > 0 && !selectedCategories.includes("all") && !selectedCategories.includes(product.category.toLowerCase())) {
-            return false
+    const [products, setProducts] = useState<Product[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+
+    const fetchProducts = useCallback(async () => {
+        setIsLoading(true)
+        try {
+            const params = new URLSearchParams()
+            if (selectedCategories.length > 0 && !selectedCategories.includes("all")) {
+                params.append("category", selectedCategories[0]) // Sending first for MVP
+            }
+            if (priceRange[0] > 0) params.append("minPrice", priceRange[0].toString())
+            if (priceRange[1] < 100000) params.append("maxPrice", priceRange[1].toString())
+            if (selectedSizes.length > 0) params.append("sizes", selectedSizes.join(","))
+            if (selectedColors.length > 0) params.append("colors", selectedColors.join(","))
+
+            const res = await fetch(`/api/products?${params.toString()}`)
+            if (!res.ok) throw new Error("Failed to fetch products")
+            const json = await res.json()
+            
+            // Map the API FilteredProduct to the standard Product interface
+            const mappedProducts: Product[] = (json.data || []).map((p: FilteredProduct) => ({
+                id: p.id,
+                title: p.title,
+                price: p.price,
+                category: p.category || '',
+                image: p.images?.[0] || '', // take first image
+                colors: p.colors || [],
+                discount: p.discount || 0,
+                rating: p.rating || 0,
+                reviews: p.reviews_count || 0,
+                inStock: p.is_in_stock ?? true,
+                description: p.description || '',
+                sizes: p.sizes || [],
+                featured: p.is_featured || false,
+                slug: p.slug,
+                originalPrice: p.original_price,
+            }))
+
+            setProducts(mappedProducts)
+        } catch (error) {
+            console.error("Error loading products:", error)
+        } finally {
+            setIsLoading(false)
         }
+    }, [selectedCategories, priceRange, selectedSizes, selectedColors])
 
-        // Price Filter
-        if (product.price < priceRange[0] || product.price > priceRange[1]) {
-            return false
-        }
+    useEffect(() => {
+        fetchProducts()
+    }, [fetchProducts])
 
-        // Size Filter
-        if (selectedSizes.length > 0) {
-            const hasSize = product.sizes?.some(size => selectedSizes.includes(size))
-            if (!hasSize) return false
-        }
-
-        // Color Filter
-        if (selectedColors.length > 0) {
-            const hasColor = product.colors?.some(color => selectedColors.includes(color))
-            if (!hasColor) return false
-        }
-
-        return true
-    })
-
-    const sortedProducts = [...filteredProducts].sort((a, b) => {
-        if (sort === "price-asc") return a.price - b.price
-        if (sort === "price-desc") return b.price - a.price
-        if (sort === "newest") return parseInt(b.id) - parseInt(a.id)
-        return 0 // featured/default
-    })
+    // Sorting must be applied client-side because our API only returns standard DB order currently
+    const sortedProducts = useMemo(() => {
+        return [...products].sort((a, b) => {
+            if (sort === "price-asc") return a.price - b.price
+            if (sort === "price-desc") return b.price - a.price
+            // "newest" roughly fallback
+            if (sort === "newest") return b.id.localeCompare(a.id)
+            return 0 // featured/default
+        })
+    }, [products, sort])
 
     // Pagination Logic
     const PRODUCTS_PER_PAGE = 8
