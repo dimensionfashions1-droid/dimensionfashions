@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { QuantitySelector } from "./QuantitySelector"
-import { Product } from "./ProductCard"
+import { Product } from "@/types"
 
 interface ProductInfoProps {
     product: Product

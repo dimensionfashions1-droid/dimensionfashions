@@ -39,8 +39,9 @@ export async function POST(req: Request) {
 
     if (error) throw error
     return NextResponse.json({ data }, { status: 201 })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Internal error' }, { status: 500 })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Internal error'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

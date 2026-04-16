@@ -97,6 +97,10 @@ Browser → Next.js (Server + Client Components) → Route Handlers (API) → Su
 ### Task 3.9: Contact API
 - `POST /api/contact` — Store submission + optional email notification to admin
 
+### Task 3.10: User Profile & Orders API
+- `GET /api/users/orders` — Authenticated: fetch full order history mapping user session
+- `POST /api/users/orders/[id]/cancel` — Authenticated: Submits cancellation request with reason preventing 'shipped' orders from being halted.
+
 ---
 
 ## 💳 Phase 4: Payment & Checkout

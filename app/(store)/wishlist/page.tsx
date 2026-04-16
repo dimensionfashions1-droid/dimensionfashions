@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { ProductCard } from "@/components/product/ProductCard"
 import { WishlistEmpty } from "@/components/product/WishlistEmpty"
-import { Product } from "@/components/product/ProductCard"
+import { Product } from "@/types"
 
 // Mock Data for Wishlist
 const MOCK_WISHLIST_ITEMS: Product[] = [

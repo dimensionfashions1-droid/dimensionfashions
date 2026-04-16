@@ -21,6 +21,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 const CATEGORIES = [
     {
@@ -114,7 +115,7 @@ const CATEGORIES = [
     }
 ]
 
-export function Navbar() {
+export function Navbar({ user }: { user?: SupabaseUser | null }) {
     const [isScrolled, setIsScrolled] = React.useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
     const [activeMegaCategory, setActiveMegaCategory] = React.useState(CATEGORIES[0])
@@ -189,9 +190,17 @@ export function Navbar() {
 
                     {/* Right: Action Icons */}
                     <div className="flex items-center gap-5 flex-shrink-0">
-                        <Link href="#" className="text-primary hover:text-accent transition-colors">
-                            <User className="w-5 h-5" />
-                        </Link>
+                        {user ? (
+                            <Link href="/profile" className="text-primary hover:text-accent transition-colors">
+                                <User className="w-5 h-5" />
+                            </Link>
+                        ) : (
+                            <div className="hidden sm:flex items-center gap-5 text-[10px] font-sans font-bold uppercase tracking-widest text-primary">
+                                <Link href="/login" className="hover:text-accent transition-colors">Log In</Link>
+                                <span className="opacity-30">|</span>
+                                <Link href="/register" className="hover:text-accent transition-colors">Register</Link>
+                            </div>
+                        )}
                         <Link href="#" className="hidden sm:block text-primary hover:text-accent transition-colors">
                             <Heart className="w-5 h-5" />
                         </Link>
@@ -330,8 +339,15 @@ export function Navbar() {
                     </ul>
 
                     <div className="mt-20 space-y-6 pt-12 border-t border-gray-100">
-                        <Link href="#" className="text-xs font-sans font-medium text-gray-500 uppercase tracking-widest block transition-colors">My Profile</Link>
-                        <Link href="#" className="text-xs font-sans font-medium text-gray-500 uppercase tracking-widest block transition-colors">Track your order</Link>
+                        {user ? (
+                            <Link href="/profile" className="text-xs font-sans font-medium text-gray-500 uppercase tracking-widest block transition-colors hover:text-accent">My Profile</Link>
+                        ) : (
+                            <>
+                                <Link href="/login" className="text-xs font-sans font-medium text-gray-500 uppercase tracking-widest block transition-colors hover:text-accent">Log In</Link>
+                                <Link href="/register" className="text-xs font-sans font-medium text-gray-500 uppercase tracking-widest block transition-colors hover:text-accent">Register</Link>
+                            </>
+                        )}
+                        <Link href="#" className="text-xs font-sans font-medium text-gray-500 uppercase tracking-widest block transition-colors hover:text-accent">Track your order</Link>
                         <Link href="#" className="text-xs font-sans font-medium text-gray-500 uppercase tracking-widest block transition-colors">Contact Us</Link>
                     </div>
                 </div>

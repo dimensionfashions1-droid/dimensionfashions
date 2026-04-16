@@ -1,6 +1,7 @@
 "use client"
 
-import { ProductCard, Product } from "../product/ProductCard"
+import { Product } from "@/types"
+import { ProductCard } from "../product/ProductCard"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"

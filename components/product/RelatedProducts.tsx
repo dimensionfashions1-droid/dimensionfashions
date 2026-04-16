@@ -1,6 +1,7 @@
 "use client"
 
-import { Product, ProductCard } from "./ProductCard"
+import { ProductCard } from "./ProductCard"
+import { Product } from "@/types"
 
 interface RelatedProductsProps {
     currentProductId: string

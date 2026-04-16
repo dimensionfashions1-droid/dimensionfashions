@@ -6,20 +6,8 @@ import { Heart, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
+import { Product } from "@/types"
 
-export interface Product {
-    id: string
-    title: string
-    price: number
-    category: string
-    image: string
-    colors?: string[]
-    discount?: number
-    rating?: number
-    inStock?: boolean
-    description?: string
-    sizes?: string[]
-}
 
 interface ProductCardProps {
     product: Product

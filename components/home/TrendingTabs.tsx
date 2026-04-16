@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ProductCard, Product } from "../product/ProductCard"
+import { ProductCard } from "../product/ProductCard"
+import { Product } from "@/types"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 

@@ -251,6 +251,8 @@ CREATE TYPE attribute_type AS ENUM ('select', 'multi_select', 'text', 'color');
 | `razorpay_payment_id` | `text` | | |
 | `razorpay_signature` | `text` | | |
 | `notes` | `text` | | |
+| `cancellation_requested` | `boolean` | `DEFAULT false` | |
+| `cancellation_reason` | `text` | | |
 | `created_at` | `timestamptz` | `DEFAULT now()` | |
 
 ---
