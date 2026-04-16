@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { Loader2 } from "lucide-react"
 
 import { AuthUser, UserProfile } from "@/types"
 
@@ -16,6 +17,14 @@ export default function OverviewTab({ user, dbUser }: { user: AuthUser, dbUser: 
   const router = useRouter()
   const { toast } = useToast()
   const [editProfileMode, setEditProfileMode] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Form State
+  const [formData, setFormData] = useState({
+    first_name: dbUser?.first_name || user?.user_metadata?.first_name || "",
+    last_name: dbUser?.last_name || user?.user_metadata?.last_name || "",
+    phone: dbUser?.phone || ""
+  })
 
   const handleLogout = async () => {
     try {
@@ -32,6 +41,37 @@ export default function OverviewTab({ user, dbUser }: { user: AuthUser, dbUser: 
     }
   }
 
+  const handleSaveProfile = async () => {
+    setIsSaving(true)
+    try {
+      const res = await fetch('/api/users/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to update profile')
+      }
+
+      toast({
+        title: "Profile Updated",
+        description: "Your personal details have been safely stored."
+      })
+      setEditProfileMode(false)
+      router.refresh()
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || "Please try again later."
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <TabsContent value="overview" className="mt-0 outline-none animate-in fade-in duration-500">
       <div className="border border-primary/20 bg-white p-8 lg:p-12 space-y-12 shadow-sm  rounded-xl">
@@ -41,13 +81,13 @@ export default function OverviewTab({ user, dbUser }: { user: AuthUser, dbUser: 
             <div>
               <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-primary/50 mb-2">First Name</p>
               <p className="text-sm font-sans font-medium text-primary tracking-wide">
-                {dbUser?.first_name || 'Not provided'}
+                {dbUser?.first_name || user?.user_metadata?.first_name || 'Not provided'}
               </p>
             </div>
             <div>
               <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-primary/50 mb-2">Last Name</p>
               <p className="text-sm font-sans font-medium text-primary tracking-wide">
-                {dbUser?.last_name || 'Not provided'}
+                {dbUser?.last_name || user?.user_metadata?.last_name || 'Not provided'}
               </p>
             </div>
             <div>
@@ -86,7 +126,7 @@ export default function OverviewTab({ user, dbUser }: { user: AuthUser, dbUser: 
         <DialogContent className="sm:max-w-xl rounded-3xl border-primary/10 p-0 overflow-hidden">
           <div className="px-8 pt-8 pb-6 border-b border-primary/5">
             <DialogHeader className="space-y-4">
-              <DialogTitle className="font-heading text-3xl font-normal tracking-tight text-primary">Edit Profile</DialogTitle>
+              <DialogTitle className="font-heading text-3xl font-normal tracking-tight text-accent">Edit Profile</DialogTitle>
               <DialogDescription className="font-sans font-medium tracking-wide text-primary/60 text-[13px] leading-relaxed">
                 Update your personal information below.
               </DialogDescription>
@@ -96,23 +136,38 @@ export default function OverviewTab({ user, dbUser }: { user: AuthUser, dbUser: 
           <div className="space-y-8 px-8 py-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-accent">First Name</Label>
-                <Input className="rounded-xl border-primary/20 focus-visible:border-accent focus-visible:ring-accent/20 shadow-sm h-12 text-[13px] font-medium px-4 transition-colors" defaultValue={dbUser?.first_name || ""} />
+                <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary">First Name</Label>
+                <Input
+                  className="rounded-xl border-primary/20 focus-visible:border-accent focus-visible:ring-accent/20 shadow-sm h-12 text-[13px] font-medium px-4 transition-colors"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  placeholder="Isabella"
+                />
               </div>
               <div className="space-y-3">
-                <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-accent">Last Name</Label>
-                <Input className="rounded-xl border-primary/20 focus-visible:border-accent focus-visible:ring-accent/20 shadow-sm h-12 text-[13px] font-medium px-4 transition-colors" defaultValue={dbUser?.last_name || ""} />
+                <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary">Last Name</Label>
+                <Input
+                  className="rounded-xl border-primary/20 focus-visible:border-accent focus-visible:ring-accent/20 shadow-sm h-12 text-[13px] font-medium px-4 transition-colors"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  placeholder="Sharma"
+                />
               </div>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/60">Email Address (Read Only)</Label>
+              <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary">Email Address (Read Only)</Label>
               <Input className="rounded-xl border-primary/10 bg-primary/5 text-primary/60 h-12 text-[13px] font-medium px-4" defaultValue={user.email} readOnly />
             </div>
 
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-accent">Phone Number</Label>
-              <Input className="rounded-xl border-primary/20 focus-visible:border-accent focus-visible:ring-accent/20 shadow-sm h-12 text-[13px] font-medium px-4 transition-colors" defaultValue={dbUser?.phone || ""} />
+              <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-primary">Phone Number</Label>
+              <Input
+                className="rounded-xl border-primary/20 focus-visible:border-accent focus-visible:ring-accent/20 shadow-sm h-12 text-[13px] font-medium px-4 transition-colors"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+91 98765 43210"
+              />
             </div>
           </div>
 
@@ -127,12 +182,11 @@ export default function OverviewTab({ user, dbUser }: { user: AuthUser, dbUser: 
             </Button>
             <Button
               type="button"
-              onClick={() => {
-                toast({ title: "Profile Updated", description: "Your personal details have been safely stored." })
-                setEditProfileMode(false)
-              }}
+              onClick={handleSaveProfile}
+              disabled={isSaving}
               className="rounded-full w-full sm:w-auto bg-accent text-white hover:bg-accent/90 h-12 px-10 text-[10px] tracking-[0.25em] uppercase font-bold shadow-md hover:shadow-lg transition-all"
             >
+              {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Save Profile
             </Button>
           </div>

@@ -12,33 +12,6 @@ import { useRouter } from "next/navigation"
 
 import { AuthUser, Order } from "@/types"
 
-const mockOrders: Order[] = [
-  {
-    id: "ord-1",
-    order_number: "DIM-2024-8841",
-    total_amount: 12450,
-    order_status: "processing",
-    created_at: new Date().toISOString(),
-    user_id: "user-123",
-    cancellation_requested: false,
-    items: [
-      { id: "oi-123", order_id: "ord-1", product_id: "p1", title: "Crimson Velvet Gown", quantity: 1, price: 8950, image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80" },
-      { id: "oi-124", order_id: "ord-1", product_id: "p2", title: "Midnight Silk Scarf", quantity: 1, price: 3500, image: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80" }
-    ]
-  },
-  {
-    id: "ord-2",
-    order_number: "DIM-2024-7720",
-    total_amount: 5200,
-    order_status: "delivered",
-    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    user_id: "user-123",
-    cancellation_requested: false,
-    items: [
-      { id: "oi-125", order_id: "ord-2", product_id: "p3", title: "Ivory Pearl Blouse", quantity: 1, price: 5200, image: "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=800&q=80" }
-    ]
-  }
-]
 
 export default function OrdersTab({ user }: { user: AuthUser }) {
   const router = useRouter()
@@ -55,10 +28,11 @@ export default function OrdersTab({ user }: { user: AuthUser }) {
       try {
         const res = await fetch('/api/users/orders')
         if (!res.ok) throw new Error('Failed to fetch orders')
-        const data = await res.json()
-        setOrders(data.orders?.length ? data.orders : mockOrders)
+        const { data } = await res.json()
+        setOrders(data || [])
       } catch (error) {
-        setOrders(mockOrders)
+        toast({ variant: "destructive", title: "Fetch Error", description: "Failed to load order history" })
+        setOrders([])
       } finally {
         setLoadingOrders(false)
       }
@@ -151,7 +125,12 @@ export default function OrdersTab({ user }: { user: AuthUser }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`inline-flex items-center justify-center px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border ${order.order_status === 'delivered' ? 'bg-[#1B4332]/5 text-[#1B4332] border-[#1B4332]/10' : order.order_status === 'processing' ? 'bg-amber-100/50 text-amber-800 border-amber-200' : 'bg-primary/5 text-primary border-primary/10'}`}>
+                    <span className={`inline-flex items-center justify-center px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border 
+                      ${order.order_status === 'delivered' ? 'bg-[#1B4332]/5 text-[#1B4332] border-[#1B4332]/10' :
+                        order.order_status === 'processing' ? 'bg-amber-100/50 text-amber-800 border-amber-200' :
+                          order.order_status === 'shipped' ? 'bg-blue-100/50 text-blue-800 border-blue-200' :
+                            order.order_status === 'cancelled' ? 'bg-red-100/50 text-red-800 border-red-200' :
+                              'bg-primary/5 text-primary border-primary/10'}`}>
                       {order.order_status}
                     </span>
                   </div>

@@ -14,11 +14,15 @@ export default async function ProfilePage() {
     redirect("/login")
   }
 
-  const { data: dbUser } = await supabase
+  const { data: dbUser, error: dbError } = await supabase
     .from("users")
-    .select("id, email, first_name, last_name, phone")
+    .select("*")
     .eq("id", user.id)
     .single()
+
+  if (dbError) {
+    console.error("Error fetching dbUser:", dbError)
+  }
 
   return (
     <div className="w-full bg-white ">

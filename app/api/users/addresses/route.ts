@@ -28,7 +28,15 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    // If setting as default, we should optimally set others to false, but keeping it simple for MVP
+    
+    // If setting as default, unset other default addresses for this user
+    if (body.is_default) {
+      await supabase
+        .from('user_addresses')
+        .update({ is_default: false })
+        .eq('user_id', user.id)
+    }
+
     const payload = { ...body, user_id: user.id }
 
     const { data, error } = await supabase
@@ -66,5 +74,42 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true })
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Internal error' }, { status: 500 })
+  }
+}
+
+export async function PATCH(req: Request) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
+
+    const body = await req.json()
+    
+    // If setting as default, unset other default addresses for this user
+    if (body.is_default) {
+      await supabase
+        .from('user_addresses')
+        .update({ is_default: false })
+        .eq('user_id', user.id)
+    }
+
+    const { data, error } = await supabase
+      .from('user_addresses')
+      .update({ ...body, updated_at: new Date().toISOString() })
+      .match({ id, user_id: user.id })
+      .select()
+      .single()
+
+    if (error) throw error
+    return NextResponse.json({ data })
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Internal error'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }

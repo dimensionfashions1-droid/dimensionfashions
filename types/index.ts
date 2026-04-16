@@ -90,5 +90,8 @@ export interface UserProfile {
 export interface AuthUser {
     id: string
     email?: string
-    // Add other supabase user properties as needed
+    user_metadata?: {
+        first_name?: string
+        last_name?: string
+    }
 }

@@ -24,7 +24,7 @@ export default function ProfileTabs({ user, dbUser }: { user: AuthUser, dbUser: 
             </div>
             <h1 className="text-2xl font-heading tracking-tight text-white">My Account</h1>
             <p className="text-white font-sans font-bold tracking-[0.2em] text-[10px] uppercase mt-2">
-              Hello, {dbUser?.first_name || 'User'}
+              Hello, {dbUser?.first_name || user?.user_metadata?.first_name || 'User'}
             </p>
           </div>
 
