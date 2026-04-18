@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/supabase/check-admin'
 
 // Interfaces for the raw joined data to avoid 'any'
 interface RawProductAttribute {
@@ -113,3 +114,92 @@ export async function GET(
   }
 }
 
+// ── PUT: Update Product ──────────────────────────────────────────────
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const adminCheck = await requireAdmin()
+  if (adminCheck) return adminCheck
+
+  try {
+    const supabase = await createClient()
+    const resolvedParams = await params
+    const slug = resolvedParams.slug
+    const body = await request.json()
+
+    // Separate product_attributes from the core product fields
+    const { attributes, ...productFields } = body
+
+    // 1. Update product core fields
+    const { data: product, error } = await supabase
+      .from('products')
+      .update(productFields)
+      .eq('slug', slug)
+      .select('id')
+      .single()
+
+    if (error) throw error
+
+    // 2. Re-link attributes if provided
+    if (attributes && Array.isArray(attributes)) {
+      // Delete existing attributes
+      const { error: deleteError } = await supabase
+        .from('product_attributes')
+        .delete()
+        .eq('product_id', product.id)
+
+      if (deleteError) throw deleteError
+
+      // Insert new attributes
+      if (attributes.length > 0) {
+        const attrRows = attributes.map((attr: { attribute_id: string; option_id?: string; text_value?: string }) => ({
+          product_id: product.id,
+          attribute_id: attr.attribute_id,
+          option_id: attr.option_id || null,
+          text_value: attr.text_value || null,
+        }))
+
+        const { error: insertError } = await supabase
+          .from('product_attributes')
+          .insert(attrRows)
+
+        if (insertError) throw insertError
+      }
+    }
+
+    return NextResponse.json({ data: product, message: 'Product updated successfully' })
+  } catch (error: unknown) {
+    console.error('API /products/[slug] PUT error:', error)
+    const err = error as Error
+    return NextResponse.json({ error: err.message || 'Failed to update product' }, { status: 500 })
+  }
+}
+
+// ── DELETE: Remove Product ───────────────────────────────────────────
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const adminCheck = await requireAdmin()
+  if (adminCheck) return adminCheck
+
+  try {
+    const supabase = await createClient()
+    const resolvedParams = await params
+    const slug = resolvedParams.slug
+
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('slug', slug)
+
+    if (error) throw error
+
+    return NextResponse.json({ message: 'Product deleted successfully' })
+  } catch (error: unknown) {
+    console.error('API /products/[slug] DELETE error:', error)
+    const err = error as Error
+    return NextResponse.json({ error: err.message || 'Failed to delete product' }, { status: 500 })
+  }
+}

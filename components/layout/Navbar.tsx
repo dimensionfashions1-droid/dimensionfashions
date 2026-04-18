@@ -134,7 +134,7 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
             {/* Level 1: Top Bar */}
             <div className="bg-primary text-secondary">
                 <div className="max-w-[1280px] mx-auto text-[8px] md:text-[10px] font-sans  py-2 px-4 flex justify-between items-center tracking-[0.2em] uppercase">
-                    <div className="flex-1 text-left">Free Shipping on orders above ₹2999</div>
+                    <div className="flex-1 text-left">Fast Shipping and secure payment</div>
                     <div className="flex gap-4 items-center">
                         <Link href="#" className="hover:text-accent transition-colors"><Instagram className="w-3.5 h-3.5" /></Link>
                         <Link href="#" className="hover:text-accent transition-colors"><Facebook className="w-3.5 h-3.5" /></Link>

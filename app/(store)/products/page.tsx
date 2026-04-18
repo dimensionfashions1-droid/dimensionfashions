@@ -14,7 +14,10 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 
-import { useEffect, useState, useCallback, useMemo } from "react"
+import { useState } from "react"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import useSWR from "swr"
+import { useDebounce } from "use-debounce"
 import { ProductRow, Product } from "@/types"
 
 // Frontend-friendly Product interface extending the DB row
@@ -24,84 +27,69 @@ interface FilteredProduct extends Omit<ProductRow, 'category_id' | 'subcategory_
     sizes?: string[]
 }
 
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
 export default function ProductsPage() {
-    const [sort, setSort] = useState("featured")
-    const [currentPage, setCurrentPage] = useState(1)
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const pathname = usePathname()
+
+    const [sort, setSort] = useState(searchParams.get("sort") || "featured")
+    const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1)
 
     // Filter State
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(
+        searchParams.get("category") ? [searchParams.get("category") as string] : []
+    )
     const [selectedSizes, setSelectedSizes] = useState<string[]>([])
     const [selectedColors, setSelectedColors] = useState<string[]>([])
-    const [priceRange, setPriceRange] = useState([0, 10000])
+    const [priceRange, setPriceRange] = useState([0, 100000])
 
-    const [products, setProducts] = useState<Product[]>([])
-    const [isLoading, setIsLoading] = useState(true)
+    const [debouncedPriceRange] = useDebounce(priceRange, 500)
+    const searchString = searchParams.get("search")
 
-    const fetchProducts = useCallback(async () => {
-        setIsLoading(true)
-        try {
-            const params = new URLSearchParams()
-            if (selectedCategories.length > 0 && !selectedCategories.includes("all")) {
-                params.append("category", selectedCategories[0]) // Sending first for MVP
-            }
-            if (priceRange[0] > 0) params.append("minPrice", priceRange[0].toString())
-            if (priceRange[1] < 100000) params.append("maxPrice", priceRange[1].toString())
-            if (selectedSizes.length > 0) params.append("sizes", selectedSizes.join(","))
-            if (selectedColors.length > 0) params.append("colors", selectedColors.join(","))
+    // Build URL for SWR
+    const queryString = new URLSearchParams()
+    queryString.append("page", currentPage.toString())
+    queryString.append("limit", "8")
+    queryString.append("sort", sort)
+    if (searchString) queryString.append("search", searchString)
+    if (selectedCategories.length > 0 && !selectedCategories.includes("all")) {
+        queryString.append("category", selectedCategories[0])
+    }
+    if (selectedSizes.length > 0) queryString.append("sizes", selectedSizes.join(","))
+    if (selectedColors.length > 0) queryString.append("colors", selectedColors.join(","))
+    
+    // Always include debounced price unless it's exactly 0-100000 (default max breadth)
+    if (debouncedPriceRange[0] > 0) queryString.append("minPrice", debouncedPriceRange[0].toString())
+    if (debouncedPriceRange[1] < 100000) queryString.append("maxPrice", debouncedPriceRange[1].toString())
 
-            const res = await fetch(`/api/products?${params.toString()}`)
-            if (!res.ok) throw new Error("Failed to fetch products")
-            const json = await res.json()
-            
-            // Map the API FilteredProduct to the standard Product interface
-            const mappedProducts: Product[] = (json.data || []).map((p: FilteredProduct) => ({
-                id: p.id,
-                title: p.title,
-                price: p.price,
-                category: p.category || '',
-                image: p.images?.[0] || '', // take first image
-                colors: p.colors || [],
-                discount: p.discount || 0,
-                rating: p.rating || 0,
-                reviews: p.reviews_count || 0,
-                inStock: p.is_in_stock ?? true,
-                description: p.description || '',
-                sizes: p.sizes || [],
-                featured: p.is_featured || false,
-                slug: p.slug,
-                originalPrice: p.original_price,
-            }))
+    // Fetch via SWR
+    const { data: response, error, isLoading } = useSWR(`/api/products?${queryString.toString()}`, fetcher)
 
-            setProducts(mappedProducts)
-        } catch (error) {
-            console.error("Error loading products:", error)
-        } finally {
-            setIsLoading(false)
-        }
-    }, [selectedCategories, priceRange, selectedSizes, selectedColors])
+    // Compute UI Variables from SWR Data
+    const rawProducts = response?.data || []
+    const meta = response?.meta
 
-    useEffect(() => {
-        fetchProducts()
-    }, [fetchProducts])
+    const products: Product[] = rawProducts.map((p: FilteredProduct) => ({
+        id: p.id,
+        title: p.title,
+        price: p.price,
+        category: p.category || '',
+        image: p.images?.[0] || '', // grab first array item safely
+        colors: p.colors || [],
+        discount: p.discount || 0,
+        rating: p.rating || 0,
+        reviews: p.reviews_count || 0,
+        inStock: p.is_in_stock ?? true,
+        description: p.description || '',
+        sizes: p.sizes || [],
+        featured: p.is_featured || false,
+        slug: p.slug,
+        originalPrice: p.original_price,
+    }))
 
-    // Sorting must be applied client-side because our API only returns standard DB order currently
-    const sortedProducts = useMemo(() => {
-        return [...products].sort((a, b) => {
-            if (sort === "price-asc") return a.price - b.price
-            if (sort === "price-desc") return b.price - a.price
-            // "newest" roughly fallback
-            if (sort === "newest") return b.id.localeCompare(a.id)
-            return 0 // featured/default
-        })
-    }, [products, sort])
-
-    // Pagination Logic
-    const PRODUCTS_PER_PAGE = 8
-    const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE)
-    const paginatedProducts = sortedProducts.slice(
-        (currentPage - 1) * PRODUCTS_PER_PAGE,
-        currentPage * PRODUCTS_PER_PAGE
-    )
+    const totalPages = meta?.totalPages || 1
 
     const filterProps = {
         selectedCategories,
@@ -111,7 +99,11 @@ export default function ProductsPage() {
         selectedColors,
         setSelectedColors,
         priceRange,
-        setPriceRange
+        setPriceRange,
+        availableColors: meta?.filters?.colors || [],
+        availableSizes: meta?.filters?.sizes || [],
+        absoluteMinPrice: meta?.minPrice || 0,
+        absoluteMaxPrice: meta?.maxPrice || 100000
     }
 
     return (
@@ -150,25 +142,39 @@ export default function ProductsPage() {
                     </aside>
 
                     {/* Main Content */}
-                    <main className="flex-1 pt-8">
-                        <div className="mb-8 text-[11px] text-primary uppercase tracking-[0.2em] font-sans font-bold opacity-80">
-                            Showing {paginatedProducts.length} of {sortedProducts.length} contemporary pieces
-                        </div>
-
-                        {sortedProducts.length > 0 ? (
-                            <>
-                                <ProductGrid products={paginatedProducts} />
-
-                                {totalPages > 1 && (
-                                    <ProductPagination
-                                        currentPage={currentPage}
-                                        totalPages={totalPages}
-                                        onPageChange={setCurrentPage}
-                                    />
-                                )}
-                            </>
+                    <main className="flex-1 pt-8 min-h-[500px]">
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center py-32 space-y-4">
+                                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                <p className="text-[10px] tracking-widest uppercase font-sans text-primary/60">Curating Selection...</p>
+                            </div>
+                        ) : error ? (
+                            <div className="flex flex-col items-center justify-center py-32 text-red-500">
+                                <p className="text-sm font-sans">Error loading products. Please try again.</p>
+                            </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center py-32 text-text-secondary space-y-8">
+                            <>
+                                <div className="mb-8 text-[11px] text-primary uppercase tracking-[0.2em] font-sans font-bold opacity-80">
+                                    Showing {products.length} of {meta?.total || 0} contemporary pieces
+                                </div>
+
+                                {products.length > 0 ? (
+                                    <>
+                                        <ProductGrid products={products} />
+
+                                        {totalPages > 1 && (
+                                            <ProductPagination
+                                                currentPage={currentPage}
+                                                totalPages={totalPages}
+                                                onPageChange={(page) => {
+                                                    setCurrentPage(page)
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                                }}
+                                            />
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-32 text-text-secondary space-y-8">
                                 <p className="text-xl font-heading tracking-wide">No exquisite pieces match your current selection.</p>
                                 <Button
                                     variant="outline"
@@ -183,6 +189,8 @@ export default function ProductsPage() {
                                     Clear all filters
                                 </Button>
                             </div>
+                        )}
+                        </>
                         )}
                     </main>
                 </div>

@@ -41,18 +41,43 @@ export async function updateSession(request: NextRequest) {
 
   // Protect Admin Routes
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user && !request.nextUrl.pathname.startsWith('/admin/login')) {
-      // no user, redirect to login
+    const isLoginPage = request.nextUrl.pathname === '/admin/login'
+
+    // 1. Not logged in → redirect to admin login (unless already there)
+    if (!user && !isLoginPage) {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
       return NextResponse.redirect(url)
     }
-    
-    // Restrict admin login if already logged in
-    if (user && request.nextUrl.pathname.startsWith('/admin/login')) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/admin/dashboard'
-      return NextResponse.redirect(url)
+
+    // 2. Logged in → verify is_admin from DB
+    if (user) {
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single()
+
+      const isAdmin = dbUser?.is_admin === true
+
+      if (!isAdmin && !isLoginPage) {
+        // Logged in but NOT an admin → kick to storefront
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        return NextResponse.redirect(url)
+      }
+
+      if (isAdmin && isLoginPage) {
+        // Admin visiting login page → redirect to dashboard
+        const url = request.nextUrl.clone()
+        url.pathname = '/admin/dashboard'
+        return NextResponse.redirect(url)
+      }
+
+      if (!isAdmin && isLoginPage) {
+        // Non-admin on login page → let them through (they can attempt login)
+        // but they won't pass the check above once they try to navigate deeper
+      }
     }
   }
 

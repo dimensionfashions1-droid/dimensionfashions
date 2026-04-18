@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/supabase/check-admin'
 import { ProductRow } from '@/types'
 
 // Interfaces for strict type safety
@@ -24,6 +25,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
     const search = searchParams.get('search')
+    const page = Number(searchParams.get('page')) || 1
+    const limit = Number(searchParams.get('limit')) || 8
+    const sort = searchParams.get('sort') || 'featured'
     
     const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : null
     const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : null
@@ -61,6 +65,17 @@ export async function GET(request: Request) {
       query = query.lte('price', maxPrice)
     }
 
+    // Apply Supabase sorting natively
+    if (sort === 'price-asc') {
+      query = query.order('price', { ascending: true })
+    } else if (sort === 'price-desc') {
+      query = query.order('price', { ascending: false })
+    } else if (sort === 'newest') {
+      query = query.order('created_at', { ascending: false })
+    } else {
+      query = query.order('is_featured', { ascending: false, nullsFirst: false })
+    }
+
     const { data: rawProducts, error } = await query
 
     if (error) throw error
@@ -90,8 +105,34 @@ export async function GET(request: Request) {
       })
     }
 
+    // Compute aggregations for the UI BEFORE pagination
+    const availableColors = new Set<string>()
+    const availableSizes = new Set<string>()
+    let absoluteMinPrice = Number.MAX_VALUE
+    let absoluteMaxPrice = 0
+
+    filtered.forEach(p => {
+      if (p.price < absoluteMinPrice) absoluteMinPrice = p.price
+      if (p.price > absoluteMaxPrice) absoluteMaxPrice = p.price
+
+      p.product_attributes?.forEach(pa => {
+        const type = pa.attribute_definitions?.slug
+        const val = pa.attribute_options?.value
+        if (type === 'color' && val) availableColors.add(val)
+        if (type === 'size' && val) availableSizes.add(val)
+      })
+    })
+
+    if (absoluteMinPrice === Number.MAX_VALUE) absoluteMinPrice = 0
+
+    const total = filtered.length
+    const totalPages = Math.ceil(total / limit)
+    
+    // Apply server-side pagination
+    const paginatedSlice = filtered.slice((page - 1) * limit, page * limit)
+
     // Clean up response: remove heavy joined tables for the list view
-    const cleanData = filtered.map((p) => {
+    const cleanData = paginatedSlice.map((p) => {
         // Destructure to remove product_attributes and categories from the response
         const { product_attributes, categories, ...rest } = p
         
@@ -108,11 +149,50 @@ export async function GET(request: Request) {
         }
     })
 
-    return NextResponse.json({ data: cleanData })
+    return NextResponse.json({ 
+      data: cleanData,
+      meta: {
+        total,
+        page,
+        totalPages,
+        minPrice: absoluteMinPrice,
+        maxPrice: absoluteMaxPrice,
+        filters: {
+          colors: Array.from(availableColors),
+          sizes: Array.from(availableSizes)
+        }
+      }
+    })
 
   } catch (error: unknown) {
     console.error('API /products GET error:', error)
     const err = error as Error
     return NextResponse.json({ error: err.message || 'Failed to fetch' }, { status: 500 })
+  }
+}
+
+export async function POST(request: Request) {
+  // 1. Secure Route - Admin Only
+  const adminCheck = await requireAdmin()
+  if (adminCheck) return adminCheck
+
+  try {
+    const body = await request.json()
+    const supabase = await createClient()
+
+    // 2. Insert into products
+    const { data, error } = await supabase
+      .from('products')
+      .insert([body]) // Expecting validated body from admin frontend
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return NextResponse.json({ data, message: 'Product created successfully' })
+  } catch (error: unknown) {
+    console.error('API /products POST error:', error)
+    const err = error as Error
+    return NextResponse.json({ error: err.message || 'Failed to create product' }, { status: 500 })
   }
 }
