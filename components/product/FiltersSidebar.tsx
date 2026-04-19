@@ -68,7 +68,7 @@ export function FiltersSidebar({
         const fetchFilters = async () => {
             try {
                 const [catRes, attrRes] = await Promise.all([
-                    fetch('/api/categories'),
+                    fetch('/api/categories?all=true'),
                     fetch('/api/attributes')
                 ])
 

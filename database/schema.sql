@@ -47,6 +47,7 @@ CREATE TABLE public.subcategories (
   category_id uuid REFERENCES public.categories(id) ON DELETE CASCADE,
   name text NOT NULL,
   slug text NOT NULL UNIQUE,
+  image_url text,
   created_at timestamptz DEFAULT now()
 );
 

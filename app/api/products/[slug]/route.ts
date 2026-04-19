@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
 
 // Interfaces for the raw joined data to avoid 'any'
@@ -24,6 +24,49 @@ interface FormattedAttribute {
   name: string
   type: string
   values: Array<string | { id: string; value: string; hex_code: string | null; display_value: string | null }>
+}
+
+async function ensureProductUniqueness(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  title: string,
+  slug: string,
+  excludeId: string
+) {
+  const loweredTitle = title.trim().toLowerCase()
+  const loweredSlug = slug.trim().toLowerCase()
+
+  const titleQuery = supabase
+    .from('products')
+    .select('id, title, slug')
+    .neq('id', excludeId)
+    .ilike('title', title.trim())
+
+  const slugQuery = supabase
+    .from('products')
+    .select('id, title, slug')
+    .neq('id', excludeId)
+    .ilike('slug', slug.trim())
+
+  const [
+    { data: titleMatches, error: titleError },
+    { data: slugMatches, error: slugError },
+  ] = await Promise.all([titleQuery, slugQuery])
+
+  if (titleError) throw titleError
+  if (slugError) throw slugError
+
+  const duplicate = [...(titleMatches || []), ...(slugMatches || [])].find((row) =>
+    row.title?.trim().toLowerCase() === loweredTitle || row.slug?.trim().toLowerCase() === loweredSlug
+  )
+
+  if (duplicate) {
+    const isTitleDuplicate = duplicate.title?.trim().toLowerCase() === loweredTitle
+    return {
+      error: `A product with this ${isTitleDuplicate ? 'title' : 'slug'} already exists.`,
+    }
+  }
+
+  return null
 }
 
 export async function GET(
@@ -123,23 +166,70 @@ export async function PUT(
   if (adminCheck) return adminCheck
 
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const resolvedParams = await params
     const slug = resolvedParams.slug
     const body = await request.json()
 
     // Separate product_attributes from the core product fields
     const { attributes, ...productFields } = body
+    let productId = ''
 
-    // 1. Update product core fields
-    const { data: product, error } = await supabase
-      .from('products')
-      .update(productFields)
-      .eq('slug', slug)
-      .select('id')
-      .single()
+    if (Object.keys(productFields).length > 0) {
+      if (!productFields.title?.trim() || !productFields.slug?.trim()) {
+        return NextResponse.json({ error: 'Title and slug are required.' }, { status: 400 })
+      }
 
-    if (error) throw error
+      const existing = await supabase
+        .from('products')
+        .select('id')
+        .eq('slug', slug)
+        .single()
+
+      if (existing.error) {
+        if (existing.error.code === 'PGRST116') {
+          return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+        }
+        throw existing.error
+      }
+
+      const uniquenessError = await ensureProductUniqueness(
+        supabase,
+        productFields.title,
+        productFields.slug,
+        existing.data.id
+      )
+      if (uniquenessError) {
+        return NextResponse.json({ error: uniquenessError.error }, { status: 409 })
+      }
+
+      // 1. Update product core fields
+      const { data: product, error } = await supabase
+        .from('products')
+        .update(productFields)
+        .eq('slug', slug)
+        .select('id')
+        .single()
+
+      if (error) throw error
+
+      productId = product.id
+    } else {
+      const existing = await supabase
+        .from('products')
+        .select('id')
+        .eq('slug', slug)
+        .single()
+
+      if (existing.error) {
+        if (existing.error.code === 'PGRST116') {
+          return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+        }
+        throw existing.error
+      }
+
+      productId = existing.data.id
+    }
 
     // 2. Re-link attributes if provided
     if (attributes && Array.isArray(attributes)) {
@@ -147,14 +237,14 @@ export async function PUT(
       const { error: deleteError } = await supabase
         .from('product_attributes')
         .delete()
-        .eq('product_id', product.id)
+        .eq('product_id', productId)
 
       if (deleteError) throw deleteError
 
       // Insert new attributes
       if (attributes.length > 0) {
         const attrRows = attributes.map((attr: { attribute_id: string; option_id?: string; text_value?: string }) => ({
-          product_id: product.id,
+          product_id: productId,
           attribute_id: attr.attribute_id,
           option_id: attr.option_id || null,
           text_value: attr.text_value || null,
@@ -168,7 +258,7 @@ export async function PUT(
       }
     }
 
-    return NextResponse.json({ data: product, message: 'Product updated successfully' })
+    return NextResponse.json({ data: { id: productId }, message: 'Product updated successfully' })
   } catch (error: unknown) {
     console.error('API /products/[slug] PUT error:', error)
     const err = error as Error
@@ -185,7 +275,7 @@ export async function DELETE(
   if (adminCheck) return adminCheck
 
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const resolvedParams = await params
     const slug = resolvedParams.slug
 

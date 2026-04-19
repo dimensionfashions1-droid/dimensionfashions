@@ -25,7 +25,7 @@ export function AdminPageHeader({
   const actionButton = actionLabel ? (
     <Button
       onClick={actionOnClick}
-      className="bg-white text-zinc-900 hover:bg-zinc-200 font-medium gap-2"
+      className="h-11 rounded-xl border border-white/10 bg-white text-zinc-950 shadow-[0_12px_32px_rgba(255,255,255,0.08)] hover:bg-zinc-100 font-medium gap-2"
     >
       {actionIcon || <Plus className="h-4 w-4" />}
       {actionLabel}

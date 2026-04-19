@@ -1,11 +1,49 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
-import { AttributeDefinitionRow, AttributeOptionRow } from '@/types'
+
+async function ensureAttributeUniqueness(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  name: string,
+  slug: string,
+  excludeId?: string
+) {
+  const loweredName = name.trim().toLowerCase()
+  const loweredSlug = slug.trim().toLowerCase()
+
+  let nameQuery = supabase.from('attribute_definitions').select('id, name, slug').ilike('name', name.trim())
+  let slugQuery = supabase.from('attribute_definitions').select('id, name, slug').ilike('slug', slug.trim())
+
+  if (excludeId) {
+    nameQuery = nameQuery.neq('id', excludeId)
+    slugQuery = slugQuery.neq('id', excludeId)
+  }
+
+  const [
+    { data: nameMatches, error: nameError },
+    { data: slugMatches, error: slugError },
+  ] = await Promise.all([nameQuery, slugQuery])
+
+  if (nameError) throw nameError
+  if (slugError) throw slugError
+
+  const duplicate = [...(nameMatches || []), ...(slugMatches || [])].find((row) =>
+    row.name?.trim().toLowerCase() === loweredName || row.slug?.trim().toLowerCase() === loweredSlug
+  )
+
+  if (duplicate) {
+    const isNameDuplicate = duplicate.name?.trim().toLowerCase() === loweredName
+    return {
+      error: `An attribute with this ${isNameDuplicate ? 'name' : 'slug'} already exists.`,
+    }
+  }
+
+  return null
+}
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     // Fetch definitions
     const { data: attributes, error: attError } = await supabase
@@ -32,9 +70,10 @@ export async function GET(request: Request) {
     })
 
     return NextResponse.json({ data: attributesWithOptions })
-  } catch (error: any) {
-    console.error('Error fetching attributes:', error)
-    return NextResponse.json({ error: error.message || 'Failed to fetch attributes' }, { status: 500 })
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error('Error fetching attributes:', err)
+    return NextResponse.json({ error: err.message || 'Failed to fetch attributes' }, { status: 500 })
   }
 }
 
@@ -43,8 +82,17 @@ export async function POST(request: Request) {
   if (adminCheck) return adminCheck
 
   try {
+    const supabase = await createAdminClient()
     const body = await request.json()
-    const supabase = await createClient()
+
+    if (!body.name?.trim() || !body.slug?.trim()) {
+      return NextResponse.json({ error: 'Name and slug are required.' }, { status: 400 })
+    }
+
+    const uniquenessError = await ensureAttributeUniqueness(supabase, body.name, body.slug)
+    if (uniquenessError) {
+      return NextResponse.json({ error: uniquenessError.error }, { status: 409 })
+    }
 
     const { data, error } = await supabase
       .from('attribute_definitions')
@@ -55,8 +103,9 @@ export async function POST(request: Request) {
     if (error) throw error
 
     return NextResponse.json({ data, message: 'Attribute created successfully' })
-  } catch (error: any) {
-    console.error('Error creating attribute:', error)
-    return NextResponse.json({ error: error.message || 'Failed to create attribute' }, { status: 500 })
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error('Error creating attribute:', err)
+    return NextResponse.json({ error: err.message || 'Failed to create attribute' }, { status: 500 })
   }
 }

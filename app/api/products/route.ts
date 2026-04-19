@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
 import { ProductRow } from '@/types'
 
@@ -18,6 +18,45 @@ interface FetchedProduct extends Omit<ProductRow, 'category_id' | 'subcategory_i
     slug: string
   } | null
   product_attributes?: JoinedProductAttribute[]
+}
+
+async function ensureProductUniqueness(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  title: string,
+  slug: string,
+  excludeId?: string
+) {
+  const loweredTitle = title.trim().toLowerCase()
+  const loweredSlug = slug.trim().toLowerCase()
+
+  let titleQuery = supabase.from('products').select('id, title, slug').ilike('title', title.trim())
+  let slugQuery = supabase.from('products').select('id, title, slug').ilike('slug', slug.trim())
+
+  if (excludeId) {
+    titleQuery = titleQuery.neq('id', excludeId)
+    slugQuery = slugQuery.neq('id', excludeId)
+  }
+
+  const [
+    { data: titleMatches, error: titleError },
+    { data: slugMatches, error: slugError },
+  ] = await Promise.all([titleQuery, slugQuery])
+
+  if (titleError) throw titleError
+  if (slugError) throw slugError
+
+  const duplicate = [...(titleMatches || []), ...(slugMatches || [])].find((row) =>
+    row.title?.trim().toLowerCase() === loweredTitle || row.slug?.trim().toLowerCase() === loweredSlug
+  )
+
+  if (duplicate) {
+    const isTitleDuplicate = duplicate.title?.trim().toLowerCase() === loweredTitle
+    return {
+      error: `A product with this ${isTitleDuplicate ? 'title' : 'slug'} already exists.`,
+    }
+  }
+
+  return null
 }
 
 export async function GET(request: Request) {
@@ -178,7 +217,16 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
+
+    if (!body.title?.trim() || !body.slug?.trim()) {
+      return NextResponse.json({ error: 'Title and slug are required.' }, { status: 400 })
+    }
+
+    const uniquenessError = await ensureProductUniqueness(supabase, body.title, body.slug)
+    if (uniquenessError) {
+      return NextResponse.json({ error: uniquenessError.error }, { status: 409 })
+    }
 
     // 2. Insert into products
     const { data, error } = await supabase

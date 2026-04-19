@@ -1,9 +1,9 @@
-import { createClient } from './server'
+import { createAdminClient } from './server'
 
 const BUCKET_NAME = 'Dimensions'
 
 export async function uploadImage(file: File, folder: string = 'products'): Promise<string> {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // Generate unique filename to prevent collisions
   const fileExt = file.name.split('.').pop()
@@ -30,7 +30,7 @@ export async function uploadImage(file: File, folder: string = 'products'): Prom
 }
 
 export async function deleteImage(publicUrl: string): Promise<boolean> {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
   // Extract the relative path from the public URL
   // The URL format is roughly: https://<project_id>.supabase.co/storage/v1/object/public/Dimensions/products/filename.jpg

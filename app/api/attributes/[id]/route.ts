@@ -1,6 +1,49 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
+
+async function ensureAttributeUniqueness(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  name: string,
+  slug: string,
+  excludeId: string
+) {
+  const loweredName = name.trim().toLowerCase()
+  const loweredSlug = slug.trim().toLowerCase()
+
+  const nameQuery = supabase
+    .from('attribute_definitions')
+    .select('id, name, slug')
+    .neq('id', excludeId)
+    .ilike('name', name.trim())
+
+  const slugQuery = supabase
+    .from('attribute_definitions')
+    .select('id, name, slug')
+    .neq('id', excludeId)
+    .ilike('slug', slug.trim())
+
+  const [
+    { data: nameMatches, error: nameError },
+    { data: slugMatches, error: slugError },
+  ] = await Promise.all([nameQuery, slugQuery])
+
+  if (nameError) throw nameError
+  if (slugError) throw slugError
+
+  const duplicate = [...(nameMatches || []), ...(slugMatches || [])].find((row) =>
+    row.name?.trim().toLowerCase() === loweredName || row.slug?.trim().toLowerCase() === loweredSlug
+  )
+
+  if (duplicate) {
+    const isNameDuplicate = duplicate.name?.trim().toLowerCase() === loweredName
+    return {
+      error: `An attribute with this ${isNameDuplicate ? 'name' : 'slug'} already exists.`,
+    }
+  }
+
+  return null
+}
 
 export async function PUT(
   request: Request,
@@ -10,12 +53,24 @@ export async function PUT(
   if (adminCheck) return adminCheck
 
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const { id } = await params
     const body = await request.json()
 
     // Separate options from the definition fields
     const { options, ...definitionFields } = body
+
+    if (definitionFields.name && definitionFields.slug) {
+      const uniquenessError = await ensureAttributeUniqueness(
+        supabase,
+        definitionFields.name,
+        definitionFields.slug,
+        id
+      )
+      if (uniquenessError) {
+        return NextResponse.json({ error: uniquenessError.error }, { status: 409 })
+      }
+    }
 
     // 1. Update definition
     if (Object.keys(definitionFields).length > 0) {
@@ -71,7 +126,7 @@ export async function DELETE(
   if (adminCheck) return adminCheck
 
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const { id } = await params
 
     const { error } = await supabase

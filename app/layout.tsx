@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthToasterWatcher } from "@/components/auth/AuthToasterWatcher"
 import "./globals.css"
+import { Suspense } from "react"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -38,7 +39,9 @@ export default function RootLayout({
         {children}
         <Analytics />
         <Toaster />
-        <AuthToasterWatcher />
+        <Suspense fallback={null}>
+          <AuthToasterWatcher />
+        </Suspense>
       </body>
     </html>
   )

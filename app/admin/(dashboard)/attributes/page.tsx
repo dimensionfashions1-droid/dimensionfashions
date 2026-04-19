@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog"
 import { Plus, Pencil, Trash2, SlidersHorizontal, Loader2, X } from "lucide-react"
 import { AdminPageHeader, AdminDeleteDialog, StatusBadge } from "@/components/admin"
+import { useToast } from "@/hooks/use-toast"
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
@@ -45,6 +46,7 @@ const typeLabels: Record<AttributeType, string> = {
 }
 
 export default function AdminAttributesPage() {
+  const { toast } = useToast()
   const { data: response, isLoading } = useSWR("/api/attributes", fetcher)
   const attributes: AttributeWithOptions[] = response?.data || []
 
@@ -52,6 +54,7 @@ export default function AdminAttributesPage() {
   const [editingAttr, setEditingAttr] = useState<AttributeWithOptions | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const [name, setName] = useState("")
   const [slug, setSlug] = useState("")
@@ -90,26 +93,61 @@ export default function AdminAttributesPage() {
       if (type !== "text") payload.options = options.filter(o => o.value.trim())
 
       if (editingAttr) {
-        await fetch(`/api/attributes/${editingAttr.id}`, {
+        const response = await fetch(`/api/attributes/${editingAttr.id}`, {
           method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
         })
+        const result = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          toast({
+            variant: "destructive",
+            title: result.error?.includes("already exists") ? "Duplicate attribute" : "Attribute update failed",
+            description: result.error || "Failed to update attribute.",
+          })
+          return
+        }
       } else {
         const res = await fetch("/api/attributes", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, slug, type, is_filterable: isFilterable, is_variant: isVariant }),
         })
-        const result = await res.json()
+        const result = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          toast({
+            variant: "destructive",
+            title: result.error?.includes("already exists") ? "Duplicate attribute" : "Attribute create failed",
+            description: result.error || "Failed to create attribute.",
+          })
+          return
+        }
         if (result.data && type !== "text" && options.length > 0) {
-          await fetch(`/api/attributes/${result.data.id}`, {
+          const optionsResponse = await fetch(`/api/attributes/${result.data.id}`, {
             method: "PUT", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ options: options.filter(o => o.value.trim()) }),
           })
+          if (!optionsResponse.ok) {
+            const optionsResult = await optionsResponse.json().catch(() => ({}))
+            toast({
+              variant: "destructive",
+              title: "Attribute options failed",
+              description: optionsResult.error || "Failed to save attribute options.",
+            })
+            return
+          }
         }
       }
-      mutate("/api/attributes")
+      await mutate("/api/attributes")
+      toast({
+        title: editingAttr ? "Attribute updated" : "Attribute created",
+        description: editingAttr ? "The attribute was updated successfully." : "The attribute was created successfully.",
+      })
       setDialogOpen(false)
     } catch (error) {
       console.error("Failed to save attribute:", error)
+      toast({
+        variant: "destructive",
+        title: editingAttr ? "Attribute update failed" : "Attribute create failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -117,12 +155,33 @@ export default function AdminAttributesPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return
+    setIsDeleting(true)
     try {
-      await fetch(`/api/attributes/${deleteId}`, { method: "DELETE" })
-      mutate("/api/attributes")
+      const response = await fetch(`/api/attributes/${deleteId}`, { method: "DELETE" })
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}))
+        toast({
+          variant: "destructive",
+          title: "Delete failed",
+          description: result.error || "Failed to delete attribute.",
+        })
+        return
+      }
+
+      await mutate("/api/attributes")
+      toast({
+        title: "Attribute deleted",
+        description: "The attribute was deleted successfully.",
+      })
     } catch (error) {
       console.error("Failed to delete attribute:", error)
+      toast({
+        variant: "destructive",
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+      })
     } finally {
+      setIsDeleting(false)
       setDeleteId(null)
     }
   }
@@ -203,23 +262,23 @@ export default function AdminAttributesPage() {
               <div className="space-y-2">
                 <Label className="text-zinc-300">Name</Label>
                 <Input value={name} onChange={e => { setName(e.target.value); if (!editingAttr) setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-')) }}
-                  className="bg-zinc-800 border-zinc-700 text-white" placeholder="Color" />
+                  className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="Color" />
               </div>
               <div className="space-y-2">
                 <Label className="text-zinc-300">Slug</Label>
                 <Input value={slug} onChange={e => setSlug(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white" placeholder="color" />
+                  className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="color" />
               </div>
             </div>
             <div className="space-y-2">
               <Label className="text-zinc-300">Type</Label>
               <Select value={type} onValueChange={(val) => setType(val as AttributeType)} disabled={!!editingAttr}>
-                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
-                  <SelectItem value="select" className="focus:bg-zinc-800">Select</SelectItem>
-                  <SelectItem value="multi_select" className="focus:bg-zinc-800">Multi Select</SelectItem>
-                  <SelectItem value="color" className="focus:bg-zinc-800">Color</SelectItem>
-                  <SelectItem value="text" className="focus:bg-zinc-800">Text</SelectItem>
+                <SelectTrigger className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100"><SelectValue /></SelectTrigger>
+                <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
+                  <SelectItem value="select" className="rounded-lg focus:bg-zinc-900">Select</SelectItem>
+                  <SelectItem value="multi_select" className="rounded-lg focus:bg-zinc-900">Multi Select</SelectItem>
+                  <SelectItem value="color" className="rounded-lg focus:bg-zinc-900">Color</SelectItem>
+                  <SelectItem value="text" className="rounded-lg focus:bg-zinc-900">Text</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -245,10 +304,10 @@ export default function AdminAttributesPage() {
                   {options.map((opt, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <Input value={opt.value} onChange={e => updateOption(i, "value", e.target.value)}
-                        className="bg-zinc-800 border-zinc-700 text-white text-sm h-8 flex-1" placeholder="Value" />
+                        className="h-10 flex-1 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500" placeholder="Value" />
                       {type === "color" && (
                         <Input value={opt.hex_code} onChange={e => updateOption(i, "hex_code", e.target.value)}
-                          className="bg-zinc-800 border-zinc-700 text-white text-sm h-8 w-24" placeholder="#hex" />
+                          className="h-10 w-24 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500" placeholder="#hex" />
                       )}
                       <Button type="button" size="icon" variant="ghost" onClick={() => removeOption(i)}
                         className="h-8 w-8 text-zinc-500 hover:text-rose-400 shrink-0">
@@ -275,6 +334,7 @@ export default function AdminAttributesPage() {
         open={!!deleteId}
         onOpenChange={() => setDeleteId(null)}
         onConfirm={handleDelete}
+        isDeleting={isDeleting}
         title="Delete Attribute"
         description="This will permanently remove this attribute definition and all its options. Products using this attribute will lose those values."
       />

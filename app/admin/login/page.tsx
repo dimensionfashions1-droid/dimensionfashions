@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
               type="email" 
               placeholder="admin@dimensions.in" 
               required 
-              className="h-11 rounded-md bg-white border-gray-200 shadow-sm focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:border-gray-900 transition-all"
+              className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60 transition-all"
             />
           </div>
 
@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
               name="password" 
               type="password" 
               required 
-              className="h-11 rounded-md bg-white border-gray-200 shadow-sm focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:border-gray-900 transition-all"
+              className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60 transition-all"
             />
           </div>
 

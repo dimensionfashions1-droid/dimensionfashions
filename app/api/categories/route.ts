@@ -1,40 +1,106 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
-import { CategoryRow, SubcategoryRow } from '@/types'
+
+async function ensureCategoryUniqueness(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  name: string,
+  slug: string,
+  excludeId?: string
+) {
+  const loweredName = name.trim().toLowerCase()
+  const loweredSlug = slug.trim().toLowerCase()
+
+  let nameQuery = supabase.from('categories').select('id, name, slug').ilike('name', name.trim())
+  let slugQuery = supabase.from('categories').select('id, name, slug').ilike('slug', slug.trim())
+
+  if (excludeId) {
+    nameQuery = nameQuery.neq('id', excludeId)
+    slugQuery = slugQuery.neq('id', excludeId)
+  }
+
+  const [
+    { data: nameMatches, error: nameError },
+    { data: slugMatches, error: slugError },
+  ] = await Promise.all([nameQuery, slugQuery])
+
+  if (nameError) throw nameError
+  if (slugError) throw slugError
+
+  const duplicate = [...(nameMatches || []), ...(slugMatches || [])].find((row) =>
+    row.name?.trim().toLowerCase() === loweredName || row.slug?.trim().toLowerCase() === loweredSlug
+  )
+
+  if (duplicate) {
+    const isNameDuplicate = duplicate.name?.trim().toLowerCase() === loweredName
+    const isSlugDuplicate = duplicate.slug?.trim().toLowerCase() === loweredSlug
+
+    return {
+      error: `A category with this ${isNameDuplicate ? 'name' : 'slug'} already exists.`,
+    }
+  }
+
+  return null
+}
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient()
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
+    const page = Number(searchParams.get('page')) || 1
+    const limit = Number(searchParams.get('limit')) || 10
+    const all = searchParams.get('all') === 'true'
+    const includeSubcategories = searchParams.get('includeSubcategories') === 'true'
 
-    // Fetch categories
-    const { data: categories, error: catsError } = await supabase
+    const supabase = await createAdminClient()
+
+    let catQuery = supabase
       .from('categories')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('name', { ascending: true })
 
+    if (search) {
+      catQuery = catQuery.ilike('name', `%${search}%`)
+    }
+
+    if (!all) {
+      const from = (page - 1) * limit
+      const to = from + limit - 1
+      catQuery = catQuery.range(from, to)
+    }
+
+    const { data: categories, error: catsError, count } = await catQuery
     if (catsError) throw catsError
 
-    // Fetch subcategories
-    const { data: subcategories, error: subsError } = await supabase
-      .from('subcategories')
-      .select('*')
-      .order('name', { ascending: true })
+    let data = categories || []
 
-    if (subsError) throw subsError
+    if (includeSubcategories && categories && categories.length > 0) {
+      const categoryIds = categories.map((category) => category.id)
+      const { data: subs, error: subsError } = await supabase
+        .from('subcategories')
+        .select('*')
+        .in('category_id', categoryIds)
+        .order('name', { ascending: true })
 
-    // Group subcategories by category_id
-    const categoriesWithSubs = (categories as CategoryRow[]).map((cat) => {
-      return {
-        ...cat,
-        subcategories: (subcategories as SubcategoryRow[]).filter((sub) => sub.category_id === cat.id)
-      }
+      if (subsError) throw subsError
+
+      data = categories.map((category) => ({
+        ...category,
+        subcategories: (subs || []).filter((sub) => sub.category_id === category.id),
+      }))
+    }
+
+    const total = count || 0
+    const totalPages = all ? 1 : Math.ceil(total / limit)
+
+    return NextResponse.json({
+      data,
+      meta: { total, page: all ? 1 : page, totalPages },
     })
-
-    return NextResponse.json({ data: categoriesWithSubs })
-  } catch (error: any) {
-    console.error('Error fetching categories:', error)
-    return NextResponse.json({ error: error.message || 'Failed to fetch categories' }, { status: 500 })
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error('Error fetching categories:', err)
+    return NextResponse.json({ error: err.message || 'Failed to fetch categories' }, { status: 500 })
   }
 }
 
@@ -43,8 +109,17 @@ export async function POST(request: Request) {
   if (adminCheck) return adminCheck
 
   try {
+    const supabase = await createAdminClient()
     const body = await request.json()
-    const supabase = await createClient()
+
+    if (!body.name?.trim() || !body.slug?.trim()) {
+      return NextResponse.json({ error: 'Name and slug are required.' }, { status: 400 })
+    }
+
+    const uniquenessError = await ensureCategoryUniqueness(supabase, body.name, body.slug)
+    if (uniquenessError) {
+      return NextResponse.json({ error: uniquenessError.error }, { status: 409 })
+    }
 
     const { data, error } = await supabase
       .from('categories')
@@ -55,8 +130,9 @@ export async function POST(request: Request) {
     if (error) throw error
 
     return NextResponse.json({ data, message: 'Category created successfully' })
-  } catch (error: any) {
-    console.error('Error creating category:', error)
-    return NextResponse.json({ error: error.message || 'Failed to create category' }, { status: 500 })
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error('Error creating category:', err)
+    return NextResponse.json({ error: err.message || 'Failed to create category' }, { status: 500 })
   }
 }

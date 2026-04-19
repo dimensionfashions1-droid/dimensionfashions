@@ -15,6 +15,7 @@ import {
   AdminDeleteDialog,
   StatusBadge,
 } from "@/components/admin"
+import { useToast } from "@/hooks/use-toast"
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
@@ -31,6 +32,7 @@ const columns = [
 ]
 
 export default function AdminProductsPage() {
+  const { toast } = useToast()
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [deleteSlug, setDeleteSlug] = useState<string | null>(null)
@@ -50,10 +52,28 @@ export default function AdminProductsPage() {
     setIsDeleting(true)
     try {
       const res = await fetch(`/api/products/${deleteSlug}`, { method: "DELETE" })
-      if (!res.ok) throw new Error("Delete failed")
-      mutate(`/api/products?${queryString.toString()}`)
+      const result = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast({
+          variant: "destructive",
+          title: "Delete failed",
+          description: result.error || "Failed to delete product.",
+        })
+        return
+      }
+
+      await mutate(`/api/products?${queryString.toString()}`)
+      toast({
+        title: "Product deleted",
+        description: "The product was deleted successfully.",
+      })
     } catch (error) {
       console.error("Failed to delete product:", error)
+      toast({
+        variant: "destructive",
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+      })
     } finally {
       setIsDeleting(false)
       setDeleteSlug(null)

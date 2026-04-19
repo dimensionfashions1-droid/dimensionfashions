@@ -162,16 +162,16 @@ export default function AdminOrdersPage() {
           className="flex-1 max-w-sm"
         />
         <Select value={statusFilter} onValueChange={val => { setStatusFilter(val); setPage(1) }}>
-          <SelectTrigger className="w-[180px] bg-zinc-900 border-zinc-800 text-white">
+          <SelectTrigger className="h-11 w-[180px] rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
-          <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
-            <SelectItem value="all" className="focus:bg-zinc-800">All Statuses</SelectItem>
-            <SelectItem value="processing" className="focus:bg-zinc-800">Processing</SelectItem>
-            <SelectItem value="shipped" className="focus:bg-zinc-800">Shipped</SelectItem>
-            <SelectItem value="delivered" className="focus:bg-zinc-800">Delivered</SelectItem>
-            <SelectItem value="cancelled" className="focus:bg-zinc-800">Cancelled</SelectItem>
-            <SelectItem value="returned" className="focus:bg-zinc-800">Returned</SelectItem>
+          <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
+            <SelectItem value="all" className="rounded-lg focus:bg-zinc-900">All Statuses</SelectItem>
+            <SelectItem value="processing" className="rounded-lg focus:bg-zinc-900">Processing</SelectItem>
+            <SelectItem value="shipped" className="rounded-lg focus:bg-zinc-900">Shipped</SelectItem>
+            <SelectItem value="delivered" className="rounded-lg focus:bg-zinc-900">Delivered</SelectItem>
+            <SelectItem value="cancelled" className="rounded-lg focus:bg-zinc-900">Cancelled</SelectItem>
+            <SelectItem value="returned" className="rounded-lg focus:bg-zinc-900">Returned</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -215,15 +215,15 @@ export default function AdminOrdersPage() {
 
       {/* Order Detail Dialog */}
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto rounded-[28px] border-zinc-800 bg-zinc-950/95 p-7 text-white shadow-2xl shadow-black/50 backdrop-blur-xl">
           {selectedOrder && (
             <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-3">
+              <DialogHeader className="space-y-2">
+                <DialogTitle className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
                   Order {selectedOrder.order_number}
                   <StatusBadge label={selectedOrder.order_status} variant={statusVariantMap[selectedOrder.order_status]} />
                 </DialogTitle>
-                <DialogDescription className="text-zinc-400">
+                <DialogDescription className="text-sm leading-6 text-zinc-400">
                   Placed on {formatDate(selectedOrder.created_at)} · {selectedOrder.payment_method?.toUpperCase()}
                 </DialogDescription>
               </DialogHeader>
@@ -280,43 +280,43 @@ export default function AdminOrdersPage() {
                     <div className="space-y-2">
                       <Label className="text-zinc-300 text-xs">Order Status</Label>
                       <Select value={editStatus} onValueChange={val => setEditStatus(val as OrderStatus)}>
-                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-9 text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
-                          <SelectItem value="processing" className="focus:bg-zinc-800">Processing</SelectItem>
-                          <SelectItem value="shipped" className="focus:bg-zinc-800">Shipped</SelectItem>
-                          <SelectItem value="delivered" className="focus:bg-zinc-800">Delivered</SelectItem>
-                          <SelectItem value="cancelled" className="focus:bg-zinc-800">Cancelled</SelectItem>
-                          <SelectItem value="returned" className="focus:bg-zinc-800">Returned</SelectItem>
+                        <SelectTrigger className="h-10 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100"><SelectValue /></SelectTrigger>
+                        <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
+                          <SelectItem value="processing" className="rounded-lg focus:bg-zinc-900">Processing</SelectItem>
+                          <SelectItem value="shipped" className="rounded-lg focus:bg-zinc-900">Shipped</SelectItem>
+                          <SelectItem value="delivered" className="rounded-lg focus:bg-zinc-900">Delivered</SelectItem>
+                          <SelectItem value="cancelled" className="rounded-lg focus:bg-zinc-900">Cancelled</SelectItem>
+                          <SelectItem value="returned" className="rounded-lg focus:bg-zinc-900">Returned</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-zinc-300 text-xs">Payment Status</Label>
                       <Select value={editPaymentStatus} onValueChange={val => setEditPaymentStatus(val as PaymentStatus)}>
-                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-9 text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
-                          <SelectItem value="pending" className="focus:bg-zinc-800">Pending</SelectItem>
-                          <SelectItem value="paid" className="focus:bg-zinc-800">Paid</SelectItem>
-                          <SelectItem value="failed" className="focus:bg-zinc-800">Failed</SelectItem>
-                          <SelectItem value="refunded" className="focus:bg-zinc-800">Refunded</SelectItem>
+                        <SelectTrigger className="h-10 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100"><SelectValue /></SelectTrigger>
+                        <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
+                          <SelectItem value="pending" className="rounded-lg focus:bg-zinc-900">Pending</SelectItem>
+                          <SelectItem value="paid" className="rounded-lg focus:bg-zinc-900">Paid</SelectItem>
+                          <SelectItem value="failed" className="rounded-lg focus:bg-zinc-900">Failed</SelectItem>
+                          <SelectItem value="refunded" className="rounded-lg focus:bg-zinc-900">Refunded</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-zinc-300 text-xs">Courier</Label>
                       <Select value={editCourier} onValueChange={setEditCourier}>
-                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-9 text-sm"><SelectValue placeholder="Select courier" /></SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
-                          <SelectItem value="delhivery" className="focus:bg-zinc-800">Delhivery</SelectItem>
-                          <SelectItem value="dtdc" className="focus:bg-zinc-800">DTDC</SelectItem>
-                          <SelectItem value="xpressbees" className="focus:bg-zinc-800">Xpressbees</SelectItem>
+                        <SelectTrigger className="h-10 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100"><SelectValue placeholder="Select courier" /></SelectTrigger>
+                        <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
+                          <SelectItem value="delhivery" className="rounded-lg focus:bg-zinc-900">Delhivery</SelectItem>
+                          <SelectItem value="dtdc" className="rounded-lg focus:bg-zinc-900">DTDC</SelectItem>
+                          <SelectItem value="xpressbees" className="rounded-lg focus:bg-zinc-900">Xpressbees</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-zinc-300 text-xs">Tracking Number</Label>
                       <Input value={editTracking} onChange={e => setEditTracking(e.target.value)}
-                        className="bg-zinc-800 border-zinc-700 text-white h-9 text-sm" placeholder="AWB / Tracking ID" />
+                        className="h-10 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500" placeholder="AWB / Tracking ID" />
                     </div>
                   </div>
                 </div>

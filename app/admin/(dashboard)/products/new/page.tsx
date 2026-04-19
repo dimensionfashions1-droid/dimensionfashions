@@ -18,6 +18,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
@@ -45,11 +46,12 @@ interface Category {
 
 export default function AdminProductNewPage() {
   const router = useRouter()
+  const { toast } = useToast()
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
 
   // Fetch categories and attributes for the form selectors
-  const { data: catResponse } = useSWR("/api/categories", fetcher)
+  const { data: catResponse } = useSWR("/api/categories?all=true&includeSubcategories=true", fetcher)
   const { data: attrResponse } = useSWR("/api/attributes", fetcher)
 
   const categories: Category[] = catResponse?.data || []
@@ -170,12 +172,18 @@ export default function AdminProductNewPage() {
         body: JSON.stringify(productPayload),
       })
 
+      const result = await res.json().catch(() => ({}))
+
       if (!res.ok) {
-        const errData = await res.json()
-        throw new Error(errData.error || "Failed to create product")
+        toast({
+          variant: "destructive",
+          title: result.error?.includes("already exists") ? "Duplicate product" : "Product create failed",
+          description: result.error || "Failed to create product.",
+        })
+        return
       }
 
-      const { data: createdProduct } = await res.json()
+      const { data: createdProduct } = result
 
       // 2. Link attributes
       const attrRows: Array<{ product_id: string; attribute_id: string; option_id?: string; text_value?: string }> = []
@@ -204,16 +212,34 @@ export default function AdminProductNewPage() {
       // Batch insert attributes if any
       if (attrRows.length > 0) {
         // We use the PUT endpoint for the newly created slug to link attributes
-        await fetch(`/api/products/${slug}`, {
+        const attrRes = await fetch(`/api/products/${slug}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ attributes: attrRows.map(r => ({ attribute_id: r.attribute_id, option_id: r.option_id, text_value: r.text_value })) }),
         })
+        if (!attrRes.ok) {
+          const attrError = await attrRes.json().catch(() => ({}))
+          toast({
+            variant: "destructive",
+            title: "Product attribute save failed",
+            description: attrError.error || "Failed to save product attributes.",
+          })
+          return
+        }
       }
 
+      toast({
+        title: "Product created",
+        description: "The product was created successfully.",
+      })
       router.push("/admin/products")
     } catch (error) {
       console.error("Error saving product:", error)
+      toast({
+        variant: "destructive",
+        title: "Product create failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+      })
     } finally {
       setIsSaving(false)
     }
@@ -243,17 +269,17 @@ export default function AdminProductNewPage() {
             <div className="space-y-2 md:col-span-2">
               <Label className="text-zinc-300">Title</Label>
               <Input value={title} onChange={e => setTitle(e.target.value)} required
-                className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-600" placeholder="e.g., Midnight Kanjivaram Saree" />
+                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="e.g., Midnight Kanjivaram Saree" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label className="text-zinc-300">Slug</Label>
               <Input value={slug} onChange={e => setSlug(e.target.value)} required
-                className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-600" placeholder="midnight-kanjivaram-saree" />
+                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="midnight-kanjivaram-saree" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label className="text-zinc-300">Description</Label>
               <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={4}
-                className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-600" placeholder="Product description..." />
+                className="min-h-[120px] rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="Product description..." />
             </div>
           </div>
         </div>
@@ -265,22 +291,22 @@ export default function AdminProductNewPage() {
             <div className="space-y-2">
               <Label className="text-zinc-300">Selling Price (₹)</Label>
               <Input type="number" value={price} onChange={e => setPrice(e.target.value)} required
-                className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-600" placeholder="2999" />
+                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="2999" />
             </div>
             <div className="space-y-2">
               <Label className="text-zinc-300">Original Price (₹)</Label>
               <Input type="number" value={originalPrice} onChange={e => setOriginalPrice(e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-600" placeholder="4999" />
+                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="4999" />
             </div>
             <div className="space-y-2">
               <Label className="text-zinc-300">Discount %</Label>
               <Input type="number" value={discount} onChange={e => setDiscount(e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-600" placeholder="20" />
+                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="20" />
             </div>
             <div className="space-y-2">
               <Label className="text-zinc-300">Stock Count</Label>
               <Input type="number" value={stockCount} onChange={e => setStockCount(e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-600" placeholder="50" />
+                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="50" />
             </div>
           </div>
         </div>
@@ -292,12 +318,12 @@ export default function AdminProductNewPage() {
             <div className="space-y-2">
               <Label className="text-zinc-300">Category</Label>
               <Select value={categoryId} onValueChange={(val) => { setCategoryId(val); setSubcategoryId("") }}>
-                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+              <SelectTrigger className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
+                <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
                   {categories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id} className="hover:bg-zinc-800 focus:bg-zinc-800">{cat.name}</SelectItem>
+                    <SelectItem key={cat.id} value={cat.id} className="rounded-lg focus:bg-zinc-900 focus:text-white">{cat.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -306,12 +332,12 @@ export default function AdminProductNewPage() {
               <div className="space-y-2">
                 <Label className="text-zinc-300">Subcategory</Label>
                 <Select value={subcategoryId} onValueChange={setSubcategoryId}>
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                  <SelectTrigger className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100">
                     <SelectValue placeholder="Select subcategory" />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
+                  <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
                     {subcategories.map(sub => (
-                      <SelectItem key={sub.id} value={sub.id} className="hover:bg-zinc-800 focus:bg-zinc-800">{sub.name}</SelectItem>
+                      <SelectItem key={sub.id} value={sub.id} className="rounded-lg focus:bg-zinc-900 focus:text-white">{sub.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -360,7 +386,7 @@ export default function AdminProductNewPage() {
                     <Input
                       value={(selectedAttributes[attr.id] as string) || ""}
                       onChange={e => handleTextAttribute(attr.id, e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-600"
+                      className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60"
                       placeholder={`Enter ${attr.name.toLowerCase()}...`}
                     />
                   ) : (

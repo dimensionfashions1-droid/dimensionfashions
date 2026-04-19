@@ -54,7 +54,7 @@ export function Sidebar() {
       
       <div className="p-4 border-t border-zinc-800">
         <Link href="/">
-           <Button variant="outline" className="w-full bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 justify-start gap-2">
+           <Button variant="outline" className="h-11 w-full justify-start gap-2 rounded-xl border-zinc-800 bg-zinc-900/90 text-zinc-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] hover:text-white hover:bg-zinc-800">
             <Store className="h-4 w-4" />
             Storefront
           </Button>

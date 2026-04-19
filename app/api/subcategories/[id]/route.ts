@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
 
-async function ensureCategoryUniqueness(
+async function ensureSubcategoryUniqueness(
   supabase: Awaited<ReturnType<typeof createAdminClient>>,
   name: string,
   slug: string,
@@ -12,13 +12,13 @@ async function ensureCategoryUniqueness(
   const loweredSlug = slug.trim().toLowerCase()
 
   const nameQuery = supabase
-    .from('categories')
+    .from('subcategories')
     .select('id, name, slug')
     .neq('id', excludeId)
     .ilike('name', name.trim())
 
   const slugQuery = supabase
-    .from('categories')
+    .from('subcategories')
     .select('id, name, slug')
     .neq('id', excludeId)
     .ilike('slug', slug.trim())
@@ -38,7 +38,7 @@ async function ensureCategoryUniqueness(
   if (duplicate) {
     const isNameDuplicate = duplicate.name?.trim().toLowerCase() === loweredName
     return {
-      error: `A category with this ${isNameDuplicate ? 'name' : 'slug'} already exists.`,
+      error: `A subcategory with this ${isNameDuplicate ? 'name' : 'slug'} already exists.`,
     }
   }
 
@@ -61,13 +61,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Name and slug are required.' }, { status: 400 })
     }
 
-    const uniquenessError = await ensureCategoryUniqueness(supabase, body.name, body.slug, id)
+    const uniquenessError = await ensureSubcategoryUniqueness(supabase, body.name, body.slug, id)
     if (uniquenessError) {
       return NextResponse.json({ error: uniquenessError.error }, { status: 409 })
     }
 
     const { data, error } = await supabase
-      .from('categories')
+      .from('subcategories')
       .update(body)
       .eq('id', id)
       .select()
@@ -75,11 +75,11 @@ export async function PUT(
 
     if (error) throw error
 
-    return NextResponse.json({ data, message: 'Category updated successfully' })
+    return NextResponse.json({ data, message: 'Subcategory updated successfully' })
   } catch (error: unknown) {
     const err = error as Error
-    console.error('API /categories/[id] PUT error:', err)
-    return NextResponse.json({ error: err.message || 'Failed to update category' }, { status: 500 })
+    console.error('API /subcategories/[id] PUT error:', err)
+    return NextResponse.json({ error: err.message || 'Failed to update subcategory' }, { status: 500 })
   }
 }
 
@@ -94,18 +94,17 @@ export async function DELETE(
     const supabase = await createAdminClient()
     const { id } = await params
 
-    // Also delete associated subcategories (FK CASCADE should handle this, but explicit is safer)
     const { error } = await supabase
-      .from('categories')
+      .from('subcategories')
       .delete()
       .eq('id', id)
 
     if (error) throw error
 
-    return NextResponse.json({ message: 'Category deleted successfully' })
+    return NextResponse.json({ message: 'Subcategory deleted successfully' })
   } catch (error: unknown) {
     const err = error as Error
-    console.error('API /categories/[id] DELETE error:', err)
-    return NextResponse.json({ error: err.message || 'Failed to delete category' }, { status: 500 })
+    console.error('API /subcategories/[id] DELETE error:', err)
+    return NextResponse.json({ error: err.message || 'Failed to delete subcategory' }, { status: 500 })
   }
 }
