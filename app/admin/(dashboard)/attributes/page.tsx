@@ -1,5 +1,8 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
+
 import { useState } from "react"
 import useSWR, { mutate } from "swr"
 import { AttributeDefinitionRow, AttributeOptionRow, AttributeType } from "@/types"

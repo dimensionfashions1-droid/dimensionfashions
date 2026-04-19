@@ -1,5 +1,8 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import useSWR from "swr"
@@ -16,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, Upload, X, Loader2 } from "lucide-react"
+import { ArrowLeft, Upload, X, Loader2, Star } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 
@@ -122,6 +125,15 @@ export default function AdminProductNewPage() {
     } finally {
       setIsUploading(false)
     }
+  }
+
+  const makeMainImage = (index: number) => {
+    setImages(prev => {
+      const newImages = [...prev]
+      const [item] = newImages.splice(index, 1)
+      newImages.unshift(item)
+      return newImages
+    })
   }
 
   const removeImage = (index: number) => {
@@ -348,29 +360,59 @@ export default function AdminProductNewPage() {
 
         {/* ── Images ───────────────────────────────────────────────── */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
-          <h2 className="text-lg font-semibold text-white border-b border-zinc-800 pb-3">Images</h2>
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <h2 className="text-lg font-semibold text-white">Images</h2>
+            <span className="text-xs text-zinc-500">{images.length} images uploaded</span>
+          </div>
+          
           <div className="flex flex-wrap gap-4">
             {images.map((url, i) => (
-              <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden border border-zinc-700 group">
-                <img src={url} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
-                <button type="button" onClick={() => removeImage(i)}
-                  className="absolute top-1 right-1 bg-zinc-900/80 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <X className="h-3 w-3 text-rose-400" />
-                </button>
+              <div key={i} className={`relative w-32 h-32 rounded-xl overflow-hidden border transition-all duration-300 group bg-zinc-950 ${
+                i === 0 ? 'border-zinc-100 ring-2 ring-zinc-100/20 shadow-lg shadow-black/50' : 'border-zinc-800'
+              }`}>
+                <img src={url} alt={`Product ${i + 1}`} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                
+                {i === 0 && (
+                  <div className="absolute top-2 left-2 px-2 py-0.5 bg-white text-zinc-900 text-[9px] font-bold rounded-md z-10 shadow-sm">
+                    MAIN
+                  </div>
+                )}
+
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
+                  {i !== 0 && (
+                    <button type="button" onClick={() => makeMainImage(i)}
+                      className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all hover:scale-110"
+                      title="Make Main">
+                      <Star className="h-4 w-4 fill-white/20" />
+                    </button>
+                  )}
+                  <button type="button" onClick={() => removeImage(i)}
+                    className="p-2 bg-rose-500/10 hover:bg-rose-500/20 rounded-full text-rose-400 transition-all hover:scale-110"
+                    title="Remove">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             ))}
-            <label className="w-24 h-24 rounded-lg border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-500 transition-colors">
+            
+            <label className="w-32 h-32 rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-950/50 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-600 hover:bg-zinc-900/50 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed">
               {isUploading ? (
-                <Loader2 className="h-5 w-5 text-zinc-500 animate-spin" />
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-5 w-5 text-zinc-500 animate-spin" />
+                  <span className="text-[10px] text-zinc-500 font-medium">Uploading...</span>
+                </div>
               ) : (
                 <>
-                  <Upload className="h-5 w-5 text-zinc-500" />
-                  <span className="text-[10px] text-zinc-500 mt-1">Upload</span>
+                  <div className="p-2 bg-zinc-900 rounded-full mb-1 group-hover:scale-110 transition-transform">
+                    <Upload className="h-5 w-5 text-zinc-500" />
+                  </div>
+                  <span className="text-[10px] text-zinc-500 font-medium">Click to upload</span>
                 </>
               )}
               <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={isUploading} />
             </label>
           </div>
+          <p className="text-[11px] text-zinc-600">The first image will be used as the primary thumbnail in the storefront.</p>
         </div>
 
         {/* ── Attributes (Dynamic) ─────────────────────────────────── */}

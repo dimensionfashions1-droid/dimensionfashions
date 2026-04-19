@@ -1,5 +1,8 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
+
 import useSWR from "swr"
 import { LayoutDashboard, Users, AlertCircle, IndianRupee } from "lucide-react"
 import { StatCard } from "@/components/admin"

@@ -4,6 +4,7 @@ export interface Product {
     price: number
     category: string
     image: string
+    images?: string[]
     colors?: string[]
     discount?: number
     rating?: number

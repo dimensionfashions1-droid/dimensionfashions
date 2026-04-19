@@ -1,5 +1,8 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
+
 import { useEffect, useMemo, useState } from "react"
 import useSWR, { mutate } from "swr"
 import { useDebounce } from "use-debounce"

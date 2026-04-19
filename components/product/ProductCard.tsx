@@ -32,7 +32,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="group space-y-4">
             {/* Image Container */}
             <div className="relative aspect-[3/4] overflow-hidden bg-primary/5 rounded-2xl">
-                <Link href={`/product/${product.id}`} className="block w-full h-full">
+                <Link href={`/product/${product.slug}`} className="block w-full h-full">
                     <Image
                         src={product.image}
                         alt={product.title}
@@ -88,7 +88,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
             {/* Product Info */}
             <div className="space-y-2.5 text-center px-1">
-                <Link href={`/product/${product.id}`}>
+                <Link href={`/product/${product.slug}`}>
                     <h3 className="font-heading font-normal text-lg text-primary tracking-tight transition-colors group-hover:text-accent line-clamp-1">
                         {product.title}
                     </h3>
