@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, ShoppingCart, User, Heart, Menu, X, ChevronDown, Instagram, Facebook, Twitter, AlignLeft } from "lucide-react"
+import { Search, ShoppingCart, User, Heart, Menu, X, ChevronDown, Instagram, Facebook, Twitter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import {
@@ -13,114 +13,40 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { CategoryRow, SubcategoryRow } from "@/types"
 
-const CATEGORIES = [
-    {
-        name: "Sarees",
-        href: "/collections/sarees",
-        image: "https://images.unsplash.com/photo-1583391733975-6664ea615c0a?auto=format&fit=crop&q=80&w=400",
-        subcategories: [
-            { name: "Silk Sarees", href: "/collections/sarees/silk" },
-            { name: "Kanjivaram", href: "/collections/sarees/kanjivaram" },
-            { name: "Organza", href: "/collections/sarees/organza" },
-            { name: "Cotton", href: "/collections/sarees/cotton" },
-            { name: "Bridal Sarees", href: "/collections/sarees/bridal" },
-        ]
-    },
-    {
-        name: "Lehengas",
-        href: "/collections/lehengas",
-        image: "https://images.unsplash.com/photo-1604580864964-0462f5d5b1a8?auto=format&fit=crop&q=80&w=400",
-        subcategories: [
-            { name: "Bridal Lehengas", href: "/collections/lehengas/bridal" },
-            { name: "Bridesmaid Lehengas", href: "/collections/lehengas/bridesmaid" },
-            { name: "Printed Lehengas", href: "/collections/lehengas/printed" },
-            { name: "Jacket Lehengas", href: "/collections/lehengas/jacket" },
-        ]
-    },
-    {
-        name: "Kurta Sets",
-        href: "/collections/kurta-sets",
-        image: "https://images.unsplash.com/photo-1595777457583-95e059f581eb?auto=format&fit=crop&q=80&w=400",
-        subcategories: [
-            { name: "Anarkali Sets", href: "/collections/kurta-sets/anarkali" },
-            { name: "Palazzo Sets", href: "/collections/kurta-sets/palazzo" },
-            { name: "Sharara Sets", href: "/collections/kurta-sets/sharara" },
-            { name: "Straight Kurtas", href: "/collections/kurta-sets/straight" },
-        ]
-    },
-    {
-        name: "Dresses",
-        href: "/collections/dresses",
-        image: "https://images.unsplash.com/photo-1555529771-331e84ae5b86?auto=format&fit=crop&q=80&w=400",
-        subcategories: [
-            { name: "Maxi Dresses", href: "/collections/dresses/maxi" },
-            { name: "Midi Dresses", href: "/collections/dresses/midi" },
-            { name: "Mini Dresses", href: "/collections/dresses/mini" },
-            { name: "Wrap Dresses", href: "/collections/dresses/wrap" },
-        ]
-    },
-    {
-        name: "Gowns",
-        href: "/collections/gowns",
-        image: "https://images.unsplash.com/photo-1580828369619-b414fccc41da?auto=format&fit=crop&q=80&w=400",
-        subcategories: [
-            { name: "Evening Gowns", href: "/collections/gowns/evening" },
-            { name: "Reception Gowns", href: "/collections/gowns/reception" },
-            { name: "Indo-Western Gowns", href: "/collections/gowns/indo-western" },
-            { name: "Drape Gowns", href: "/collections/gowns/drape" },
-        ]
-    },
-    {
-        name: "Tops",
-        href: "/collections/tops",
-        image: "https://images.unsplash.com/photo-1594917172018-9366eecf46f4?auto=format&fit=crop&q=80&w=400",
-        subcategories: [
-            { name: "Crop Tops", href: "/collections/tops/crop" },
-            { name: "Tunics", href: "/collections/tops/tunics" },
-            { name: "Shirts", href: "/collections/tops/shirts" },
-            { name: "Blouses", href: "/collections/tops/blouses" },
-        ]
-    },
-    {
-        name: "Co-ords",
-        href: "/collections/coords",
-        image: "https://images.unsplash.com/photo-1617265882583-b5419d280b2a?auto=format&fit=crop&q=80&w=400",
-        subcategories: [
-            { name: "Printed Co-ords", href: "/collections/coords/printed" },
-            { name: "Solid Co-ords", href: "/collections/coords/solid" },
-            { name: "Embroidered Co-ords", href: "/collections/coords/embroidered" },
-            { name: "Lounge Co-ords", href: "/collections/coords/lounge" },
-        ]
-    },
-    {
-        name: "Loungewear",
-        href: "/collections/loungewear",
-        image: "https://images.unsplash.com/photo-1610030469983-98e500b71826?auto=format&fit=crop&q=80&w=400",
-        subcategories: [
-            { name: "Kaftans", href: "/collections/loungewear/kaftans" },
-            { name: "Pyjama Sets", href: "/collections/loungewear/pyjamas" },
-            { name: "Nightdresses", href: "/collections/loungewear/nightdresses" },
-            { name: "Robes", href: "/collections/loungewear/robes" },
-        ]
-    }
-]
+interface Category extends CategoryRow {
+    subcategories: SubcategoryRow[]
+}
 
 export function Navbar({ user }: { user?: SupabaseUser | null }) {
     const [isScrolled, setIsScrolled] = React.useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
-    const [activeMegaCategory, setActiveMegaCategory] = React.useState(CATEGORIES[0])
+    const [categories, setCategories] = React.useState<Category[]>([])
+    const [activeMegaCategory, setActiveMegaCategory] = React.useState<Category | null>(null)
+    const [loading, setLoading] = React.useState(true)
 
     React.useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('/api/categories?all=true&includeSubcategories=true')
+                const result = await response.json()
+                if (result.data) {
+                    setCategories(result.data)
+                    if (result.data.length > 0) {
+                        setActiveMegaCategory(result.data[0])
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchCategories()
+
         const handleScroll = () => setIsScrolled(window.scrollY > 20)
         window.addEventListener("scroll", handleScroll)
         return () => window.removeEventListener("scroll", handleScroll)
@@ -170,8 +96,8 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                                 </SelectTrigger>
                                 <SelectContent className="rounded-xl border-gray-100 shadow-xl">
                                     <SelectItem value="all" className="text-[10px] font-sans font-bold uppercase tracking-widest">All</SelectItem>
-                                    {CATEGORIES.map((cat) => (
-                                        <SelectItem key={cat.name} value={cat.name.toLowerCase()} className="text-[10px] font-sans font-bold uppercase tracking-widest">
+                                    {categories.map((cat) => (
+                                        <SelectItem key={`nav_search_cat_${cat.id}`} value={cat.slug} className="text-[10px] font-sans font-bold uppercase tracking-widest">
                                             {cat.name}
                                         </SelectItem>
                                     ))}
@@ -226,73 +152,79 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                                 All Categories
                             </button>
                             {/* Mega Menu Dropdown */}
-                            <div className="absolute top-full left-0 pt-3 hidden group-hover:block w-[800px] z-[100]">
-                                <div className="flex bg-white shadow-2xl border border-gray-100 min-h-[400px] w-full transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300 overflow-hidden shadow-black/5 rounded-b-lg">
-                                    {/* Left Sidebar */}
-                                    <div className="w-[30%] bg-gray-50/80 p-6 border-r border-gray-100">
-                                        <ul className="space-y-1">
-                                            {CATEGORIES.map((cat) => (
-                                                <li key={cat.name}>
-                                                    <Link
-                                                        href={cat.href}
-                                                        onMouseEnter={() => setActiveMegaCategory(cat)}
-                                                        className={cn(
-                                                            "w-full text-left py-3 pr-4 pl-3.5 text-[10px] font-sans font-bold uppercase tracking-widest transition-all rounded-none block border-l-2",
-                                                            activeMegaCategory.name === cat.name
-                                                                ? "bg-accent/10 rounded-r-sm text-primary border-accent shadow-sm"
-                                                                : "border-transparent text-primary/70 hover:bg-white/50 hover:text-primary"
-                                                        )}
-                                                    >
-                                                        {cat.name}
-                                                    </Link>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-
-                                    {/* Right Split Section */}
-                                    <div className="w-[70%] p-8 flex gap-8 bg-white">
-                                        {/* Subcategories */}
-                                        <div className="flex-1 space-y-6">
-                                            <h3 className="text-xl font-heading text-primary border-b border-gray-100 pb-3 block">
-                                                {activeMegaCategory.name}
-                                            </h3>
-                                            <ul className="space-y-4">
-                                                {activeMegaCategory.subcategories.map((sub) => (
-                                                    <li key={sub.name}>
-                                                        <Link href={sub.href} className="text-[11px] font-sans font-bold text-primary/60 hover:text-accent uppercase tracking-[0.15em] transition-colors block">
-                                                            {sub.name}
+                            {categories.length > 0 && activeMegaCategory && (
+                                <div className="absolute top-full left-0 pt-3 hidden group-hover:block w-[800px] z-[100]">
+                                    <div className="flex bg-white shadow-2xl border border-gray-100 min-h-[400px] w-full transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300 overflow-hidden shadow-black/5 rounded-b-lg">
+                                        {/* Left Sidebar */}
+                                        <div className="w-[30%] bg-gray-50/80 p-6 border-r border-gray-100">
+                                            <ul className="space-y-1">
+                                                {categories.map((cat) => (
+                                                    <li key={`nav_mega_cat_${cat.id}`}>
+                                                        <Link
+                                                            href={`/products?category=${cat.slug}`}
+                                                            onMouseEnter={() => setActiveMegaCategory(cat)}
+                                                            className={cn(
+                                                                "w-full text-left py-3 pr-4 pl-3.5 text-[10px] font-sans font-bold uppercase tracking-widest transition-all rounded-none block border-l-2",
+                                                                activeMegaCategory.id === cat.id
+                                                                    ? "bg-accent/10 rounded-r-sm text-primary border-accent shadow-sm"
+                                                                    : "border-transparent text-primary/70 hover:bg-white/50 hover:text-primary"
+                                                            )}
+                                                        >
+                                                            {cat.name}
                                                         </Link>
                                                     </li>
                                                 ))}
                                             </ul>
                                         </div>
 
-                                        {/* Category Image */}
-                                        <div className="w-[240px] flex flex-col items-center justify-center space-y-4">
-                                            <Link href={activeMegaCategory.href} className="block relative aspect-[3/4] w-full rounded-sm overflow-hidden group/img bg-gray-50">
-                                                <Image
-                                                    src={activeMegaCategory.image}
-                                                    alt={activeMegaCategory.name}
-                                                    fill
-                                                    className="object-cover group-hover/img:scale-105 transition-transform duration-700"
-                                                    sizes="240px"
-                                                />
-                                                <div className="absolute inset-0 bg-primary/0 group-hover/img:bg-primary/5 transition-colors duration-500" />
-                                            </Link>
-                                            <Link href={activeMegaCategory.href} className="text-[9px] font-sans font-bold tracking-[0.2em] text-accent uppercase border-b border-accent/30 p-1 hover:border-accent transition-colors block text-center">
-                                                Explore {activeMegaCategory.name}
-                                            </Link>
+                                        {/* Right Split Section */}
+                                        <div className="w-[70%] p-8 flex gap-8 bg-white">
+                                            {/* Subcategories */}
+                                            <div className="flex-1 space-y-6">
+                                                <h3 className="text-xl font-heading text-primary border-b border-gray-100 pb-3 block">
+                                                    {activeMegaCategory.name}
+                                                </h3>
+                                                <ul className="space-y-4">
+                                                    {activeMegaCategory.subcategories.map((sub) => (
+                                                        <li key={`nav_sub_${sub.id}`}>
+                                                            <Link href={`/products?category=${activeMegaCategory.slug}&subcategory=${sub.slug}`} className="text-[11px] font-sans font-bold text-primary/60 hover:text-accent uppercase tracking-[0.15em] transition-colors block">
+                                                                {sub.name}
+                                                            </Link>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+
+                                            {/* Category Image */}
+                                            <div className="w-[240px] flex flex-col items-center justify-center space-y-4">
+                                                <Link href={`/products?category=${activeMegaCategory.slug}`} className="block relative aspect-[3/4] w-full rounded-sm overflow-hidden group/img bg-gray-50">
+                                                    {activeMegaCategory.image_url ? (
+                                                        <Image
+                                                            src={activeMegaCategory.image_url}
+                                                            alt={activeMegaCategory.name}
+                                                            fill
+                                                            className="object-cover group-hover/img:scale-105 transition-transform duration-700"
+                                                            sizes="240px"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">No Image</div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-primary/0 group-hover/img:bg-primary/5 transition-colors duration-500" />
+                                                </Link>
+                                                <Link href={`/products?category=${activeMegaCategory.slug}`} className="text-[9px] font-sans font-bold tracking-[0.2em] text-accent uppercase border-b border-accent/30 p-1 hover:border-accent transition-colors block text-center">
+                                                    Explore {activeMegaCategory.name}
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
-                        {CATEGORIES.slice(0, 4).map((cat) => (
+                        {categories.slice(0, 4).map((cat) => (
                             <Link
-                                key={cat.name}
-                                href={cat.href}
+                                key={`nav_main_cat_${cat.id}`}
+                                href={`/products?category=${cat.slug}`}
                                 className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
                             >
                                 {cat.name}
@@ -325,11 +257,12 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                     </div>
 
                     <ul className="space-y-8">
-                        {CATEGORIES.map((cat) => (
-                            <li key={cat.name}>
+                        {categories.map((cat) => (
+                            <li key={`nav_mobile_cat_${cat.id}`}>
                                 <Link
-                                    href={cat.href}
+                                    href={`/products?category=${cat.slug}`}
                                     className="text-sm font-sans font-bold text-primary uppercase tracking-[0.2em] flex items-center justify-between"
+                                    onClick={() => setMobileMenuOpen(false)}
                                 >
                                     {cat.name}
                                     <ChevronDown className="w-4 h-4 opacity-30" />

@@ -74,7 +74,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const resolvedParams = await params
     const slug = resolvedParams.slug
 
@@ -86,13 +86,24 @@ export async function GET(
       .from('products')
       .select(`
         *,
+        category_id,
+        subcategory_id,
         categories (id, name, slug),
         subcategories (id, name, slug),
         product_attributes (
           id,
           text_value,
-          attribute_definitions!inner (id, name, slug, type),
+          attribute_definitions!inner (id, name, slug, type, is_variant),
           attribute_options (id, value, hex_code, display_value)
+        ),
+        product_variants (
+          *,
+          product_variant_options (
+            attribute_id,
+            option_id,
+            attribute_definitions (name, slug),
+            attribute_options (value, hex_code)
+          )
         )
       `)
       .eq('slug', slug)
@@ -104,6 +115,19 @@ export async function GET(
       }
       throw error
     }
+
+    // --- RAW DEBUG TRACING START ---
+    console.log("DEBUG API RAW: Product found ID:", product.id)
+    console.log("DEBUG API RAW: Product variations array length:", product.product_variants?.length || 0)
+    
+    // Independent check: double-check product_variants table directly
+    const { count: variantCountDirect } = await supabase
+      .from('product_variants')
+      .select('*', { count: 'exact', head: true })
+      .eq('product_id', product.id)
+    
+    console.log("DEBUG API RAW: Independent variant count query for ID:", product.id, "RESULTS:", variantCountDirect)
+    // --- RAW DEBUG TRACING END ---
 
     // Get aggregated reviews for this product
     const { data: reviews, error: reviewsError } = await supabase
@@ -119,10 +143,32 @@ export async function GET(
 
     const rawAttributes = product.product_attributes as unknown as RawProductAttribute[]
 
+    // Process variants to be more usable
+    const formattedVariants = (product.product_variants || []).map((v: any) => {
+      const options = (v.product_variant_options || []).reduce((acc: any, pvo: any) => {
+        // Ensure definitions and options exist before accessing properties
+        const slug = pvo.attribute_definitions?.slug
+        const value = pvo.attribute_options?.value
+        
+        if (slug && value !== undefined) {
+          acc[slug] = value
+        }
+        return acc
+      }, {})
+
+      return {
+        ...v,
+        options
+      }
+    })
+
+    console.log(`DEBUG API: Product ${slug} fetched with ${formattedVariants.length} variants.`)
+
     // Process the raw product data to format attributes cleanly for the frontend
     const formattedProduct = {
       ...product,
       computed_rating: averageRating,
+      variants: formattedVariants,
       attributes: (rawAttributes || []).reduce<Record<string, FormattedAttribute>>((acc, pa) => {
         const attrDef = pa.attribute_definitions
         if (!attrDef) return acc
@@ -147,7 +193,8 @@ export async function GET(
     }
 
     // Clean up raw joining table arrays
-    delete (formattedProduct as typeof formattedProduct & { product_attributes?: unknown }).product_attributes
+    delete (formattedProduct as any).product_attributes
+    delete (formattedProduct as any).product_variants
 
     return NextResponse.json({ data: formattedProduct })
   } catch (error: unknown) {
@@ -171,64 +218,47 @@ export async function PUT(
     const slug = resolvedParams.slug
     const body = await request.json()
 
-    // Separate product_attributes from the core product fields
-    const { attributes, ...productFields } = body
+    // Separate attributes and variants from the core product fields
+    const { attributes, variants, ...productFields } = body
     let productId = ''
+
+    const existing = await supabase
+      .from('products')
+      .select('id')
+      .eq('slug', slug)
+      .single()
+
+    if (existing.error) {
+      if (existing.error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+      }
+      throw existing.error
+    }
+
+    productId = existing.data.id
 
     if (Object.keys(productFields).length > 0) {
       if (!productFields.title?.trim() || !productFields.slug?.trim()) {
         return NextResponse.json({ error: 'Title and slug are required.' }, { status: 400 })
       }
 
-      const existing = await supabase
-        .from('products')
-        .select('id')
-        .eq('slug', slug)
-        .single()
-
-      if (existing.error) {
-        if (existing.error.code === 'PGRST116') {
-          return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-        }
-        throw existing.error
-      }
-
       const uniquenessError = await ensureProductUniqueness(
         supabase,
         productFields.title,
         productFields.slug,
-        existing.data.id
+        productId
       )
       if (uniquenessError) {
         return NextResponse.json({ error: uniquenessError.error }, { status: 409 })
       }
 
       // 1. Update product core fields
-      const { data: product, error } = await supabase
+      const { error } = await supabase
         .from('products')
         .update(productFields)
-        .eq('slug', slug)
-        .select('id')
-        .single()
+        .eq('id', productId)
 
       if (error) throw error
-
-      productId = product.id
-    } else {
-      const existing = await supabase
-        .from('products')
-        .select('id')
-        .eq('slug', slug)
-        .single()
-
-      if (existing.error) {
-        if (existing.error.code === 'PGRST116') {
-          return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-        }
-        throw existing.error
-      }
-
-      productId = existing.data.id
     }
 
     // 2. Re-link attributes if provided
@@ -255,6 +285,54 @@ export async function PUT(
           .insert(attrRows)
 
         if (insertError) throw insertError
+      }
+    }
+
+    // 3. Sync Variants
+    if (variants && Array.isArray(variants)) {
+      // Delete existing variants (cascades to product_variant_options)
+      const { error: deleteVariantsError } = await supabase
+        .from('product_variants')
+        .delete()
+        .eq('product_id', productId)
+
+      if (deleteVariantsError) throw deleteVariantsError
+
+      for (const variant of variants) {
+        const { price, original_price, stock_count, sku, images, options } = variant
+        
+        // Insert variant
+        const { data: createdVariant, error: variantError } = await supabase
+          .from('product_variants')
+          .insert([{
+            product_id: productId,
+            price: price || null,
+            original_price: original_price || null,
+            stock_count: stock_count || 0,
+            sku: sku || null,
+            images: images || null
+          }])
+          .select()
+          .single()
+
+        if (variantError) throw variantError
+
+        // Insert variant options
+        if (variant.options && Array.isArray(variant.options)) {
+          const optionRows = variant.options.map((opt: { attribute_id: string; option_id: string }) => ({
+            variant_id: createdVariant.id,
+            attribute_id: opt.attribute_id,
+            option_id: opt.option_id
+          }))
+
+          if (optionRows.length > 0) {
+            const { error: variantOptionsError } = await supabase
+              .from('product_variant_options')
+              .insert(optionRows)
+
+            if (variantOptionsError) throw variantOptionsError
+          }
+        }
       }
     }
 

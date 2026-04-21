@@ -79,6 +79,26 @@ export interface ProductRow {
     created_at: string
 }
 
+export interface ProductVariantRow {
+    id: string
+    product_id: string
+    sku?: string
+    price?: number
+    original_price?: number
+    stock_count: number
+    images?: string[]
+    is_active: boolean
+    created_at: string
+    updated_at: string
+}
+
+export interface ProductVariantOptionRow {
+    id: string
+    variant_id: string
+    attribute_id: string
+    option_id: string
+}
+
 export interface ReviewRow {
     id: string
     product_id: string

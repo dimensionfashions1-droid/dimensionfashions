@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
+import { AttributeDefinitionRow, AttributeOptionRow } from '@/types'
 
 async function ensureAttributeUniqueness(
   supabase: Awaited<ReturnType<typeof createAdminClient>>,

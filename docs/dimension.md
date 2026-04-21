@@ -39,6 +39,11 @@ Supabase (PostgreSQL + Auth + Storage)
 
 ### 1. Product Management
 - **Generic Attribute System:** Allows flexible product types (Sarees, Footwear, etc.) without schema changes using a decoupled attribute-option model.
+- **Variable Products (Variants):** Support for unique combinations of attributes (e.g., Maroon-XL) with specific:
+    - **Price & Original Price overrides**
+    - **Inventory tracking (Stock Count)**
+    - **SKU management**
+    - **Variant-specific image galleries**
 - **Categorization:** Hierarchical organization via Categories and Subcategories.
 - **Search & Filters:** Full-text search and dynamic filtering based on product attributes.
 

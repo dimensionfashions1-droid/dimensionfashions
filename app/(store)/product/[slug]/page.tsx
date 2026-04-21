@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, use } from "react"
+import { useState, use, useEffect } from "react"
 import useSWR from "swr"
 import { ProductImageGallery } from "@/components/product/ProductImageGallery"
 import { ProductInfo } from "@/components/product/ProductInfo"
@@ -23,6 +23,17 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     const [quantity, setQuantity] = useState(1)
     const [selectedColor, setSelectedColor] = useState<string | undefined>()
     const [selectedSize, setSelectedSize] = useState<string | undefined>()
+
+    // Initialize selections
+    useEffect(() => {
+        if (response?.data) {
+            const p = response.data
+            const firstColor = p.attributes?.color?.values[0]?.value
+            const firstSize = p.attributes?.size?.values[0]?.value
+            if (firstColor && !selectedColor) setSelectedColor(firstColor)
+            if (firstSize && !selectedSize) setSelectedSize(firstSize)
+        }
+    }, [response, selectedColor, selectedSize])
 
     if (isLoading) {
         return (
@@ -47,19 +58,33 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
     const dbProduct = response.data
 
+    // ── Variant Selection Logic ──────────────────────────────────────
+    // 1. Find the active variant based on selectedColor and selectedSize
+    const activeVariant = dbProduct.variants?.find((v: any) => {
+        const colorMatch = !selectedColor || v.options.color === selectedColor
+        const sizeMatch = !selectedSize || v.options.size === selectedSize
+        return colorMatch && sizeMatch
+    })
+
+    // 2. Map values, prioritizing variant overrides
+    const displayPrice = activeVariant?.price || dbProduct.price
+    const displayOriginalPrice = activeVariant?.original_price || dbProduct.original_price
+    const displayStockCount = activeVariant ? activeVariant.stock_count : dbProduct.stock_count
+    const displayInStock = displayStockCount > 0
+
     // Map DB structure to Frontend Product interface
     const product: Product = {
         id: dbProduct.id,
         title: dbProduct.title,
-        price: dbProduct.price,
-        originalPrice: dbProduct.original_price,
+        price: displayPrice,
+        originalPrice: displayOriginalPrice,
         discount: dbProduct.discount,
         category: dbProduct.categories?.name || 'Collection',
         description: dbProduct.description,
-        images: dbProduct.images || [],
-        image: dbProduct.images?.[0] || '',
+        images: activeVariant?.images?.length ? activeVariant.images : (dbProduct.images || []),
+        image: activeVariant?.images?.[0] || dbProduct.images?.[0] || '',
         rating: dbProduct.computed_rating || 0,
-        inStock: dbProduct.stock_count > 0,
+        inStock: displayInStock,
         colors: dbProduct.attributes?.color?.values.map((v: any) => v.value) || [],
         sizes: dbProduct.attributes?.size?.values.map((v: any) => v.value) || [],
         slug: dbProduct.slug
@@ -68,9 +93,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     const addToCart = () => {
         console.log(`Added to cart:`, {
             productId: product.id,
+            variantId: activeVariant?.id,
             quantity,
-            color: selectedColor || product.colors?.[0],
-            size: selectedSize || product.sizes?.[0]
+            color: selectedColor,
+            size: selectedSize
         })
         // TODO: Implement actual cart logic with global state or API
     }

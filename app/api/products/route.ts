@@ -77,19 +77,35 @@ export async function GET(request: Request) {
 
     const supabase = await createClient()
 
+    if (category) {
+      // First find the category ID if slug is provided
+      const { data: catData } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('slug', category)
+        .single()
+      
+      if (catData) {
+        // Use the ID directly in the products query
+        // This is safer than inner join slug when we want left join behavior for non-filtered queries
+      }
+    }
+
     let query = supabase
       .from('products')
       .select(`
         *,
-        categories!inner(slug),
+        categories(slug),
         product_attributes(
-          attribute_definitions!inner(slug),
-          attribute_options!inner(value)
+          attribute_definitions(slug),
+          attribute_options(value)
         )
       `)
 
     if (category) {
-      query = query.eq('categories.slug', category)
+       // Re-fetch to get ID or just filter by joined slug (which requires inner join logic for that specific filter)
+       // Let's actually just use the eq on 'categories.slug' but without !inner in the main select
+       query = query.eq('categories.slug', category)
     }
 
     if (search) {
@@ -175,9 +191,14 @@ export async function GET(request: Request) {
         // Destructure to remove product_attributes and categories from the response
         const { product_attributes, categories, ...rest } = p
         
+        // Handle case where categories might be null or an object (due to left join)
+        const categorySlug = Array.isArray(categories) 
+          ? categories[0]?.slug 
+          : (categories as any)?.slug || 'uncategorized'
+
         return { 
           ...rest, 
-          category: categories?.slug,
+          category: categorySlug,
           // Extract an array of colors and sizes strictly for the frontend pill/filter display
           colors: product_attributes
             ?.filter((pa) => pa.attribute_definitions?.slug === 'color' && pa.attribute_options?.value)
@@ -219,25 +240,81 @@ export async function POST(request: Request) {
     const body = await request.json()
     const supabase = await createAdminClient()
 
-    if (!body.title?.trim() || !body.slug?.trim()) {
+    const { attributes, variants, ...productFields } = body
+
+    if (!productFields.title?.trim() || !productFields.slug?.trim()) {
       return NextResponse.json({ error: 'Title and slug are required.' }, { status: 400 })
     }
 
-    const uniquenessError = await ensureProductUniqueness(supabase, body.title, body.slug)
+    const uniquenessError = await ensureProductUniqueness(supabase, productFields.title, productFields.slug)
     if (uniquenessError) {
       return NextResponse.json({ error: uniquenessError.error }, { status: 409 })
     }
 
     // 2. Insert into products
-    const { data, error } = await supabase
+    const { data: product, error } = await supabase
       .from('products')
-      .insert([body]) // Expecting validated body from admin frontend
+      .insert([productFields])
       .select()
       .single()
 
     if (error) throw error
 
-    return NextResponse.json({ data, message: 'Product created successfully' })
+    const productId = product.id
+
+    // 3. Link attributes
+    if (attributes && Array.isArray(attributes) && attributes.length > 0) {
+      const attrRows = attributes.map((attr: any) => ({
+        product_id: productId,
+        attribute_id: attr.attribute_id,
+        option_id: attr.option_id || null,
+        text_value: attr.text_value || null,
+      }))
+
+      const { error: attrError } = await supabase
+        .from('product_attributes')
+        .insert(attrRows)
+
+      if (attrError) throw attrError
+    }
+
+    // 4. Create Variants
+    if (variants && Array.isArray(variants) && variants.length > 0) {
+      for (const variant of variants) {
+        const { price, original_price, stock_count, sku, images, options } = variant
+        
+        const { data: createdVariant, error: variantError } = await supabase
+          .from('product_variants')
+          .insert([{
+            product_id: productId,
+            price: price || null,
+            original_price: original_price || null,
+            stock_count: stock_count || 0,
+            sku: sku || null,
+            images: images || null
+          }])
+          .select()
+          .single()
+
+        if (variantError) throw variantError
+
+        if (options && Array.isArray(options) && options.length > 0) {
+          const optionRows = options.map((opt: any) => ({
+            variant_id: createdVariant.id,
+            attribute_id: opt.attribute_id,
+            option_id: opt.option_id
+          }))
+
+          const { error: variantOptionsError } = await supabase
+            .from('product_variant_options')
+            .insert(optionRows)
+
+          if (variantOptionsError) throw variantOptionsError
+        }
+      }
+    }
+
+    return NextResponse.json({ data: product, message: 'Product created successfully' })
   } catch (error: unknown) {
     console.error('API /products POST error:', error)
     const err = error as Error
