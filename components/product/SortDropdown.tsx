@@ -11,10 +11,6 @@ import {
 
 const sortOptions = [
     {
-        value: "featured",
-        label: "Featured",
-    },
-    {
         value: "newest",
         label: "Newest Arrivals",
     },
@@ -25,10 +21,6 @@ const sortOptions = [
     {
         value: "price-desc",
         label: "Price: High to Low",
-    },
-    {
-        value: "best-selling",
-        label: "Best Selling",
     },
 ]
 
@@ -45,7 +37,7 @@ export function SortDropdown({ onSortChange, currentSort }: SortDropdownProps) {
             </span>
             <Select value={currentSort} onValueChange={onSortChange}>
                 <SelectTrigger className="w-[180px] h-10 rounded-full border-gray-100 bg-gray-50/50 px-6 text-primary hover:bg-gray-100/50 transition-all duration-300 uppercase tracking-widest text-[10px] font-bold font-sans shadow-none focus:ring-0 focus:ring-offset-0">
-                    <SelectValue placeholder="Featured" />
+                    <SelectValue placeholder="Newest Arrivals" />
                 </SelectTrigger>
                 <SelectContent 
                     className="rounded-xl border-gray-100 bg-white shadow-xl p-0 min-w-[200px] overflow-hidden"

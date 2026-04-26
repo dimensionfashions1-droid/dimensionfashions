@@ -5,12 +5,13 @@ import { login } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowRight, Lock, Loader2 } from 'lucide-react'
+import { ArrowRight, Lock, Loader2, Eye, EyeOff } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 
 export default function AdminLoginPage() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -27,8 +28,8 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
-      <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50/50">
+      <div className="max-w-md w-full p-8 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-zinc-200">
         <div className="flex justify-center mb-8">
           <div className="h-12 w-12 bg-black rounded-xl flex items-center justify-center">
             <Lock className="text-white h-5 w-5" />
@@ -40,7 +41,7 @@ export default function AdminLoginPage() {
             Admin Portal
           </h1>
           <p className="text-sm text-gray-500">
-            Secure login for Dimensions staff only.
+            Secure login for Dimension staff only.
           </p>
         </div>
 
@@ -51,9 +52,9 @@ export default function AdminLoginPage() {
               id="email" 
               name="email" 
               type="email" 
-              placeholder="admin@dimensions.in" 
+              placeholder="admin@dimension.in" 
               required 
-              className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60 transition-all"
+              className="h-11 rounded-xl border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-500 focus-visible:border-zinc-400 focus-visible:ring-zinc-400/20 transition-all"
             />
           </div>
 
@@ -61,13 +62,22 @@ export default function AdminLoginPage() {
             <div className="flex items-center justify-between">
               <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
             </div>
-            <Input 
-              id="password" 
-              name="password" 
-              type="password" 
-              required 
-              className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60 transition-all"
-            />
+            <div className="relative">
+              <Input 
+                id="password" 
+                name="password" 
+                type={showPassword ? "text" : "password"} 
+                required 
+                className="h-11 rounded-xl border-zinc-200 bg-zinc-50 text-zinc-900 pr-10 focus-visible:border-zinc-400 focus-visible:ring-zinc-400/20 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
 
           <Button disabled={isLoading} type="submit" className="w-full h-11 text-base font-medium rounded-md shadow-sm bg-black hover:bg-gray-900 transition-all group">

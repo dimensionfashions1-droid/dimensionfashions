@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import ProfileTabs from "@/components/profile/ProfileTabs"
 
 export const metadata = {
-  title: "My Profile | Dimensions",
+  title: "My Profile | Dimension",
 }
 
 export default async function ProfilePage() {

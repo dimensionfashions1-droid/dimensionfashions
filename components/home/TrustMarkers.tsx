@@ -1,25 +1,25 @@
 import { Truck, ShieldCheck, CreditCard, RotateCcw } from "lucide-react"
 
 const MARKERS = [
-    { 
-        icon: <Truck className="w-6 h-6" />, 
-        title: "Global Delivery", 
-        desc: "Shipping to over 200 countries" 
+    {
+        icon: <Truck className="w-6 h-6" />,
+        title: "Quick Delivery",
+        desc: "Fast and reliable delivery all over India"
     },
-    { 
-        icon: <ShieldCheck className="w-6 h-6" />, 
-        title: "100% Authentic", 
-        desc: "Directly from top designers" 
+    {
+        icon: <ShieldCheck className="w-6 h-6" />,
+        title: "100% Authentic",
+        desc: "Directly from top designers"
     },
-    { 
-        icon: <RotateCcw className="w-6 h-6" />, 
-        title: "Easy Returns", 
-        desc: "Hassle-free 7-day returns" 
+    {
+        icon: <RotateCcw className="w-6 h-6" />,
+        title: "Easy Returns",
+        desc: "Hassle-free 7-day returns"
     },
-    { 
-        icon: <CreditCard className="w-6 h-6" />, 
-        title: "Secure Payments", 
-        desc: "UPI, Cards, Netbanking" 
+    {
+        icon: <CreditCard className="w-6 h-6" />,
+        title: "Secure Payments",
+        desc: "UPI, Cards, Netbanking"
     }
 ]
 

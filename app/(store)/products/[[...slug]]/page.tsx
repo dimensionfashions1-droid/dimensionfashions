@@ -14,17 +14,28 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 
-import { useState } from "react"
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useSearchParams, useRouter, usePathname, useParams } from "next/navigation"
 import useSWR from "swr"
 import { useDebounce } from "use-debounce"
 import { ProductRow, Product } from "@/types"
 
 // Frontend-friendly Product interface extending the DB row
-interface FilteredProduct extends Omit<ProductRow, 'category_id' | 'subcategory_id'> {
+interface FilteredProduct {
+    id: string
+    title: string
+    price: number
+    originalPrice?: number
     category?: string
+    image?: string
     colors?: string[]
     sizes?: string[]
+    hasVariants?: boolean
+    inStock?: boolean
+    slug: string
+    rating?: number
+    reviews_count?: number
+    description?: string
 }
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
@@ -33,14 +44,38 @@ export default function ProductsPage() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const pathname = usePathname()
+    const params = useParams()
+    
+    // Extract category and subcategory from slug: /products/[[...slug]]
+    const slug = params.slug as string[] | undefined
+    const categoryFromUrl = slug?.[0] || null
+    const subcategoryFromUrl = slug?.[1] || null
 
-    const [sort, setSort] = useState(searchParams.get("sort") || "featured")
+    const [sort, setSort] = useState(searchParams.get("sort") || "newest")
     const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1)
 
     // Filter State
     const [selectedCategories, setSelectedCategories] = useState<string[]>(
-        searchParams.get("category") ? [searchParams.get("category") as string] : []
+        categoryFromUrl ? [categoryFromUrl] : []
     )
+    const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
+        subcategoryFromUrl ? [subcategoryFromUrl] : []
+    )
+
+    // Sync state if URL changes (e.g. back button or direct link)
+    useEffect(() => {
+        if (categoryFromUrl) {
+            setSelectedCategories([categoryFromUrl])
+        } else {
+            setSelectedCategories([])
+        }
+        
+        if (subcategoryFromUrl) {
+            setSelectedSubcategories([subcategoryFromUrl])
+        } else {
+            setSelectedSubcategories([])
+        }
+    }, [categoryFromUrl, subcategoryFromUrl])
     const [selectedSizes, setSelectedSizes] = useState<string[]>([])
     const [selectedColors, setSelectedColors] = useState<string[]>([])
     const [priceRange, setPriceRange] = useState([0, 100000])
@@ -56,6 +91,9 @@ export default function ProductsPage() {
     if (searchString) queryString.append("search", searchString)
     if (selectedCategories.length > 0 && !selectedCategories.includes("all")) {
         queryString.append("category", selectedCategories[0])
+    }
+    if (selectedSubcategories.length > 0) {
+        queryString.append("subcategory", selectedSubcategories[0])
     }
     if (selectedSizes.length > 0) queryString.append("sizes", selectedSizes.join(","))
     if (selectedColors.length > 0) queryString.append("colors", selectedColors.join(","))
@@ -76,24 +114,31 @@ export default function ProductsPage() {
         title: p.title,
         price: p.price,
         category: p.category || '',
-        image: p.images?.[0] || '', // grab first array item safely
+        image: p.image || '', // API now returns 'image' directly
         colors: p.colors || [],
-        discount: p.discount || 0,
         rating: p.rating || 0,
         reviews: p.reviews_count || 0,
-        inStock: p.is_in_stock ?? true,
+        inStock: p.inStock ?? true,
         description: p.description || '',
         sizes: p.sizes || [],
-        featured: p.is_featured || false,
         slug: p.slug,
-        originalPrice: p.original_price,
+        originalPrice: p.originalPrice,
+        hasVariants: p.hasVariants
     }))
 
     const totalPages = meta?.totalPages || 1
 
     const filterProps = {
         selectedCategories,
-        setSelectedCategories,
+        setSelectedCategories: (categories: string[]) => {
+            // When category changes in sidebar, navigate to new dynamic path
+            const newCat = categories[0]
+            if (newCat && newCat !== "all") {
+                router.push(`/products/${newCat}`)
+            } else {
+                router.push(`/products`)
+            }
+        },
         selectedSizes,
         setSelectedSizes,
         selectedColors,
@@ -118,9 +163,25 @@ export default function ProductsPage() {
                             </BreadcrumbItem>
                             <BreadcrumbSeparator className="text-accent/40" />
                             <BreadcrumbItem>
-                                <BreadcrumbPage className="uppercase text-[10px] tracking-[0.2em] font-bold text-primary font-sans">Products</BreadcrumbPage>
+                                <BreadcrumbLink href="/products" className="uppercase text-[10px] tracking-[0.2em] font-bold text-primary font-sans">Products</BreadcrumbLink>
                             </BreadcrumbItem>
-                        </BreadcrumbList>
+                            {categoryFromUrl && (
+                                <>
+                                    <BreadcrumbSeparator className="text-accent/40" />
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink href={`/products/${categoryFromUrl}`} className="uppercase text-[10px] tracking-[0.2em] font-bold text-primary font-sans">{categoryFromUrl}</BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                </>
+                            )}
+                            {subcategoryFromUrl && (
+                                <>
+                                    <BreadcrumbSeparator className="text-accent/40" />
+                                    <BreadcrumbItem>
+                                        <BreadcrumbPage className="uppercase text-[10px] tracking-[0.2em] font-bold text-primary font-sans">{subcategoryFromUrl}</BreadcrumbPage>
+                                    </BreadcrumbItem>
+                                </>
+                            )}
+                            </BreadcrumbList>
                     </Breadcrumb>
 
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
@@ -155,7 +216,7 @@ export default function ProductsPage() {
                         ) : (
                             <>
                                 <div className="mb-8 text-[11px] text-primary uppercase tracking-[0.2em] font-sans font-bold opacity-80">
-                                    Showing {products.length} of {meta?.total || 0} contemporary pieces
+                                    Showing {products.length} of {meta?.total || 0} exquisite pieces
                                 </div>
 
                                 {products.length > 0 ? (

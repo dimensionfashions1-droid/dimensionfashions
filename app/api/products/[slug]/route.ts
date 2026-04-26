@@ -116,6 +116,14 @@ export async function GET(
       throw error
     }
 
+    // Security: If product is draft, only allow admins
+    if (product.status === 'draft') {
+      const adminCheck = await requireAdmin()
+      if (adminCheck) {
+        return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+      }
+    }
+
     // --- RAW DEBUG TRACING START ---
     console.log("DEBUG API RAW: Product found ID:", product.id)
     console.log("DEBUG API RAW: Product variations array length:", product.product_variants?.length || 0)
@@ -146,12 +154,17 @@ export async function GET(
     // Process variants to be more usable
     const formattedVariants = (product.product_variants || []).map((v: any) => {
       const options = (v.product_variant_options || []).reduce((acc: any, pvo: any) => {
-        // Ensure definitions and options exist before accessing properties
         const slug = pvo.attribute_definitions?.slug
         const value = pvo.attribute_options?.value
+        const optionId = pvo.option_id
+        const attributeId = pvo.attribute_id
         
         if (slug && value !== undefined) {
-          acc[slug] = value
+          acc[slug] = {
+            value,
+            option_id: optionId,
+            attribute_id: attributeId
+          }
         }
         return acc
       }, {})
@@ -290,48 +303,76 @@ export async function PUT(
 
     // 3. Sync Variants
     if (variants && Array.isArray(variants)) {
-      // Delete existing variants (cascades to product_variant_options)
-      const { error: deleteVariantsError } = await supabase
+      // Fetch existing variants to compare
+      const { data: existingVariants, error: fetchVariantsError } = await supabase
         .from('product_variants')
-        .delete()
+        .select('*, product_variant_options(*)')
         .eq('product_id', productId)
 
-      if (deleteVariantsError) throw deleteVariantsError
+      if (fetchVariantsError) throw fetchVariantsError
 
-      for (const variant of variants) {
-        const { price, original_price, stock_count, sku, images, options } = variant
-        
-        // Insert variant
-        const { data: createdVariant, error: variantError } = await supabase
+      const existingVariantIds = existingVariants.map(v => v.id)
+      const incomingVariantIds = variants.filter(v => v.id && !v.id.startsWith('temp-')).map(v => v.id)
+
+      // a. Delete variants that are no longer present
+      const variantsToDelete = existingVariantIds.filter(id => !incomingVariantIds.includes(id))
+      if (variantsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
           .from('product_variants')
-          .insert([{
-            product_id: productId,
-            price: price || null,
-            original_price: original_price || null,
-            stock_count: stock_count || 0,
-            sku: sku || null,
-            images: images || null
-          }])
-          .select()
-          .single()
+          .delete()
+          .in('id', variantsToDelete)
+        if (deleteError) throw deleteError
+      }
 
-        if (variantError) throw variantError
+      // b. Update or Insert variants
+      for (const variant of variants) {
+        const { id, price, original_price, stock_count, sku, images, options } = variant
+        const isNew = !id || id.startsWith('temp-')
 
-        // Insert variant options
-        if (variant.options && Array.isArray(variant.options)) {
-          const optionRows = variant.options.map((opt: { attribute_id: string; option_id: string }) => ({
-            variant_id: createdVariant.id,
+        let variantId = id
+
+        const variantData = {
+          product_id: productId,
+          price: price ? Number(price) : null,
+          original_price: original_price ? Number(original_price) : null,
+          stock_count: Number(stock_count) || 0,
+          sku: sku || null,
+          images: images || null
+        }
+
+        if (isNew) {
+          const { data: newV, error: insError } = await supabase
+            .from('product_variants')
+            .insert([variantData])
+            .select()
+            .single()
+          if (insError) throw insError
+          variantId = newV.id
+        } else {
+          const { error: updError } = await supabase
+            .from('product_variants')
+            .update(variantData)
+            .eq('id', variantId)
+          if (updError) throw updError
+        }
+
+        // c. Sync variant options (simpler to delete and re-insert for the specific variant)
+        const { error: delOptError } = await supabase
+          .from('product_variant_options')
+          .delete()
+          .eq('variant_id', variantId)
+        if (delOptError) throw delOptError
+
+        if (options && Array.isArray(options) && options.length > 0) {
+          const optionRows = options.map((opt: any) => ({
+            variant_id: variantId,
             attribute_id: opt.attribute_id,
             option_id: opt.option_id
           }))
-
-          if (optionRows.length > 0) {
-            const { error: variantOptionsError } = await supabase
-              .from('product_variant_options')
-              .insert(optionRows)
-
-            if (variantOptionsError) throw variantOptionsError
-          }
+          const { error: insOptError } = await supabase
+            .from('product_variant_options')
+            .insert(optionRows)
+          if (insOptError) throw insOptError
         }
       }
     }

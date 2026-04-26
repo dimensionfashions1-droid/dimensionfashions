@@ -85,7 +85,7 @@ export function CategoryCircles() {
                                 key={`circle_${cat.id}`}
                                 className="pl-3 md:pl-4 basis-1/4 md:basis-[12.5%]"
                             >
-                                <Link href={`/products?category=${cat.slug}`} className="group flex flex-col items-center gap-3">
+                                <Link href={`/products/${cat.slug}`} className="group flex flex-col items-center gap-3">
                                     <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden border border-gray-100 transition-all duration-500 group-hover:shadow-lg group-hover:scale-105 group-hover:border-accent/30 bg-white">
                                         {cat.image_url ? (
                                             <Image
@@ -93,6 +93,7 @@ export function CategoryCircles() {
                                                 alt={cat.name}
                                                 fill
                                                 className="object-cover transition-all duration-700"
+                                                unoptimized
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">No Image</div>

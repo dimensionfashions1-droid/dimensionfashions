@@ -45,8 +45,8 @@ INSERT INTO public.site_settings (key, value, description) VALUES
 ('flat_shipping_rate', '99', 'Standard shipping cost'),
 ('cod_extra_charge', '49', 'Extra fee for COD'),
 ('return_days', '7', 'Number of days to return products'),
-('store_email', 'hello@dimensions.in', 'Contact email shown in footer'),
+('store_email', 'hello@dimension.in', 'Contact email shown in footer'),
 ('store_phone', '+91 98765 43210', 'Contact phone shown in footer'),
-('instagram_url', 'https://instagram.com/dimensions', 'Instagram URL'),
-('facebook_url', 'https://facebook.com/dimensions', 'Facebook URL')
+('instagram_url', 'https://instagram.com/dimension', 'Instagram URL'),
+('facebook_url', 'https://facebook.com/dimension', 'Facebook URL')
 ON CONFLICT (key) DO NOTHING;

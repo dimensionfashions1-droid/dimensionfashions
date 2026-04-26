@@ -10,77 +10,37 @@ import { IntroSection } from "@/components/home/IntroSection"
 import { OfferBanner } from "@/components/home/OfferBanner"
 import { CtaSection } from "@/components/home/CtaSection"
 
-export default function Home() {
-    const products = [
-        {
-            id: "1",
-            title: "Midnight Bloom Kanjivaram",
-            price: 18499,
-            category: "Sarees",
-            image: "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600"
-        },
-        {
-            id: "2",
-            title: "Zari Weave Lehenga",
-            price: 24999,
-            category: "Lehengas",
-            image: "https://www.sourcesplash.com/i/random?q=lehenga,indian-wedding,bridal&w=1200&h=1600"
-        },
-        {
-            id: "3",
-            title: "Pastel Kurta Set",
-            price: 4999,
-            category: "Kurta Sets",
-            image: "https://www.sourcesplash.com/i/random?q=kurti,set,indian-fashion&w=1200&h=1600"
-        },
-        {
-            id: "4",
-            title: "Floral Summer Dress",
-            price: 2999,
-            category: "Dresses",
-            image: "https://www.sourcesplash.com/i/random?q=women-dress,floral,fashion&w=1200&h=1600"
-        },
-        {
-            id: "5",
-            title: "Chic Co-ord Set",
-            price: 3999,
-            category: "Co-ords",
-            image: "https://www.sourcesplash.com/i/random?q=co-ord,set,women-fashion&w=1200&h=1600"
-        },
-        {
-            id: "6",
-            title: "Evening Glam Gown",
-            price: 8999,
-            category: "Gowns",
-            image: "https://www.sourcesplash.com/i/random?q=evening-gown,party,model&w=1200&h=1600"
-        },
-        {
-            id: "7",
-            title: "Minimal Cotton Top",
-            price: 1499,
-            category: "Tops",
-            image: "https://www.sourcesplash.com/i/random?q=women-top,minimal,fashion&w=1200&h=1600"
-        },
-        {
-            id: "8",
-            title: "Soft Lounge Set",
-            price: 1999,
-            category: "Loungewear",
-            image: "https://www.sourcesplash.com/i/random?q=loungewear,women,homewear&w=1200&h=1600"
+export default async function Home() {
+    let initialCategories: { name: string, slug: string }[] = [];
+    let initialProducts: any[] = [];
+
+    try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ||
+            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+
+        const res = await fetch(`${appUrl}/api/home/products`, { next: { revalidate: 3600 } });
+
+        if (res.ok) {
+            const json = await res.json();
+            if (json.data) {
+                initialCategories = json.data.categories || [];
+                initialProducts = json.data.products || [];
+            }
         }
-    ];
+    } catch (error) {
+        console.error("Failed to fetch data for home page:", error);
+    }
 
     return (
         <main className="bg-white">
             <HeroCarousel />
             <CategoryCircles />
-            <TrendingTabs products={products} />
+            <TrendingTabs initialCategories={initialCategories} initialProducts={initialProducts} />
             <MarqueeSection />
             <EditorialGrid />
             <FeaturedDrop />
             <IntroSection />
             <OfferBanner />
-            <CtaSection />
             <TrustMarkers />
         </main>
     )

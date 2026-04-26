@@ -12,11 +12,11 @@ export function FeaturedDrop() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 lg:gap-32 items-center">
 
                     {/* Visual */}
-                    <div className="lg:col-span-6 relative aspect-[3/4] w-full max-w-lg mx-auto lg:mx-0 group">
+                    <div className="lg:col-span-6 relative aspect-[4/4] w-full max-w-lg mx-auto lg:mx-0 group">
                         <div className="relative w-full h-full overflow-hidden shadow-2xl">
                             <Image
-                                src="https://www.sourcesplash.com/i/random?q=indian-dress&w=800&h=1200"
-                                alt="Contemporary Dresses Collection"
+                                src="/images/contemprory.jpg"
+                                alt="Premium Dresses Collection"
                                 fill
                                 className="object-cover transition-transform duration-[2000ms] group-hover:scale-110"
                             />
@@ -32,15 +32,15 @@ export function FeaturedDrop() {
                         <div className="space-y-8">
                             <div className="flex flex-col text-left space-y-3">
                                 <span className="text-[10px] text-accent uppercase tracking-[0.4em] font-sans font-bold">
-                                    The Summer Edit
+                                    The Western Edit
                                 </span>
                                 <h2 className="font-heading font-normal text-3xl md:text-4xl text-primary tracking-tight">
-                                    Contemporary <span>Dresses</span>
+                                    Modern <span>Collection</span>
                                 </h2>
                             </div>
 
                             <p className="font-sans text-primary/60 text-sm md:text-base max-w-md leading-relaxed tracking-wide pt-2">
-                                Step into effortless grace with our meticulously crafted dresses. Designed with flowing silhouettes, premium fabrics, and modern cuts for the contemporary wardrobe. From breezy daytime midis to elegant evening maxis, find your perfect fit.
+                                Step into effortless grace with our meticulously crafted western collection. Designed with sharp silhouettes, premium fabrics, and modern cuts for the modern wardrobe. From breezy daytime tops to elegant evening dresses, find your perfect fit.
                             </p>
                         </div>
 
@@ -51,15 +51,7 @@ export function FeaturedDrop() {
                             >
                                 Shop Dresses
                             </Link>
-                            <Link
-                                href="/lookbook"
-                                className="group inline-flex items-center gap-4 text-[10px] font-sans font-bold uppercase tracking-[0.3em] text-primary transition-all hover:text-accent"
-                            >
-                                <span className="border-b border-primary/20 pb-1 group-hover:border-accent transition-colors">
-                                    Explore Lookbook
-                                </span>
-                                <ArrowRight className="w-4 h-4 translate-x-0 transition-transform duration-500 group-hover:translate-x-1" />
-                            </Link>
+
                         </div>
                     </div>
 

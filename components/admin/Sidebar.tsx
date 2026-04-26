@@ -11,7 +11,8 @@ import {
   Settings, 
   Users,
   LogOut,
-  Store
+  Store,
+  MonitorPlay
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Products', href: '/admin/products', icon: Package },
+  { name: 'Banners', href: '/admin/banners', icon: MonitorPlay },
   { name: 'Categories', href: '/admin/categories', icon: Tags },
   { name: 'Attributes', href: '/admin/attributes', icon: SlidersHorizontal },
   { name: 'Orders', href: '/admin/orders', icon: ClipboardList },

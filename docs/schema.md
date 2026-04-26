@@ -1,6 +1,6 @@
-# Database Schema: Dimensions
+# Database Schema: Dimension
 
-Complete PostgreSQL schema for the Dimensions e-commerce platform (Supabase).
+Complete PostgreSQL schema for the Dimension e-commerce platform (Supabase).
 
 ## 🛠️ Extensions & Enums
 
@@ -312,8 +312,7 @@ CREATE TYPE attribute_type AS ENUM ('select', 'multi_select', 'text', 'color');
 | `title` | `text` | `NOT NULL` | e.g., 'Ethnic Elegance' |
 | `subtitle` | `text` | | e.g., 'Graceful festive charm' |
 | `image_url` | `text` | `NOT NULL` | Banner image |
-| `link_url` | `text` | | CTA destination |
-| `placement` | `text` | `NOT NULL` | 'hero', 'promo', 'sale' |
+| `link_url` | `text` | | Destination link |
 | `display_order` | `int` | `DEFAULT 0` | Sort order |
 | `is_active` | `boolean` | `DEFAULT true` | |
 | `starts_at` | `timestamptz` | | Schedule start |
@@ -342,10 +341,10 @@ CREATE TYPE attribute_type AS ENUM ('select', 'multi_select', 'text', 'color');
 | `flat_shipping_rate` | `99` | Flat shipping charge (₹) |
 | `cod_extra_charge` | `49` | Extra charge for COD orders (₹) |
 | `return_days` | `7` | Return window in days |
-| `store_email` | `hello@dimensions.in` | Contact email |
+| `store_email` | `hello@dimension.in` | Contact email |
 | `store_phone` | `+91 98765 43210` | Contact phone |
-| `instagram_url` | `https://instagram.com/dimensions` | Social link |
-| `facebook_url` | `https://facebook.com/dimensions` | Social link |
+| `instagram_url` | `https://instagram.com/dimension` | Social link |
+| `facebook_url` | `https://facebook.com/dimension` | Social link |
 
 ---
 

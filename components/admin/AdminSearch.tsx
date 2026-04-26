@@ -23,7 +23,7 @@ export function AdminSearch({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 rounded-xl border-zinc-800 bg-zinc-950/80 pl-10 text-zinc-100 placeholder:text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60"
+        className="h-11 rounded-xl border-zinc-800 bg-zinc-950 pl-10 text-zinc-100 placeholder:text-zinc-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60"
       />
     </div>
   )

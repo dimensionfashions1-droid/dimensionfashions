@@ -1,6 +1,6 @@
 import { createAdminClient } from './server'
 
-const BUCKET_NAME = 'Dimensions'
+const BUCKET_NAME = 'Dimension'
 
 export async function uploadImage(file: File, folder: string = 'products'): Promise<string> {
   const supabase = await createAdminClient()
@@ -33,7 +33,7 @@ export async function deleteImage(publicUrl: string): Promise<boolean> {
   const supabase = await createAdminClient()
 
   // Extract the relative path from the public URL
-  // The URL format is roughly: https://<project_id>.supabase.co/storage/v1/object/public/Dimensions/products/filename.jpg
+  // The URL format is roughly: https://<project_id>.supabase.co/storage/v1/object/public/Dimension/products/filename.jpg
   // So we extract everything after the bucket name
   try {
     const urlParts = publicUrl.split(`/public/${BUCKET_NAME}/`)

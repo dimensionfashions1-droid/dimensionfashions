@@ -21,8 +21,8 @@ const montserrat = Montserrat({
 })
 
 export const metadata: Metadata = {
-  title: "DIMENSIONS | Premium Women's Wear",
-  description: "A curated collection of contemporary and ethnic women's wear designed for elegance and comfort.",
+  title: "DIMENSION | Premium Women's Wear",
+  description: "A curated collection of premium and ethnic women's wear designed for elegance and comfort.",
   generator: "Next.js",
 }
 

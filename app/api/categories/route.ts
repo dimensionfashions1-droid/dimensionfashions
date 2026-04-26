@@ -33,7 +33,6 @@ async function ensureCategoryUniqueness(
 
   if (duplicate) {
     const isNameDuplicate = duplicate.name?.trim().toLowerCase() === loweredName
-    const isSlugDuplicate = duplicate.slug?.trim().toLowerCase() === loweredSlug
 
     return {
       error: `A category with this ${isNameDuplicate ? 'name' : 'slug'} already exists.`,

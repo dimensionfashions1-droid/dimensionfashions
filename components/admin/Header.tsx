@@ -31,7 +31,7 @@ export function Header() {
     <header className="fixed top-0 inset-x-0 h-16 bg-zinc-950 border-b border-zinc-800 z-50 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
       <div className="flex items-center gap-2">
         <span className="text-xl font-bold tracking-tight text-white flex items-center gap-2 font-serif">
-          DIMENSIONS
+          DIMENSION
           <span className="text-[10px] uppercase font-sans tracking-widest bg-zinc-800 px-2 py-0.5 rounded text-zinc-300 ml-2">Admin</span>
         </span>
       </div>

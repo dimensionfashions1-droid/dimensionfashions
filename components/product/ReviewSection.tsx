@@ -30,7 +30,7 @@ const MOCK_REVIEWS = [
         rating: 5,
         date: "2 months ago",
         title: "Worth every penny",
-        content: "Dimensions never disappoints. This is my third purchase and the quality is consistent. comfortable and stylish.",
+        content: "Dimension never disappoints. This is my third purchase and the quality is consistent. comfortable and stylish.",
         helpful: 24
     }
 ]

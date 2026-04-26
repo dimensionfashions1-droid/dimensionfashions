@@ -1,6 +1,6 @@
-# Project Analysis: Dimensions
+# Project Analysis: Dimension
 
-Dimensions is a low-budget, scalable eCommerce platform designed specifically for a Women's Wear business operating within India. The project prioritizes speed of development, cost-efficiency (leveraging free tiers), and a clean, maintainable full-stack architecture.
+Dimension is a low-budget, scalable eCommerce platform designed specifically for a Women's Wear business operating within India. The project prioritizes speed of development, cost-efficiency (leveraging free tiers), and a clean, maintainable full-stack architecture.
 
 ## 🏗️ Architecture
 

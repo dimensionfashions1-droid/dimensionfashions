@@ -34,7 +34,6 @@ export function RelatedProducts({ currentProductId, categorySlug }: RelatedProdu
             image: p.images?.[0] || '',
             slug: p.slug,
             rating: p.rating,
-            discount: p.discount,
         }))
 
     if (products.length === 0) return null

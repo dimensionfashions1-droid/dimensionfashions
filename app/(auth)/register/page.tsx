@@ -46,7 +46,7 @@ export default function StoreRegisterPage() {
                 <div className="space-y-3">
                   <h1 className="text-3xl font-light tracking-tight text-gray-900">Check your email</h1>
                   <p className="text-gray-500 text-sm font-light leading-relaxed">
-                    We've sent a confirmation link to your inbox. Please click the link to activate your account and start your journey with Dimensions.
+                    We've sent a confirmation link to your inbox. Please click the link to activate your account and start your journey with Dimension.
                   </p>
                 </div>
                 <div className="pt-6 border-t border-gray-100 flex flex-col gap-4">
@@ -149,7 +149,7 @@ export default function StoreRegisterPage() {
         <div className="hidden lg:flex lg:w-1/2 relative bg-gray-100">
           <Image
             src="/images/auth-banner2.jpg"
-            alt="Dimensions Collection"
+            alt="Dimension Collection"
             fill
             className="object-cover"
             priority

@@ -3,37 +3,50 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-const LATEST_ARRIVALS = [
-    {
-        title: "Midnight Silk Kanjivaram",
-        tag: "Sarees",
-        image: "https://www.sourcesplash.com/i/random?q=indian-model&w=1200&h=800",
-        href: "/product/midnight-silk",
-        className: "md:col-span-4 md:row-span-2 h-[500px] md:h-full"
-    },
-    {
-        title: "Crimson Bridal Velvet",
-        tag: "Lehengas",
-        image: "https://www.sourcesplash.com/i/random?q=lehenga&w=1200&h=400",
-        href: "/product/crimson-velvet",
-        className: "md:col-span-8 h-[240px] md:h-[300px]"
-    },
-    {
-        title: "Pastel Kurta Set",
-        tag: "Kurta Sets",
-        image: "https://www.sourcesplash.com/i/random?q=kurti,woman&w=600&h=400",
-        href: "/product/pastel-kurta",
-        className: "md:col-span-4 h-[240px] md:h-[276px]"
-    },
-    {
-        title: "Emerald Drape Gown",
-        tag: "Gowns",
-        image: "https://www.sourcesplash.com/i/random?q=gowns,&w=600&h=400",
-        href: "/product/emerald-gown",
-        className: "md:col-span-4 h-[240px] md:h-[276px]"
-    }
-];
+import { useState, useEffect } from "react"
+import { Product } from "@/types"
+
+const GRID_LAYOUTS: Record<number, string[]> = {
+    1: ["md:col-span-12 h-[500px]"],
+    2: ["md:col-span-8 h-[500px]", "md:col-span-4 h-[500px]"],
+    3: ["md:col-span-6 md:row-span-2 h-[500px] md:h-full", "md:col-span-6 h-[240px]", "md:col-span-6 h-[240px]"],
+    4: ["md:col-span-4 md:row-span-2 h-[500px] md:h-full", "md:col-span-8 h-[240px] md:h-[300px]", "md:col-span-4 h-[240px] md:h-[276px]", "md:col-span-4 h-[240px] md:h-[276px]"],
+    5: ["md:col-span-4 md:row-span-2 h-[500px] md:h-full", "md:col-span-4 h-[240px]", "md:col-span-4 h-[240px]", "md:col-span-4 h-[240px]", "md:col-span-4 h-[240px]"]
+};
+
 export function EditorialGrid() {
+    const [products, setProducts] = useState<Product[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchLatest = async () => {
+            try {
+                const res = await fetch('/api/products?limit=5&sort=newest')
+                const data = await res.json()
+                if (data.data) {
+                    setProducts(data.data)
+                }
+            } catch (error) {
+                console.error("Error fetching editorial products:", error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchLatest()
+    }, [])
+
+    if (loading) {
+        return (
+            <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        )
+    }
+
+    if (products.length === 0) return null
+
+    const layout = GRID_LAYOUTS[products.length] || GRID_LAYOUTS[4]
+
     return (
         <section className="py-8 md:py-15 bg-accent/10">
             <div className="max-w-[1280px] mx-auto px-4">
@@ -48,18 +61,19 @@ export function EditorialGrid() {
                 </div>
 
                 {/* Asymmetric Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[600px]">
-                    {LATEST_ARRIVALS.map((item, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:min-h-[600px]">
+                    {products.map((item, index) => (
                         <Link
-                            key={item.title}
-                            href={item.href}
-                            className={`group relative overflow-hidden rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-700 ${item.className}`}
+                            key={item.id}
+                            href={`/product/${item.slug}`}
+                            className={`group relative overflow-hidden rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-700 ${layout[index]}`}
                         >
                             <Image
                                 src={item.image}
                                 alt={item.title}
                                 fill
                                 className="object-cover transition-transform duration-[2000ms] group-hover:scale-105"
+                                unoptimized
                             />
 
                             {/* Gradient Overlay */}
@@ -69,11 +83,14 @@ export function EditorialGrid() {
                             <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white">
                                 <div className="space-y-1">
                                     <span className="text-[10px] text-accent font-sans font-bold uppercase tracking-[0.2em] block mb-2">
-                                        {item.tag}
+                                        {item.category}
                                     </span>
-                                    <h3 className={`font-heading ${index === 0 ? "text-3xl md:text-5xl" : "text-2xl md:text-3xl"} leading-tight`}>
+                                    <h3 className={`font-heading ${index === 0 ? "text-2xl md:text-4xl" : "text-xl md:text-2xl"} leading-tight line-clamp-2`}>
                                         {item.title}
                                     </h3>
+                                    <p className="text-[12px] font-sans font-bold text-white/80 tracking-widest mt-2">
+                                        ₹{item.price.toLocaleString("en-IN")}
+                                    </p>
                                 </div>
                             </div>
 
@@ -86,7 +103,7 @@ export function EditorialGrid() {
                 {/* View More Button */}
                 <div className="mt-14 flex justify-center">
                     <Link
-                        href="/products/new"
+                        href="/products"
                         className="group inline-flex items-center gap-4 text-primary text-[10px] font-sans font-bold uppercase tracking-[0.3em] transition-all hover:text-accent"
                     >
                         <span className="border-b border-primary/20 pb-1 group-hover:border-accent transition-colors">

@@ -87,12 +87,10 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [originalPrice, setOriginalPrice] = useState("")
-  const [discount, setDiscount] = useState("")
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined)
   const [subcategoryId, setSubcategoryId] = useState<string | undefined>(undefined)
   const [stockCount, setStockCount] = useState("0")
-  const [isFeatured, setIsFeatured] = useState(false)
-  const [isBestSeller, setIsBestSeller] = useState(false)
+  const [status, setStatus] = useState<"draft" | "published">("draft")
   const [images, setImages] = useState<string[]>([])
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string[] | string>>({})
   const [variants, setVariants] = useState<Variant[]>([])
@@ -112,15 +110,13 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
       setDescription(p.description || "")
       setPrice(p.price?.toString() || "")
       setOriginalPrice(p.original_price?.toString() || "")
-      setDiscount(p.discount?.toString() || "")
+      setStatus(p.status || "draft")
 
       // Ensure category IDs are strings for the Select component
       setCategoryId(p.category_id ? p.category_id.toString() : undefined)
       setSubcategoryId(p.subcategory_id ? p.subcategory_id.toString() : undefined)
 
       setStockCount(p.stock_count?.toString() || "0")
-      setIsFeatured(p.is_featured || false)
-      setIsBestSeller(p.is_best_seller || false)
       setImages(p.images || [])
 
       // Process attributes
@@ -140,19 +136,14 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
       // Process variants
       if (p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
         const mappedVariants: Variant[] = p.variants.map((v: any) => {
-          // API returns options as { slug: value }. Map back to ID-based options.
-          const processedOptions = Object.entries(v.options || {}).map(([attrSlug, val]) => {
+          const processedOptions = Object.entries(v.options || {}).map(([attrSlug, optData]: [string, any]) => {
             const def = (defs as AttributeDefinition[]).find(d => d.slug === attrSlug)
-            // Match value case-insensitively for robustness
-            const opt = def?.options.find(o =>
-              o.value?.toString().toLowerCase() === val?.toString().toLowerCase()
-            )
 
             return {
-              attribute_id: def?.id || "",
+              attribute_id: optData.attribute_id || def?.id || "",
               attribute_name: def?.name || attrSlug,
-              option_id: opt?.id || "",
-              option_value: val?.toString() || "Unknown"
+              option_id: optData.option_id || "",
+              option_value: optData.value?.toString() || "Unknown"
             }
           })
 
@@ -340,12 +331,10 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
         description,
         price: Number(price),
         original_price: originalPrice ? Number(originalPrice) : null,
-        discount: discount ? Number(discount) : 0,
         category_id: categoryId || null,
         subcategory_id: subcategoryId || null,
         stock_count: Number(stockCount),
-        is_featured: isFeatured,
-        is_best_seller: isBestSeller,
+        status,
         images,
         attributes: attrRows,
         variants: variantPayload
@@ -437,6 +426,18 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
               <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={4}
                 className="min-h-[120px] rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" />
             </div>
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Status</Label>
+              <Select value={status} onValueChange={(val: any) => setStatus(val)}>
+                <SelectTrigger className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl">
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -454,11 +455,6 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
                 className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100" />
             </div>
             <div className="space-y-2">
-              <Label className="text-zinc-300">Discount %</Label>
-              <Input type="number" value={discount} onChange={e => setDiscount(e.target.value)}
-                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100" />
-            </div>
-            <div className="space-y-2">
               <Label className="text-zinc-300">Default Stock</Label>
               <Input type="number" value={stockCount} onChange={e => setStockCount(e.target.value)}
                 className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100" />
@@ -471,7 +467,7 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
             <h2 className="text-lg font-semibold text-white">Category</h2>
             {categoryName && <Badge variant="secondary" className="bg-zinc-800 text-zinc-300">{categoryName} {subcategoryName ? `/ ${subcategoryName}` : ''}</Badge>}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
             <div className="space-y-2">
               <Label className="text-zinc-300">Category</Label>
               <Select
@@ -589,7 +585,7 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
               ))}
             </div>
             <div className="pt-4 border-t border-zinc-800 flex justify-center">
-              <Button type="button" onClick={generateVariants} variant="outline" className="bg-accent/10 border-accent/20 text-accent hover:bg-accent/20 hover:text-accent font-bold uppercase tracking-widest text-[10px] h-11 px-8 rounded-full">
+              <Button type="button" onClick={generateVariants} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white font-bold uppercase tracking-widest text-[10px] h-11 px-8 rounded-full">
                 Sync Product Variations
               </Button>
             </div>
@@ -618,19 +614,19 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">SKU</Label>
-                      <Input value={v.sku} onChange={(e) => updateVariant(v.id, 'sku', e.target.value)} className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-xs" />
+                      <Input value={v.sku} onChange={(e) => updateVariant(v.id, 'sku', e.target.value)} className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Price (₹)</Label>
-                      <Input type="number" value={v.price} onChange={(e) => updateVariant(v.id, 'price', e.target.value)} className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-xs" />
+                      <Input type="number" value={v.price} onChange={(e) => updateVariant(v.id, 'price', e.target.value)} className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Orig. Price</Label>
-                      <Input type="number" value={v.original_price} onChange={(e) => updateVariant(v.id, 'original_price', e.target.value)} className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-xs" />
+                      <Input type="number" value={v.original_price} onChange={(e) => updateVariant(v.id, 'original_price', e.target.value)} className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Stock</Label>
-                      <Input type="number" value={v.stock_count} onChange={(e) => updateVariant(v.id, 'stock_count', e.target.value)} className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-xs" />
+                      <Input type="number" value={v.stock_count} onChange={(e) => updateVariant(v.id, 'stock_count', e.target.value)} className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs" />
                     </div>
                   </div>
                 </div>
@@ -639,19 +635,6 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
           </div>
         )}
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
-          <h2 className="text-lg font-semibold text-white border-b border-zinc-800 pb-3">Visibility</h2>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <Label className="text-zinc-300">Featured Product</Label>
-              <Switch checked={isFeatured} onCheckedChange={setIsFeatured} />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label className="text-zinc-300">Best Seller</Label>
-              <Switch checked={isBestSeller} onCheckedChange={setIsBestSeller} />
-            </div>
-          </div>
-        </div>
 
         <div className="flex items-center justify-end gap-4 pt-4">
           <Link href="/admin/products">

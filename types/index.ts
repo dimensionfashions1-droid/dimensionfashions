@@ -6,16 +6,17 @@ export interface Product {
     image: string
     images?: string[]
     colors?: string[]
-    discount?: number
     rating?: number
     reviews?: number
     inStock?: boolean
     description?: string
+    status?: 'draft' | 'published'
     sizes?: string[]
     fabric?: string
     featured?: boolean
     slug?: string
     originalPrice?: number
+    hasVariants?: boolean
 }
 
 // DB Table Interfaces
@@ -66,16 +67,14 @@ export interface ProductRow {
     description?: string
     price: number
     original_price?: number
-    discount: number
     category_id?: string
     subcategory_id?: string
     images: string[]
+    status: 'draft' | 'published'
     rating: number
     reviews_count: number
     stock_count: number
     is_in_stock: boolean
-    is_featured: boolean
-    is_best_seller: boolean
     created_at: string
 }
 
@@ -118,7 +117,6 @@ export interface BannerRow {
     subtitle?: string
     image_url: string
     link_url?: string
-    placement: string
     display_order: number
     is_active: boolean
     starts_at?: string

@@ -3,18 +3,11 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, ShoppingCart, User, Heart, Menu, X, ChevronDown, Instagram, Facebook, Twitter } from "lucide-react"
+import { Search, ShoppingCart, User, Heart, Menu, X, ChevronDown, Instagram, Facebook, Twitter, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CategoryRow, SubcategoryRow } from "@/types"
+import { SearchInput } from "./SearchInput"
 
 interface Category extends CategoryRow {
     subcategories: SubcategoryRow[]
@@ -75,7 +68,7 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                     {/* Left: Logo */}
                     <Link href="/" className="flex-shrink-0">
                         <span className="font-heading font-normal text-3xl md:text-4xl tracking-tighter text-primary">
-                            DIMENSIONS
+                            DIMENSION
                         </span>
                     </Link>
 
@@ -89,29 +82,7 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
 
                     {/* Center: Wide Search Bar */}
                     <div className="hidden lg:flex flex-1 justify-center px-8">
-                        <div className="flex items-center gap-0 relative w-full max-w-[600px]">
-                            <Select defaultValue="all">
-                                <SelectTrigger className="w-[120px] h-10 rounded-l-full rounded-r-none border-r-0 border-gray-200 bg-gray-50/50 text-[10px] font-sans font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 shadow-none">
-                                    <SelectValue placeholder="All" />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-xl border-gray-100 shadow-xl">
-                                    <SelectItem value="all" className="text-[10px] font-sans font-bold uppercase tracking-widest">All</SelectItem>
-                                    {categories.map((cat) => (
-                                        <SelectItem key={`nav_search_cat_${cat.id}`} value={cat.slug} className="text-[10px] font-sans font-bold uppercase tracking-widest">
-                                            {cat.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <div className="relative flex-1">
-                                <Input
-                                    type="text"
-                                    placeholder="Search for sarees, lehengas..."
-                                    className="w-full h-9 pl-10 pr-4 rounded-l-none rounded-r-full border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-accent text-[8px] font-sans bg-gray-50/50 shadow-none placeholder-primary/50"
-                                />
-                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                            </div>
-                        </div>
+                        <SearchInput />
                     </div>
 
                     {/* Right: Action Icons */}
@@ -145,7 +116,7 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                         {/* Burger Menu / Mega Menu */}
                         <div className="group relative">
                             <button
-                                className="flex items-center gap-2 text-[11px] font-sans font-bold text-white hover:text-primary uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
+                                className="flex items-center gap-2 text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
                                 suppressHydrationWarning
                             >
                                 <Menu className="w-4 h-4 text-white" />
@@ -153,15 +124,18 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                             </button>
                             {/* Mega Menu Dropdown */}
                             {categories.length > 0 && activeMegaCategory && (
-                                <div className="absolute top-full left-0 pt-3 hidden group-hover:block w-[800px] z-[100]">
-                                    <div className="flex bg-white shadow-2xl border border-gray-100 min-h-[400px] w-full transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300 overflow-hidden shadow-black/5 rounded-b-lg">
+                                <div className={cn(
+                                    "absolute top-full left-0 pt-3 hidden group-hover:block z-[100]",
+                                    activeMegaCategory.subcategories.length > 0 ? "w-[800px]" : "w-auto"
+                                )}>
+                                    <div className="flex bg-white shadow-2xl border border-gray-100 w-full transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300 overflow-hidden shadow-black/5 rounded-b-lg">
                                         {/* Left Sidebar */}
-                                        <div className="w-[30%] bg-gray-50/80 p-6 border-r border-gray-100">
+                                        <div className="w-[220px] shrink-0 bg-gray-50/80 p-6 border-r border-gray-100">
                                             <ul className="space-y-1">
                                                 {categories.map((cat) => (
                                                     <li key={`nav_mega_cat_${cat.id}`}>
                                                         <Link
-                                                            href={`/products?category=${cat.slug}`}
+                                                            href={`/products/${cat.slug}`}
                                                             onMouseEnter={() => setActiveMegaCategory(cat)}
                                                             className={cn(
                                                                 "w-full text-left py-3 pr-4 pl-3.5 text-[10px] font-sans font-bold uppercase tracking-widest transition-all rounded-none block border-l-2",
@@ -177,44 +151,42 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                                             </ul>
                                         </div>
 
-                                        {/* Right Split Section */}
-                                        <div className="w-[70%] p-8 flex gap-8 bg-white">
-                                            {/* Subcategories */}
-                                            <div className="flex-1 space-y-6">
+                                        {/* Subcategories - only show if category has subcategories */}
+                                        {activeMegaCategory.subcategories.length > 0 && (
+                                            <div className="flex-1 p-8 space-y-6 bg-white">
                                                 <h3 className="text-xl font-heading text-primary border-b border-gray-100 pb-3 block">
                                                     {activeMegaCategory.name}
                                                 </h3>
                                                 <ul className="space-y-4">
                                                     {activeMegaCategory.subcategories.map((sub) => (
                                                         <li key={`nav_sub_${sub.id}`}>
-                                                            <Link href={`/products?category=${activeMegaCategory.slug}&subcategory=${sub.slug}`} className="text-[11px] font-sans font-bold text-primary/60 hover:text-accent uppercase tracking-[0.15em] transition-colors block">
+                                                            <Link href={`/products/${activeMegaCategory.slug}/${sub.slug}`} className="text-[11px] font-sans font-bold text-primary/60 hover:text-accent uppercase tracking-[0.15em] transition-colors block">
                                                                 {sub.name}
                                                             </Link>
                                                         </li>
                                                     ))}
                                                 </ul>
                                             </div>
+                                        )}
 
-                                            {/* Category Image */}
-                                            <div className="w-[240px] flex flex-col items-center justify-center space-y-4">
-                                                <Link href={`/products?category=${activeMegaCategory.slug}`} className="block relative aspect-[3/4] w-full rounded-sm overflow-hidden group/img bg-gray-50">
-                                                    {activeMegaCategory.image_url ? (
-                                                        <Image
-                                                            src={activeMegaCategory.image_url}
-                                                            alt={activeMegaCategory.name}
-                                                            fill
-                                                            className="object-cover group-hover/img:scale-105 transition-transform duration-700"
-                                                            sizes="240px"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">No Image</div>
-                                                    )}
-                                                    <div className="absolute inset-0 bg-primary/0 group-hover/img:bg-primary/5 transition-colors duration-500" />
-                                                </Link>
-                                                <Link href={`/products?category=${activeMegaCategory.slug}`} className="text-[9px] font-sans font-bold tracking-[0.2em] text-accent uppercase border-b border-accent/30 p-1 hover:border-accent transition-colors block text-center">
-                                                    Explore {activeMegaCategory.name}
-                                                </Link>
-                                            </div>
+                                        {/* Category Image */}
+                                        <div className="w-[240px] shrink-0 p-8 flex flex-col items-center justify-center space-y-4 bg-white">
+                                            <Link href={`/products/${activeMegaCategory.slug}`} className="block relative aspect-[3/4] w-full rounded-sm overflow-hidden group/img bg-gray-50">
+                                                {activeMegaCategory.image_url ? (
+                                                    <Image
+                                                        src={activeMegaCategory.image_url}
+                                                        alt={activeMegaCategory.name}
+                                                        fill
+                                                        className="object-cover group-hover/img:scale-105 transition-transform duration-700"
+                                                        sizes="240px"
+                                                        unoptimized
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">No Image</div>
+                                                )}
+                                                <div className="absolute inset-0 bg-primary/0 group-hover/img:bg-primary/5 transition-colors duration-500" />
+                                            </Link>
+
                                         </div>
                                     </div>
                                 </div>
@@ -224,7 +196,7 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                         {categories.slice(0, 4).map((cat) => (
                             <Link
                                 key={`nav_main_cat_${cat.id}`}
-                                href={`/products?category=${cat.slug}`}
+                                href={`/products/${cat.slug}`}
                                 className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
                             >
                                 {cat.name}
@@ -250,7 +222,7 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                     mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
                 )}>
                     <div className="flex justify-between items-center mb-12">
-                        <span className="font-heading text-2xl tracking-tighter">DIMENSIONS</span>
+                        <span className="font-heading text-2xl tracking-tighter">DIMENSION</span>
                         <button onClick={() => setMobileMenuOpen(false)}>
                             <X className="w-6 h-6 text-primary" />
                         </button>
@@ -260,7 +232,7 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                         {categories.map((cat) => (
                             <li key={`nav_mobile_cat_${cat.id}`}>
                                 <Link
-                                    href={`/products?category=${cat.slug}`}
+                                    href={`/products/${cat.slug}`}
                                     className="text-sm font-sans font-bold text-primary uppercase tracking-[0.2em] flex items-center justify-between"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >

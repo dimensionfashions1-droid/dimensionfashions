@@ -78,7 +78,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         title: dbProduct.title,
         price: displayPrice,
         originalPrice: displayOriginalPrice,
-        discount: dbProduct.discount,
         category: dbProduct.categories?.name || 'Collection',
         description: dbProduct.description,
         images: activeVariant?.images?.length ? activeVariant.images : (dbProduct.images || []),
@@ -114,6 +113,14 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                             <BreadcrumbItem>
                                 <BreadcrumbLink href="/products" className="uppercase text-[10px] tracking-[0.2em] text-primary/40 hover:text-primary transition-colors font-sans font-bold">Products</BreadcrumbLink>
                             </BreadcrumbItem>
+                            {dbProduct.categories && (
+                                <>
+                                    <BreadcrumbSeparator className="text-primary/10" />
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink href={`/products/${dbProduct.categories.slug}`} className="uppercase text-[10px] tracking-[0.2em] text-primary/40 hover:text-primary transition-colors font-sans font-bold">{dbProduct.categories.name}</BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                </>
+                            )}
                             <BreadcrumbSeparator className="text-primary/10" />
                             <BreadcrumbItem>
                                 <BreadcrumbPage className="uppercase text-[10px] tracking-[0.2em] font-sans font-bold text-primary">{product.title}</BreadcrumbPage>

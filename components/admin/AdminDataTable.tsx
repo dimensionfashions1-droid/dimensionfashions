@@ -60,7 +60,7 @@ export function AdminDataTable<T>({
               </TableCell>
             </TableRow>
           ) : data.length === 0 ? (
-            <TableRow className="border-zinc-800">
+            <TableRow className="border-zinc-800 hover:bg-transparent">
               <TableCell colSpan={columns.length} className="text-center py-12 text-zinc-500">
                 {emptyIcon && <div className="flex justify-center mb-2">{emptyIcon}</div>}
                 {emptyMessage}
@@ -68,7 +68,7 @@ export function AdminDataTable<T>({
             </TableRow>
           ) : (
             data.map((item) => (
-              <TableRow key={keyExtractor(item)} className="border-zinc-800 hover:bg-zinc-800/50">
+              <TableRow key={keyExtractor(item)} className="border-zinc-800 hover:bg-transparent">
                 {renderRow(item)}
               </TableRow>
             ))

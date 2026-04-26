@@ -13,7 +13,7 @@ export function IntroSection() {
                 </div>
 
                 <p className="font-sans text-primary/60 text-sm md:text-base max-w-2xl mx-auto leading-relaxed tracking-wide">
-                    From boardrooms to banquet halls, our pieces are designed to honor every facet of your journey. Experience the perfect harmony of contemporary silhouettes and age-old regional weaves.
+                    From boardrooms to casual weekends, our pieces are designed to honor every facet of your journey. Experience the perfect harmony of modern silhouettes and premium western aesthetics.
                 </p>
 
 

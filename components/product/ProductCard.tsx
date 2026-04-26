@@ -8,25 +8,12 @@ import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { Product } from "@/types"
 
-
 interface ProductCardProps {
     product: Product
 }
 
-const DEFAULT_COLORS = [
-    { name: "Maroon", value: "#6B1D2A" },
-    { name: "Navy", value: "#1B2A4A" },
-    { name: "Emerald", value: "#1B4332" },
-    { name: "Gold", value: "#B8860B" },
-]
-
 export function ProductCard({ product }: ProductCardProps) {
     const [isWishlisted, setIsWishlisted] = useState(false)
-    const [selectedColor, setSelectedColor] = useState(0)
-
-    const colors = product.colors
-        ? product.colors.map((c, i) => ({ name: c, value: c }))
-        : DEFAULT_COLORS
 
     return (
         <div className="group space-y-4">
@@ -38,6 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
                         alt={product.title}
                         fill
                         className="object-cover transition-transform duration-[1500ms] ease-out group-hover:scale-110"
+                        unoptimized
                     />
                     {/* Hover overlay */}
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -70,19 +58,30 @@ export function ProductCard({ product }: ProductCardProps) {
                     />
                 </button>
 
-                {/* Add to Cart — slides up on hover */}
+                {/* Action Button — slides up on hover */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                    <Button
-                        size="sm"
-                        className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] h-10 transition-all duration-500 hover:bg-black gap-2"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            // TODO: Add to cart logic
-                        }}
-                    >
-                        <ShoppingBag className="w-3.5 h-3.5" />
-                        Add to Cart
-                    </Button>
+                    {product.hasVariants ? (
+                        <Link href={`/product/${product.slug}`}>
+                            <Button
+                                size="sm"
+                                className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] h-10 transition-all duration-500 hover:bg-black gap-2"
+                            >
+                                View Product
+                            </Button>
+                        </Link>
+                    ) : (
+                        <Button
+                            size="sm"
+                            className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] h-10 transition-all duration-500 hover:bg-black gap-2"
+                            onClick={(e) => {
+                                e.preventDefault()
+                                // TODO: Add to cart logic
+                            }}
+                        >
+                            <ShoppingBag className="w-3.5 h-3.5" />
+                            Add to Cart
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -94,32 +93,21 @@ export function ProductCard({ product }: ProductCardProps) {
                     </h3>
                 </Link>
 
-                <p className="text-[10px] font-sans font-medium uppercase tracking-[0.2em] text-primary/80">
-                    {product.category}
-                </p>
-
-                {/* Color Selector */}
-                <div className="flex items-center justify-center gap-1.5 py-1">
-                    {colors.slice(0, 4).map((color, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setSelectedColor(index)}
-                            className={cn(
-                                "w-4 h-4 rounded-full border-2 transition-all duration-200 hover:scale-125",
-                                selectedColor === index
-                                    ? "border-primary/60 scale-110"
-                                    : "border-transparent"
-                            )}
-                            style={{ backgroundColor: color.value }}
-                            aria-label={`Select ${color.name}`}
-                            suppressHydrationWarning
-                        />
-                    ))}
+                <div className="flex items-center justify-center gap-3">
+                    <p className="text-[12px] font-sans font-bold text-primary tracking-widest">
+                        ₹{product.price.toLocaleString("en-IN")}
+                    </p>
+                    {product.originalPrice && product.originalPrice > product.price && (
+                        <>
+                            <p className="text-[10px] font-sans font-medium text-primary/40 line-through tracking-wider">
+                                ₹{product.originalPrice.toLocaleString("en-IN")}
+                            </p>
+                            <span className="text-[9px] font-sans font-bold text-accent uppercase tracking-tighter">
+                                {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                            </span>
+                        </>
+                    )}
                 </div>
-
-                <p className="text-[12px] font-sans font-bold text-primary tracking-widest">
-                    ₹{product.price.toLocaleString("en-IN")}
-                </p>
             </div>
         </div>
     )

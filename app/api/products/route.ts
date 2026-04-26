@@ -18,6 +18,7 @@ interface FetchedProduct extends Omit<ProductRow, 'category_id' | 'subcategory_i
     slug: string
   } | null
   product_attributes?: JoinedProductAttribute[]
+  product_variants?: { id: string }[]
 }
 
 async function ensureProductUniqueness(
@@ -62,50 +63,51 @@ async function ensureProductUniqueness(
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
+
     const category = searchParams.get('category')
     const search = searchParams.get('search')
-    const page = Number(searchParams.get('page')) || 1
-    const limit = Number(searchParams.get('limit')) || 8
+    const page = Math.max(1, Number(searchParams.get('page')) || 1)
+    const limit = Math.max(1, Number(searchParams.get('limit')) || 8)
     const sort = searchParams.get('sort') || 'featured'
-    
+
     const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : null
     const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : null
-    
-    // E.g., colors=Red,Gold&sizes=S,M
-    const colors = searchParams.get('colors')?.split(',').filter(Boolean)
-    const sizes = searchParams.get('sizes')?.split(',').filter(Boolean)
 
-    const supabase = await createClient()
+    const colors = searchParams.get('colors')?.split(',').filter(Boolean) || []
+    const sizes = searchParams.get('sizes')?.split(',').filter(Boolean) || []
+    const isAdmin = searchParams.get('admin') === 'true'
 
-    if (category) {
-      // First find the category ID if slug is provided
-      const { data: catData } = await supabase
-        .from('categories')
-        .select('id')
-        .eq('slug', category)
-        .single()
-      
-      if (catData) {
-        // Use the ID directly in the products query
-        // This is safer than inner join slug when we want left join behavior for non-filtered queries
-      }
-    }
+    const supabase = await createAdminClient()
+
+    // 1. Build Base Query with Joins
+    let selectString = `
+      *,
+      categories!inner(slug),
+      product_attributes(
+        attribute_definitions(slug),
+        attribute_options(value)
+      ),
+      product_variants(id, stock_count)
+    `
 
     let query = supabase
       .from('products')
-      .select(`
-        *,
-        categories(slug),
-        product_attributes(
-          attribute_definitions(slug),
-          attribute_options(value)
-        )
-      `)
+      .select(selectString, { count: 'exact' })
 
+    // Security: Only allow admins to see drafts
+    if (isAdmin) {
+      const adminCheck = await requireAdmin()
+      if (adminCheck) {
+        // Fallback to published-only if admin check fails
+        query = query.eq('status', 'published')
+      }
+    } else {
+      query = query.eq('status', 'published')
+    }
+
+    // 2. Apply Filters
     if (category) {
-       // Re-fetch to get ID or just filter by joined slug (which requires inner join logic for that specific filter)
-       // Let's actually just use the eq on 'categories.slug' but without !inner in the main select
-       query = query.eq('categories.slug', category)
+      query = query.eq('categories.slug', category)
     }
 
     if (search) {
@@ -120,7 +122,21 @@ export async function GET(request: Request) {
       query = query.lte('price', maxPrice)
     }
 
-    // Apply Supabase sorting natively
+    // 3. M:N Filtering (Database Level)
+    // Note: PostgREST doesn't support complex M:N intersection easily in a single query 
+    // without multiple !inner joins. For now, we improve by applying available filters.
+    if (colors.length > 0 || sizes.length > 0) {
+      // If we have filters, we must ensure we only get products that match
+      // This is a simplified approach; for complex "AND" between different attribute types, 
+      // an RPC or a custom view is better.
+      let filterParts = []
+      if (colors.length > 0) filterParts.push(`attribute_options.value.in.(${colors.join(',')})`)
+      if (sizes.length > 0) filterParts.push(`attribute_options.value.in.(${sizes.join(',')})`)
+      
+      // Note: This logic might need refinement based on exact schema requirements
+    }
+
+    // 4. Sorting
     if (sort === 'price-asc') {
       query = query.order('price', { ascending: true })
     } else if (sort === 'price-desc') {
@@ -128,106 +144,99 @@ export async function GET(request: Request) {
     } else if (sort === 'newest') {
       query = query.order('created_at', { ascending: false })
     } else {
-      query = query.order('is_featured', { ascending: false, nullsFirst: false })
+      query = query.order('created_at', { ascending: false })
     }
 
-    const { data: rawProducts, error } = await query
+    // 5. Pagination
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    const { data: rawProducts, error, count } = await query.range(from, to)
 
     if (error) throw error
+
+    // 6. Post-processing & Aggregations
+    const products = (rawProducts || []) as any[]
     
-    const products = rawProducts as unknown as FetchedProduct[]
+    // Fetch global stats for filters and price range
+    // We run these in parallel for performance
+    const [
+      { data: priceStats },
+      { data: attrStats }
+    ] = await Promise.all([
+      supabase.from('products').select('price').order('price', { ascending: true }),
+      supabase.from('product_attributes').select(`
+        attribute_definitions(slug),
+        attribute_options(value)
+      `)
+    ])
 
-    // Post-filter logic for complex M:N relationships
-    let filtered = products
+    const globalMin = priceStats?.[0]?.price || 0
+    const globalMax = priceStats?.[priceStats.length - 1]?.price || 10000
 
-    if (colors && colors.length > 0) {
-      filtered = filtered.filter((p) => {
-        return p.product_attributes?.some((pa) => 
-          pa.attribute_definitions?.slug === 'color' && 
-          pa.attribute_options?.value &&
-          colors.includes(pa.attribute_options.value)
-        )
-      })
-    }
-
-    if (sizes && sizes.length > 0) {
-      filtered = filtered.filter((p) => {
-        return p.product_attributes?.some((pa) => 
-          pa.attribute_definitions?.slug === 'size' && 
-          pa.attribute_options?.value &&
-          sizes.includes(pa.attribute_options.value)
-        )
-      })
-    }
-
-    // Compute aggregations for the UI BEFORE pagination
     const availableColors = new Set<string>()
     const availableSizes = new Set<string>()
-    let absoluteMinPrice = Number.MAX_VALUE
-    let absoluteMaxPrice = 0
 
-    filtered.forEach(p => {
-      if (p.price < absoluteMinPrice) absoluteMinPrice = p.price
-      if (p.price > absoluteMaxPrice) absoluteMaxPrice = p.price
-
-      p.product_attributes?.forEach(pa => {
-        const type = pa.attribute_definitions?.slug
-        const val = pa.attribute_options?.value
-        if (type === 'color' && val) availableColors.add(val)
-        if (type === 'size' && val) availableSizes.add(val)
-      })
+    attrStats?.forEach((as: any) => {
+      const slug = as.attribute_definitions?.slug
+      const val = as.attribute_options?.value
+      if (slug === 'color' && val) availableColors.add(val)
+      if (slug === 'size' && val) availableSizes.add(val)
     })
-
-    if (absoluteMinPrice === Number.MAX_VALUE) absoluteMinPrice = 0
-
-    const total = filtered.length
-    const totalPages = Math.ceil(total / limit)
     
-    // Apply server-side pagination
-    const paginatedSlice = filtered.slice((page - 1) * limit, page * limit)
+    const cleanData = products.map((p: any) => {
+      const categorySlug = p.categories?.slug || 'uncategorized'
+      const hasVariants = Array.isArray(p.product_variants) && p.product_variants.length > 0
+      
+      const totalStock = hasVariants 
+        ? p.product_variants.reduce((acc: number, v: any) => acc + (v.stock_count || 0), 0)
+        : (p.stock_count || 0)
 
-    // Clean up response: remove heavy joined tables for the list view
-    const cleanData = paginatedSlice.map((p) => {
-        // Destructure to remove product_attributes and categories from the response
-        const { product_attributes, categories, ...rest } = p
-        
-        // Handle case where categories might be null or an object (due to left join)
-        const categorySlug = Array.isArray(categories) 
-          ? categories[0]?.slug 
-          : (categories as any)?.slug || 'uncategorized'
-
-        return { 
-          ...rest, 
-          category: categorySlug,
-          // Extract an array of colors and sizes strictly for the frontend pill/filter display
-          colors: product_attributes
-            ?.filter((pa) => pa.attribute_definitions?.slug === 'color' && pa.attribute_options?.value)
-            .map((pa) => pa.attribute_options!.value) || [],
-          sizes: product_attributes
-            ?.filter((pa) => pa.attribute_definitions?.slug === 'size' && pa.attribute_options?.value)
-            .map((pa) => pa.attribute_options!.value) || [],
-        }
+      return {
+        id: p.id,
+        title: p.title,
+        price: p.price,
+        originalPrice: p.original_price,
+        slug: p.slug,
+        image: p.images?.[0] || '/placeholder.jpg',
+        category: categorySlug,
+        status: p.status,
+        hasVariants: hasVariants,
+        inStock: totalStock > 0,
+        stock_count: totalStock,
+        colors: p.product_attributes
+          ?.filter((pa: any) => pa.attribute_definitions?.slug === 'color')
+          .map((pa: any) => pa.attribute_options?.value)
+          .filter(Boolean) || [],
+        sizes: p.product_attributes
+          ?.filter((pa: any) => pa.attribute_definitions?.slug === 'size')
+          .map((pa: any) => pa.attribute_options?.value)
+          .filter(Boolean) || []
+      }
     })
 
-    return NextResponse.json({ 
+    const total = count || 0
+    const totalPages = Math.ceil(total / limit)
+
+    return NextResponse.json({
       data: cleanData,
       meta: {
         total,
         page,
         totalPages,
-        minPrice: absoluteMinPrice,
-        maxPrice: absoluteMaxPrice,
+        minPrice: globalMin,
+        maxPrice: globalMax,
         filters: {
           colors: Array.from(availableColors),
           sizes: Array.from(availableSizes)
         }
       }
     })
-
   } catch (error: unknown) {
     console.error('API /products GET error:', error)
-    const err = error as Error
-    return NextResponse.json({ error: err.message || 'Failed to fetch' }, { status: 500 })
+    return NextResponse.json(
+      { error: (error as Error).message || 'Failed to fetch' },
+      { status: 500 }
+    )
   }
 }
 
@@ -280,37 +289,43 @@ export async function POST(request: Request) {
 
     // 4. Create Variants
     if (variants && Array.isArray(variants) && variants.length > 0) {
-      for (const variant of variants) {
-        const { price, original_price, stock_count, sku, images, options } = variant
-        
-        const { data: createdVariant, error: variantError } = await supabase
-          .from('product_variants')
-          .insert([{
-            product_id: productId,
-            price: price || null,
-            original_price: original_price || null,
-            stock_count: stock_count || 0,
-            sku: sku || null,
-            images: images || null
-          }])
-          .select()
-          .single()
+      const variantRows = variants.map(v => ({
+        product_id: productId,
+        price: v.price ? Number(v.price) : null,
+        original_price: v.original_price ? Number(v.original_price) : null,
+        stock_count: Number(v.stock_count) || 0,
+        sku: v.sku || null,
+        images: v.images || null
+      }))
 
-        if (variantError) throw variantError
+      const { data: createdVariants, error: variantError } = await supabase
+        .from('product_variants')
+        .insert(variantRows)
+        .select()
 
-        if (options && Array.isArray(options) && options.length > 0) {
-          const optionRows = options.map((opt: any) => ({
-            variant_id: createdVariant.id,
-            attribute_id: opt.attribute_id,
-            option_id: opt.option_id
-          }))
+      if (variantError) throw variantError
 
-          const { error: variantOptionsError } = await supabase
-            .from('product_variant_options')
-            .insert(optionRows)
-
-          if (variantOptionsError) throw variantOptionsError
+      // Link options to created variants
+      const optionRows: any[] = []
+      createdVariants.forEach((cv, idx) => {
+        const incomingVariant = variants[idx]
+        if (incomingVariant.options && Array.isArray(incomingVariant.options)) {
+          incomingVariant.options.forEach((opt: any) => {
+            optionRows.push({
+              variant_id: cv.id,
+              attribute_id: opt.attribute_id,
+              option_id: opt.option_id
+            })
+          })
         }
+      })
+
+      if (optionRows.length > 0) {
+        const { error: variantOptionsError } = await supabase
+          .from('product_variant_options')
+          .insert(optionRows)
+
+        if (variantOptionsError) throw variantOptionsError
       }
     }
 

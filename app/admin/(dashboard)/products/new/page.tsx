@@ -77,12 +77,10 @@ export default function AdminProductNewPage() {
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [originalPrice, setOriginalPrice] = useState("")
-  const [discount, setDiscount] = useState("")
   const [categoryId, setCategoryId] = useState("")
   const [subcategoryId, setSubcategoryId] = useState("")
   const [stockCount, setStockCount] = useState("0")
-  const [isFeatured, setIsFeatured] = useState(false)
-  const [isBestSeller, setIsBestSeller] = useState(false)
+  const [status, setStatus] = useState<"draft" | "published">("draft")
   const [images, setImages] = useState<string[]>([])
 
   // Dynamic attributes: { [attribute_id]: option_id[] | text_value }
@@ -309,12 +307,10 @@ export default function AdminProductNewPage() {
         description,
         price: Number(price),
         original_price: originalPrice ? Number(originalPrice) : null,
-        discount: discount ? Number(discount) : 0,
         category_id: categoryId || null,
         subcategory_id: subcategoryId || null,
         stock_count: Number(stockCount),
-        is_featured: isFeatured,
-        is_best_seller: isBestSeller,
+        status,
         images,
         attributes: attrRows,
         variants: variantPayload
@@ -389,6 +385,18 @@ export default function AdminProductNewPage() {
               <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={4}
                 className="min-h-[120px] rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="Product description..." />
             </div>
+            <div className="space-y-2">
+              <Label className="text-zinc-300">Status</Label>
+              <Select value={status} onValueChange={(val: any) => setStatus(val)}>
+                <SelectTrigger className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl">
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -406,11 +414,6 @@ export default function AdminProductNewPage() {
                 className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="4999" />
             </div>
             <div className="space-y-2">
-              <Label className="text-zinc-300">Discount %</Label>
-              <Input type="number" value={discount} onChange={e => setDiscount(e.target.value)}
-                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="20" />
-            </div>
-            <div className="space-y-2">
               <Label className="text-zinc-300">Default Stock</Label>
               <Input type="number" value={stockCount} onChange={e => setStockCount(e.target.value)}
                 className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="50" />
@@ -424,7 +427,7 @@ export default function AdminProductNewPage() {
             <h2 className="text-lg font-semibold text-white">Category</h2>
             {categoryName && <Badge variant="secondary" className="bg-zinc-800 text-zinc-300">{categoryName} {subcategoryName ? `/ ${subcategoryName}` : ''}</Badge>}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
             <div className="space-y-2">
               <Label className="text-zinc-300">Category</Label>
               <Select 
@@ -620,7 +623,7 @@ export default function AdminProductNewPage() {
                       <Input 
                         value={v.sku} 
                         onChange={(e) => updateVariant(v.id, 'sku', e.target.value)}
-                        className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-xs"
+                        className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -629,7 +632,7 @@ export default function AdminProductNewPage() {
                         type="number"
                         value={v.price} 
                         onChange={(e) => updateVariant(v.id, 'price', e.target.value)}
-                        className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-xs"
+                        className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -638,7 +641,7 @@ export default function AdminProductNewPage() {
                         type="number"
                         value={v.original_price} 
                         onChange={(e) => updateVariant(v.id, 'original_price', e.target.value)}
-                        className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-xs"
+                        className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -647,7 +650,7 @@ export default function AdminProductNewPage() {
                         type="number"
                         value={v.stock_count} 
                         onChange={(e) => updateVariant(v.id, 'stock_count', e.target.value)}
-                        className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-xs"
+                        className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs"
                       />
                     </div>
                   </div>
@@ -657,20 +660,6 @@ export default function AdminProductNewPage() {
           </div>
         )}
 
-        {/* ── Flags ────────────────────────────────────────────────── */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
-          <h2 className="text-lg font-semibold text-white border-b border-zinc-800 pb-3">Visibility</h2>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <Label className="text-zinc-300">Featured Product</Label>
-              <Switch checked={isFeatured} onCheckedChange={setIsFeatured} />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label className="text-zinc-300">Best Seller</Label>
-              <Switch checked={isBestSeller} onCheckedChange={setIsBestSeller} />
-            </div>
-          </div>
-        </div>
 
         {/* ── Actions ──────────────────────────────────────────────── */}
         <div className="flex items-center justify-end gap-4 pt-4">

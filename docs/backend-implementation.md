@@ -1,6 +1,6 @@
-# Backend Implementation Guide: Dimensions
+# Backend Implementation Guide: Dimension
 
-Complete phased backend implementation plan for the Dimensions Women's Wear e-commerce platform.
+Complete phased backend implementation plan for the Dimension Women's Wear e-commerce platform.
 
 > [!NOTE]
 > Product attributes (color, size, fabric, sole type, etc.) use a **generic attribute system** so the store can sell any product type (sarees, chappals, shoes, bags) without schema changes. See [schema.md](file:///d:/dimensions/docs/schema.md) for full definitions.

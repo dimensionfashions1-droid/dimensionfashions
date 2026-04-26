@@ -36,7 +36,7 @@ export default function StoreLoginPage() {
         <div className="hidden lg:flex lg:w-1/2 relative bg-gray-100">
           <Image
             src="/images/auth-banner.jpg"
-            alt="Dimensions Ethnic Wear"
+            alt="Dimension Ethnic Wear"
             fill
             className="object-cover"
             priority
@@ -54,7 +54,7 @@ export default function StoreLoginPage() {
             <div className="space-y-3">
               <h1 className="text-3xl font-light tracking-tight text-gray-900">Sign In</h1>
               <p className="text-gray-500 text-sm font-light">
-                Welcome back to Dimensions. Enter your details to continue.
+                Welcome back to Dimension. Enter your details to continue.
               </p>
             </div>
 

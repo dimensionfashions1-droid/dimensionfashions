@@ -22,8 +22,20 @@ import { useToast } from "@/hooks/use-toast"
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-interface AdminProduct extends ProductRow {
-  category?: string
+interface AdminProduct {
+  id: string
+  title: string
+  price: number
+  originalPrice?: number
+  slug: string
+  image: string
+  category: string
+  status: 'draft' | 'published'
+  hasVariants: boolean
+  inStock: boolean
+  stock_count: number
+  colors: string[]
+  sizes: string[]
 }
 
 const columns = [
@@ -31,6 +43,7 @@ const columns = [
   { key: "price", label: "Price" },
   { key: "stock", label: "Stock" },
   { key: "status", label: "Status" },
+  { key: "availability", label: "Availability" },
   { key: "actions", label: "Actions", className: "text-right" },
 ]
 
@@ -44,6 +57,7 @@ export default function AdminProductsPage() {
   const queryString = new URLSearchParams()
   queryString.append("page", page.toString())
   queryString.append("limit", "10")
+  queryString.append("admin", "true")
   if (search) queryString.append("search", search)
 
   const { data: response, isLoading } = useSWR(`/api/products?${queryString.toString()}`, fetcher)
@@ -109,8 +123,12 @@ export default function AdminProductsPage() {
           <>
             <TableCell>
               <div className="flex items-center gap-3">
-                {product.images?.[0] && (
-                  <img src={product.images[0]} alt={product.title} className="h-10 w-10 rounded-lg object-cover bg-zinc-800" />
+                {product.image ? (
+                  <img src={product.image} alt={product.title} className="h-10 w-10 rounded-lg object-cover bg-zinc-800" />
+                ) : (
+                   <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
+                     <Package className="h-5 w-5 text-zinc-600" />
+                   </div>
                 )}
                 <div>
                   <p className="font-medium text-white text-sm">{product.title}</p>
@@ -126,8 +144,14 @@ export default function AdminProductsPage() {
             </TableCell>
             <TableCell>
               <StatusBadge
-                label={product.is_in_stock ? "In Stock" : "Out of Stock"}
-                variant={product.is_in_stock ? "success" : "danger"}
+                label={product.status === 'published' ? "Published" : "Draft"}
+                variant={product.status === 'published' ? "success" : "neutral"}
+              />
+            </TableCell>
+            <TableCell>
+              <StatusBadge
+                label={product.inStock ? "In Stock" : "Out of Stock"}
+                variant={product.inStock ? "success" : "danger"}
               />
             </TableCell>
             <TableCell className="text-right">

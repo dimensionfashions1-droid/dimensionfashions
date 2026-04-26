@@ -30,12 +30,13 @@ export function ProductInfo({
     selectedSize,
     setSelectedSize
 }: ProductInfoProps) {
-    const discountedPrice = product.discount
-        ? Math.round(product.price * (1 - product.discount / 100))
-        : null
-
     const handleIncrease = () => setQuantity(quantity + 1)
     const handleDecrease = () => setQuantity(quantity > 1 ? quantity - 1 : 1)
+
+    const hasDiscount = product.originalPrice && product.originalPrice > product.price
+    const discountPercentage = hasDiscount 
+        ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+        : null
 
     return (
         <div className="flex flex-col gap-8">
@@ -70,23 +71,19 @@ export function ProductInfo({
                         ))}
                     </div>
                     <span className="text-sm text-neutral-400 underline decoration-neutral-600 underline-offset-4">
-                        128 Reviews
+                        {product.reviews || 0} Reviews
                     </span>
                 </div>
 
                 <div className="flex items-center gap-4 text-2xl">
-                    {discountedPrice ? (
+                    <span className="font-bold text-primary">₹{product.price.toLocaleString()}</span>
+                    {hasDiscount && (
                         <>
-                            <span className="font-bold text-primary">₹{discountedPrice.toLocaleString()}</span>
-                            <span className="text-lg text-primary/40 line-through decoration-primary/40">₹{product.price.toLocaleString()}</span>
-                            {product.discount && (
-                                <Badge className="bg-red-500 hover:bg-red-600 text-white border-0">
-                                    -{product.discount}%
-                                </Badge>
-                            )}
+                            <span className="text-lg text-primary/40 line-through decoration-primary/40 text-[0.8em]">₹{product.originalPrice?.toLocaleString()}</span>
+                            <Badge className="bg-accent hover:bg-accent text-white border-0 text-[0.5em] tracking-wider uppercase px-3 py-1 font-bold">
+                                {discountPercentage}% OFF
+                            </Badge>
                         </>
-                    ) : (
-                        <span className="font-bold text-primary">₹{product.price.toLocaleString()}</span>
                     )}
                 </div>
             </div>

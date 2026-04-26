@@ -2,12 +2,12 @@
 
 export function MarqueeSection() {
     const items = [
-        "Handwoven Heritage",
+        "Modern Apparel",
         "Timeless Elegance",
-        "Handwoven Heritage",
-        "Timeless Elegance",
-        "Handwoven Heritage",
-        "Timeless Elegance",
+        "Western Fashion",
+        "Premium Footwear",
+        "Modern Apparel",
+        "Western Fashion",
     ]
 
     return (
