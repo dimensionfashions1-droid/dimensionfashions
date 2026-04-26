@@ -7,12 +7,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { PackageX, Loader2 } from "lucide-react"
 
-// Fallback tabs if API fails
-const FALLBACK_TABS = [
-    { name: "Dresses", slug: "dresses" },
-    { name: "Tops", slug: "tops" },
-    { name: "Shoes", slug: "shoes" },
-]
+// No fallback tabs - use empty array if API fails
+const FALLBACK_TABS: CategoryData[] = []
 
 export interface CategoryData {
     name: string;
@@ -26,6 +22,9 @@ interface TrendingTabsProps {
 
 export function TrendingTabs({ initialCategories, initialProducts }: TrendingTabsProps) {
     const tabs = initialCategories && initialCategories.length > 0 ? initialCategories : FALLBACK_TABS;
+    
+    if (tabs.length === 0) return null;
+
     const defaultTab = tabs[0]?.slug;
 
     const [activeTab, setActiveTab] = React.useState<string>(defaultTab);

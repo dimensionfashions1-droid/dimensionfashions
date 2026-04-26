@@ -9,24 +9,16 @@ import { FeaturedDrop } from "@/components/home/FeaturedDrop"
 import { IntroSection } from "@/components/home/IntroSection"
 import { OfferBanner } from "@/components/home/OfferBanner"
 import { CtaSection } from "@/components/home/CtaSection"
+import { getHomeProducts } from "@/lib/supabase/home"
 
 export default async function Home() {
     let initialCategories: { name: string, slug: string }[] = [];
     let initialProducts: any[] = [];
 
     try {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL ||
-            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-
-        const res = await fetch(`${appUrl}/api/home/products`, { next: { revalidate: 3600 } });
-
-        if (res.ok) {
-            const json = await res.json();
-            if (json.data) {
-                initialCategories = json.data.categories || [];
-                initialProducts = json.data.products || [];
-            }
-        }
+        const data = await getHomeProducts();
+        initialCategories = data.categories;
+        initialProducts = data.products;
     } catch (error) {
         console.error("Failed to fetch data for home page:", error);
     }

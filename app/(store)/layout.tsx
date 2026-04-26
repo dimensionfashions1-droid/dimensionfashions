@@ -13,7 +13,7 @@ export default async function StoreLayout({
     return (
         <div className="min-h-screen flex flex-col">
             <Navbar user={user} />
-            <main className="flex-1 pt-[140px]">
+            <main className="flex-1 pt-[80px] lg:pt-[140px]">
                 {children}
             </main>
             <Footer />
