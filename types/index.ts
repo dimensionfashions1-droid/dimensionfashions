@@ -151,10 +151,8 @@ export interface CartItem {
     price: number
     image: string
     quantity: number
-    variant?: string
-    size?: string
-    color?: string
-    selectedColor?: string
+    selectedAttributes?: Record<string, string>
+    slug?: string
 }
 
 export interface OrderItem {

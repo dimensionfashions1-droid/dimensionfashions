@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
+
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -11,41 +13,33 @@ import {
 } from "@/components/ui/breadcrumb"
 import { ProductCard } from "@/components/product/ProductCard"
 import { WishlistEmpty } from "@/components/product/WishlistEmpty"
-import { Product } from "@/types"
-
-// Mock Data for Wishlist
-const MOCK_WISHLIST_ITEMS: Product[] = [
-    {
-        id: "1",
-        title: "Midnight Bloom Kanjivaram",
-        price: 18499,
-        category: "Sarees",
-        image: "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600",
-        inStock: true,
-        colors: ["Maroon", "Gold"],
-        sizes: ["Standard"]
-    },
-    {
-        id: "3",
-        title: "Pastel Kurta Set",
-        price: 4999,
-        category: "Kurta Sets",
-        image: "https://www.sourcesplash.com/i/random?q=kurti,set,indian-fashion&w=1200&h=1600",
-        inStock: true,
-        colors: ["Ivory", "Emerald"],
-        sizes: ["XS", "S", "M", "L", "XL"]
-    }
-]
+import { useWishlist } from "@/hooks/use-wishlist"
+import { createClient } from "@/lib/supabase/client"
 
 export default function WishlistPage() {
-    const [wishlistItems, setWishlistItems] = useState<Product[]>(MOCK_WISHLIST_ITEMS)
+    const wishlist = useWishlist()
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [isMounted, setIsMounted] = useState(false)
 
-    if (wishlistItems.length === 0) {
-        return (
-            <div className="container mx-auto px-4 py-12 md:py-20 lg:py-32">
-                <WishlistEmpty />
-            </div>
-        )
+    useEffect(() => {
+        setIsMounted(true)
+        const checkUser = async () => {
+            try {
+                const supabase = createClient()
+                const { data } = await supabase.auth.getUser()
+                setIsAuthenticated(!!data?.user)
+            } catch (error) {
+                console.error("Auth check failed:", error)
+                setIsAuthenticated(false)
+            }
+        }
+        checkUser()
+    }, [])
+
+    if (!isMounted) return null
+
+    if (wishlist.items.length === 0) {
+        return <WishlistEmpty />
     }
 
     return (
@@ -64,18 +58,12 @@ export default function WishlistPage() {
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div className="space-y-2">
-                            <h1 className="font-heading font-normal text-2xl md:text-4xl text-primary uppercase tracking-[0.05em]">Your <span className="text-accent">Wishlist</span></h1>
-                            <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-primary/40">{wishlistItems.length} exquisite pieces saved</p>
-                        </div>
-                    </div>
+                    <h1 className="font-heading font-normal text-2xl md:text-4xl text-primary uppercase tracking-[0.05em]">Your <span>Wishlist</span></h1>
                 </div>
 
-                {/* Wishlist Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
-                    {wishlistItems.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-12 gap-x-8 md:gap-x-10">
+                    {wishlist.items.map((product) => (
+                        <ProductCard key={product.id} product={product} isAuthenticated={isAuthenticated} />
                     ))}
                 </div>
             </div>

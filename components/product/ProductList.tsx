@@ -4,9 +4,10 @@ import { Product } from "@/types"
 interface ProductListProps {
     title: string
     products: Product[]
+    isAuthenticated?: boolean
 }
 
-export function ProductList({ title, products, className }: ProductListProps & { className?: string }) {
+export function ProductList({ title, products, isAuthenticated, className }: ProductListProps & { className?: string }) {
     return (
         <section className={`py-24 md:py-40 bg-background ${className}`}>
             <div className="container mx-auto px-6 md:px-12">
@@ -28,7 +29,7 @@ export function ProductList({ title, products, className }: ProductListProps & {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-16">
                     {products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard key={product.id} product={product} isAuthenticated={isAuthenticated} />
                     ))}
                 </div>
             </div>

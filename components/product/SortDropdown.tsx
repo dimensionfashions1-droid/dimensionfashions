@@ -15,6 +15,10 @@ const sortOptions = [
         label: "Newest Arrivals",
     },
     {
+        value: "bestsellers",
+        label: "Best Sellers",
+    },
+    {
         value: "price-asc",
         label: "Price: Low to High",
     },

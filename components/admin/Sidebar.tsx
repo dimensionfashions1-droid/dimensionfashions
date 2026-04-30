@@ -12,7 +12,8 @@ import {
   Users,
   LogOut,
   Store,
-  MonitorPlay
+  MonitorPlay,
+  Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ const navItems = [
   { name: 'Attributes', href: '/admin/attributes', icon: SlidersHorizontal },
   { name: 'Orders', href: '/admin/orders', icon: ClipboardList },
   { name: 'Users', href: '/admin/users', icon: Users },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Messages', href: '/admin/contact', icon: Mail },
 ];
 
 export function Sidebar() {

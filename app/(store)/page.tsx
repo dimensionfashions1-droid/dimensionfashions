@@ -10,10 +10,15 @@ import { IntroSection } from "@/components/home/IntroSection"
 import { OfferBanner } from "@/components/home/OfferBanner"
 import { CtaSection } from "@/components/home/CtaSection"
 import { getHomeProducts } from "@/lib/supabase/home"
+import { createClient } from "@/lib/supabase/server"
 
 export default async function Home() {
     let initialCategories: { name: string, slug: string }[] = [];
     let initialProducts: any[] = [];
+    
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getUser()
+    const isAuthenticated = !!data?.user
 
     try {
         const data = await getHomeProducts();
@@ -27,7 +32,11 @@ export default async function Home() {
         <main className="bg-white">
             <HeroCarousel />
             <CategoryCircles />
-            <TrendingTabs initialCategories={initialCategories} initialProducts={initialProducts} />
+            <TrendingTabs 
+                initialCategories={initialCategories} 
+                initialProducts={initialProducts} 
+                isAuthenticated={isAuthenticated} 
+            />
             <MarqueeSection />
             <EditorialGrid />
             <FeaturedDrop />

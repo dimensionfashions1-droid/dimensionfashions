@@ -84,6 +84,7 @@ CREATE TABLE public.products (
   category_id uuid REFERENCES public.categories(id),
   subcategory_id uuid REFERENCES public.subcategories(id),
   images text[] NOT NULL,
+  status text DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
   rating numeric DEFAULT 0,
   reviews_count int DEFAULT 0,
   stock_count int DEFAULT 0,
@@ -222,7 +223,8 @@ CREATE TABLE public.wishlist (
   guest_id uuid,
   product_id uuid REFERENCES public.products(id),
   created_at timestamptz DEFAULT now(),
-  CONSTRAINT chk_owner CHECK (user_id IS NOT NULL OR guest_id IS NOT NULL)
+  CONSTRAINT chk_owner CHECK (user_id IS NOT NULL OR guest_id IS NOT NULL),
+  CONSTRAINT unique_wishlist_item UNIQUE (user_id, product_id)
 );
 
 -- 18. Cart
@@ -234,7 +236,8 @@ CREATE TABLE public.cart (
   quantity int DEFAULT 1,
   selected_attributes jsonb,
   updated_at timestamptz DEFAULT now(),
-  CONSTRAINT chk_owner CHECK (user_id IS NOT NULL OR guest_id IS NOT NULL)
+  CONSTRAINT chk_owner CHECK (user_id IS NOT NULL OR guest_id IS NOT NULL),
+  CONSTRAINT unique_cart_item UNIQUE (user_id, product_id, selected_attributes)
 );
 
 -- 19. User Addresses

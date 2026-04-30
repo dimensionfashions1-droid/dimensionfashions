@@ -67,17 +67,60 @@ export async function GET(request: Request) {
     const category = searchParams.get('category')
     const search = searchParams.get('search')
     const page = Math.max(1, Number(searchParams.get('page')) || 1)
-    const limit = Math.max(1, Number(searchParams.get('limit')) || 8)
+    const limit = Math.max(1, Number(searchParams.get('limit')) || 12)
     const sort = searchParams.get('sort') || 'featured'
 
     const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : null
     const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : null
 
-    const colors = searchParams.get('colors')?.split(',').filter(Boolean) || []
-    const sizes = searchParams.get('sizes')?.split(',').filter(Boolean) || []
     const isAdmin = searchParams.get('admin') === 'true'
 
     const supabase = await createAdminClient()
+
+    // --- DYNAMIC ATTRIBUTE FILTERING ---
+    // 1. Identify attribute filters (exclude known non-attribute params)
+    const knownParams = ['category', 'subcategory', 'search', 'page', 'limit', 'sort', 'minPrice', 'maxPrice', 'admin']
+    const attributeFilters: Record<string, string[]> = {}
+    
+    searchParams.forEach((value, key) => {
+        if (!knownParams.includes(key)) {
+            const vals = value.split(',').filter(Boolean)
+            if (vals.length > 0) {
+                attributeFilters[key] = vals
+            }
+        }
+    })
+
+    // 2. Fetch product IDs that match attribute filters
+    // We need to find products that have ALL the requested attributes (AND)
+    // For each attribute, we find products that match ANY of its values (OR)
+    let filteredProductIds: string[] | null = null
+
+    if (Object.keys(attributeFilters).length > 0) {
+        for (const [slug, values] of Object.entries(attributeFilters)) {
+            const { data: matchedRows, error: attrMatchError } = await supabase
+                .from('product_attributes')
+                .select('product_id')
+                .eq('attribute_definitions.slug', slug)
+                .in('attribute_options.value', values)
+                // We use inner joins via the select string to filter
+                .select('product_id, attribute_definitions!inner(slug), attribute_options!inner(value)')
+
+            if (attrMatchError) throw attrMatchError
+
+            const currentIds = Array.from(new Set(matchedRows.map(r => r.product_id)))
+            
+            if (filteredProductIds === null) {
+                filteredProductIds = currentIds
+            } else {
+                // Intersect with previous matches (AND logic between different attributes)
+                filteredProductIds = filteredProductIds.filter(id => currentIds.includes(id))
+            }
+            
+            // If no products match the current intersection, we can stop early
+            if (filteredProductIds.length === 0) break
+        }
+    }
 
     // 1. Build Base Query with Joins
     let selectString = `
@@ -94,46 +137,43 @@ export async function GET(request: Request) {
       .from('products')
       .select(selectString, { count: 'exact' })
 
-    // Security: Only allow admins to see drafts
-    if (isAdmin) {
-      const adminCheck = await requireAdmin()
-      if (adminCheck) {
-        // Fallback to published-only if admin check fails
-        query = query.eq('status', 'published')
-      }
-    } else {
-      query = query.eq('status', 'published')
+    // Apply attribute filter if we have one
+    if (filteredProductIds !== null) {
+        query = query.in('id', filteredProductIds)
     }
 
-    // 2. Apply Filters
+    // Security: Only allow admins to see drafts
+    if (isAdmin) {
+        const adminCheck = await requireAdmin()
+        if (adminCheck) {
+            query = query.eq('status', 'published')
+        }
+    } else {
+        query = query.eq('status', 'published')
+    }
+
+    // 2. Apply Basic Filters
     if (category) {
-      query = query.eq('categories.slug', category)
+        query = query.eq('categories.slug', category)
+    }
+
+    const subcategory = searchParams.get('subcategory')
+    if (subcategory) {
+        // Since we have categories!inner, we might need a similar join for subcategories if we filter by them
+        // But for now, we can filter by the product's subcategory relation if it's joined
+        // Let's keep it simple for now as per schema
     }
 
     if (search) {
-      query = query.ilike('title', `%${search}%`)
+        query = query.ilike('title', `%${search}%`)
     }
 
     if (minPrice !== null && !isNaN(minPrice)) {
-      query = query.gte('price', minPrice)
+        query = query.gte('price', minPrice)
     }
 
     if (maxPrice !== null && !isNaN(maxPrice)) {
-      query = query.lte('price', maxPrice)
-    }
-
-    // 3. M:N Filtering (Database Level)
-    // Note: PostgREST doesn't support complex M:N intersection easily in a single query 
-    // without multiple !inner joins. For now, we improve by applying available filters.
-    if (colors.length > 0 || sizes.length > 0) {
-      // If we have filters, we must ensure we only get products that match
-      // This is a simplified approach; for complex "AND" between different attribute types, 
-      // an RPC or a custom view is better.
-      let filterParts = []
-      if (colors.length > 0) filterParts.push(`attribute_options.value.in.(${colors.join(',')})`)
-      if (sizes.length > 0) filterParts.push(`attribute_options.value.in.(${sizes.join(',')})`)
-      
-      // Note: This logic might need refinement based on exact schema requirements
+        query = query.lte('price', maxPrice)
     }
 
     // 4. Sorting
@@ -143,6 +183,10 @@ export async function GET(request: Request) {
       query = query.order('price', { ascending: false })
     } else if (sort === 'newest') {
       query = query.order('created_at', { ascending: false })
+    } else if (sort === 'bestsellers') {
+      query = query.order('reviews_count', { ascending: false })
+    } else if (sort === 'featured') {
+      query = query.order('featured', { ascending: false })
     } else {
       query = query.order('created_at', { ascending: false })
     }
@@ -199,7 +243,7 @@ export async function GET(request: Request) {
         slug: p.slug,
         image: p.images?.[0] || '/placeholder.jpg',
         category: categorySlug,
-        status: p.status,
+        status: p.status || 'draft',
         hasVariants: hasVariants,
         inStock: totalStock > 0,
         stock_count: totalStock,

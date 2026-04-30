@@ -1,4 +1,3 @@
-
 import {
     Pagination,
     PaginationContent,
@@ -9,6 +8,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import { cn } from "@/lib/utils"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface ProductPaginationProps {
     currentPage: number
@@ -25,7 +25,6 @@ export function ProductPagination({ currentPage, totalPages, onPageChange }: Pro
                 pages.push(i)
             }
         } else {
-            // Logic for many pages (simplified for MVP)
             if (currentPage <= 3) {
                 pages.push(1, 2, 3, 4, '...', totalPages)
             } else if (currentPage >= totalPages - 2) {
@@ -40,59 +39,58 @@ export function ProductPagination({ currentPage, totalPages, onPageChange }: Pro
     if (totalPages <= 1) return null
 
     return (
-        <Pagination className="mt-20 border-t border-primary/10 pt-12">
-            <PaginationContent className="gap-2">
+        <Pagination className="mt-20 pt-12 border-t border-gray-100">
+            <PaginationContent className="gap-3">
                 <PaginationItem>
-                    <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            if (currentPage > 1) onPageChange(currentPage - 1)
-                        }}
+                    <button
+                        onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
                         className={cn(
-                            "rounded-none border-primary/20 text-primary hover:bg-primary hover:text-white transition-all uppercase tracking-widest text-[10px] font-bold px-6",
-                            currentPage === 1 ? "pointer-events-none opacity-30" : "cursor-pointer"
+                            "group flex items-center justify-center w-10 h-10 rounded-full border border-gray-100 transition-all duration-300",
+                            currentPage === 1 
+                                ? "opacity-20 cursor-not-allowed" 
+                                : "hover:border-primary hover:bg-primary hover:text-white"
                         )}
-                    />
+                        aria-label="Previous page"
+                    >
+                        <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                    </button>
                 </PaginationItem>
 
                 {getPageNumbers().map((page, index) => (
                     <PaginationItem key={index}>
                         {page === '...' ? (
-                            <PaginationEllipsis className="text-primary/40" />
+                            <PaginationEllipsis className="text-primary/20" />
                         ) : (
-                            <PaginationLink
-                                href="#"
-                                isActive={currentPage === page}
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    onPageChange(page as number)
-                                }}
+                            <button
+                                onClick={() => onPageChange(page as number)}
                                 className={cn(
-                                    "rounded-none w-10 h-10 flex items-center justify-center font-sans text-xs font-bold transition-all",
+                                    "w-10 h-10 rounded-full flex items-center justify-center font-sans text-xs font-bold transition-all duration-300 border",
                                     currentPage === page 
-                                        ? "bg-primary text-white border-primary" 
-                                        : "border-primary/10 text-text-secondary hover:border-primary/40 hover:text-primary"
+                                        ? "bg-primary text-white border-primary shadow-lg shadow-black/10 scale-110" 
+                                        : "border-transparent text-primary/40 hover:text-primary hover:border-gray-100"
                                 )}
                             >
                                 {page}
-                            </PaginationLink>
+                            </button>
                         )}
                     </PaginationItem>
                 ))}
 
                 <PaginationItem>
-                    <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            if (currentPage < totalPages) onPageChange(currentPage + 1)
-                        }}
+                    <button
+                        onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
                         className={cn(
-                            "rounded-none border-primary/20 text-primary hover:bg-primary hover:text-white transition-all uppercase tracking-widest text-[10px] font-bold px-6",
-                            currentPage === totalPages ? "pointer-events-none opacity-30" : "cursor-pointer"
+                            "group flex items-center justify-center w-10 h-10 rounded-full border border-gray-100 transition-all duration-300",
+                            currentPage === totalPages 
+                                ? "opacity-20 cursor-not-allowed" 
+                                : "hover:border-primary hover:bg-primary hover:text-white"
                         )}
-                    />
+                        aria-label="Next page"
+                    >
+                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                    </button>
                 </PaginationItem>
             </PaginationContent>
         </Pagination>

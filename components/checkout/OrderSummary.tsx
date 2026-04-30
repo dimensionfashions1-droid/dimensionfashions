@@ -26,10 +26,11 @@ export function OrderSummary({ items, subtotal, shipping = 0, discount = 0 }: Or
                     <div key={item.id} className="flex gap-5 items-start">
                         <div className="relative h-20 w-16 flex-shrink-0 bg-white rounded-xl overflow-hidden border border-primary/5">
                             <Image
-                                src={item.image}
+                                src={item.image || '/placeholder.jpg'}
                                 alt={item.title}
                                 fill
                                 className="object-cover"
+                                unoptimized
                             />
                             <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 rounded-full bg-primary text-secondary text-[9px] border-0 font-bold shadow-md">
                                 {item.quantity}
@@ -38,8 +39,15 @@ export function OrderSummary({ items, subtotal, shipping = 0, discount = 0 }: Or
                         <div className="flex-1 min-w-0 space-y-1 py-1">
                             <p className="text-[11px] font-sans font-bold text-primary uppercase tracking-widest truncate leading-tight">{item.title}</p>
                             <div className="flex flex-wrap gap-3 text-[9px] uppercase tracking-[0.1em] text-primary/40 font-bold font-sans">
-                                {item.size && <span>{item.size}</span>}
-                                {item.color && <span>• {item.color}</span>}
+                                {item.selectedAttributes?.size && (
+                                    <span>{item.selectedAttributes.size}</span>
+                                )}
+                                {item.selectedAttributes?.color && (
+                                    <span>
+                                        {item.selectedAttributes.size ? "• " : ""}
+                                        {item.selectedAttributes.color}
+                                    </span>
+                                )}
                             </div>
                         </div>
                         <p className="text-[11px] font-sans font-bold text-primary py-1 tracking-widest">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
@@ -63,7 +71,7 @@ export function OrderSummary({ items, subtotal, shipping = 0, discount = 0 }: Or
                 {shipping !== 0 && (
                     <div className="flex justify-between text-primary/50">
                         <span>Shipping</span>
-                        <span className="text-primary lowercase">
+                        <span className="text-primary uppercase">
                             ₹{shipping.toLocaleString("en-IN")}
                         </span>
                     </div>

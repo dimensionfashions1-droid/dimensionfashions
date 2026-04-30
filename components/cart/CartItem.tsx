@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 import { Minus, Plus, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,18 +12,30 @@ interface CartItemProps {
     item: CartItemType
     onUpdateQuantity: (id: string, quantity: number) => void
     onRemove: (id: string) => void
+    isOutOfStock?: boolean
 }
 
-export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
+export function CartItem({ item, onUpdateQuantity, onRemove, isOutOfStock }: CartItemProps) {
     return (
-        <div className="flex gap-6 p-6 bg-white border border-primary/5 rounded-2xl transition-all duration-300 hover:border-accent/20 group">
+        <div className={cn(
+            "flex gap-6 p-6 bg-white border rounded-2xl transition-all duration-300 group relative",
+            isOutOfStock 
+                ? "border-red-100 bg-red-50/30 opacity-70" 
+                : "border-primary/5 hover:border-accent/20"
+        )}>
+            {isOutOfStock && (
+                <div className="absolute top-4 left-4 z-10 bg-red-600 text-white text-[7px] font-sans font-bold uppercase tracking-[0.2em] px-2 py-1 rounded-sm shadow-lg">
+                    Unavailable
+                </div>
+            )}
             {/* Image */}
             <div className="relative aspect-[3/4] w-28 sm:w-36 flex-shrink-0 overflow-hidden rounded-xl bg-primary/5">
                 <Image
-                    src={item.image}
+                    src={item.image || '/placeholder.jpg'}
                     alt={item.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    unoptimized
                 />
             </div>
 
@@ -31,27 +44,18 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
                 <div className="flex justify-between items-start gap-4">
                     <div className="space-y-3">
                         <h3 className="font-heading font-normal text-lg sm:text-xl text-primary tracking-tight leading-tight">
-                            <Link href={`/product/${item.productId}`} className="hover:text-accent transition-colors">
+                            <Link href={`/product/${item.slug || item.productId}`} className="hover:text-accent transition-colors">
                                 {item.title}
                             </Link>
                         </h3>
 
                         <div className="flex flex-wrap gap-6 text-sm">
-                            {item.size && (
-                                <div className="flex flex-col gap-1">
-                                    <span className="font-sans font-bold uppercase text-[9px] tracking-[0.2em] text-primary/40">Size</span>
-                                    <span className="text-primary font-sans font-bold text-xs uppercase tracking-wider">{item.size}</span>
+                            {item.selectedAttributes && Object.entries(item.selectedAttributes).map(([key, value]) => (
+                                <div key={key} className="flex flex-col gap-1">
+                                    <span className="font-sans font-bold uppercase text-[9px] tracking-[0.2em] text-primary/40">{key}</span>
+                                    <span className="text-primary font-sans font-bold text-xs uppercase tracking-wider">{value}</span>
                                 </div>
-                            )}
-                            {item.color && (
-                                <div className="flex flex-col gap-1">
-                                    <span className="font-sans font-bold uppercase text-[9px] tracking-[0.2em] text-primary/40">Color</span>
-                                    <span className="text-primary font-sans font-bold text-xs uppercase tracking-wider">{item.color}</span>
-                                </div>
-                            )}
-                            {item.variant && (
-                                <p className="text-xs">{item.variant}</p>
-                            )}
+                            ))}
                         </div>
                     </div>
                     <p className="font-sans font-bold text-primary text-lg tracking-widest">

@@ -7,11 +7,12 @@ import { Product, ProductRow } from "@/types"
 interface RelatedProductsProps {
     currentProductId: string
     categorySlug?: string
+    isAuthenticated?: boolean
 }
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-export function RelatedProducts({ currentProductId, categorySlug }: RelatedProductsProps) {
+export function RelatedProducts({ currentProductId, categorySlug, isAuthenticated }: RelatedProductsProps) {
     // Fetch products from the same category
     const { data: response, isLoading } = useSWR(
         categorySlug ? `/api/products?category=${categorySlug}&limit=5` : null,
@@ -39,12 +40,12 @@ export function RelatedProducts({ currentProductId, categorySlug }: RelatedProdu
     if (products.length === 0) return null
 
     return (
-        <div className="py-20 border-t border-primary/5">
-            <h2 className="font-heading font-normal text-3xl md:text-4xl uppercase tracking-[0.1em] mb-16 text-primary">You May Also <span>Like</span></h2>
+        <div className="py-10 border-t border-primary/5">
+            <h2 className="font-heading font-normal text-2xl md:text-3xl uppercase tracking-[0.1em] mb-16 text-primary">You May Also <span>Like</span></h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
                 {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard key={product.id} product={product} isAuthenticated={isAuthenticated} />
                 ))}
             </div>
         </div>

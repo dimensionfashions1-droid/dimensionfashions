@@ -110,8 +110,9 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
       setDescription(p.description || "")
       setPrice(p.price?.toString() || "")
       setOriginalPrice(p.original_price?.toString() || "")
-      setStatus(p.status || "draft")
-
+      setStatus(
+        p.status ? p.status.toLowerCase() as "draft" | "published" : "draft"
+      )
       // Ensure category IDs are strings for the Select component
       setCategoryId(p.category_id ? p.category_id.toString() : undefined)
       setSubcategoryId(p.subcategory_id ? p.subcategory_id.toString() : undefined)
@@ -428,10 +429,9 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
             </div>
             <div className="space-y-2">
               <Label className="text-zinc-300">Status</Label>
-              <Select value={status} onValueChange={(val: any) => setStatus(val)}>
-                <SelectTrigger className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
+              <Select value={status} onValueChange={(val) => setStatus(val as "draft" | "published")}>                <SelectTrigger className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
                 <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl">
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="published">Published</SelectItem>

@@ -9,37 +9,51 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useCart } from "@/hooks/use-cart"
+import { useToast } from "@/hooks/use-toast"
+import { Loader2, AlertCircle } from "lucide-react"
 import { CheckoutForm } from "@/components/checkout/CheckoutForm"
 import { OrderSummary } from "@/components/checkout/OrderSummary"
-import { CartItem } from "@/types"
-
-// Temporary mock data for checkout items (should come from same source/context as cart)
-const MOCK_CART_ITEMS: CartItem[] = [
-    {
-        id: "1",
-        productId: "1",
-        title: "Midnight Bloom Kanjivaram",
-        price: 18499,
-        image: "https://www.sourcesplash.com/i/random?q=kanjivaram-saree,indian-model&w=1200&h=1600",
-        quantity: 1,
-        size: "Standard",
-        color: "Maroon"
-    },
-    {
-        id: "2",
-        productId: "2",
-        title: "Zari Weave Lehenga",
-        price: 24999,
-        image: "https://www.sourcesplash.com/i/random?q=lehenga,indian-wedding,bridal&w=1200&h=1600",
-        quantity: 1,
-        size: "Standard",
-        color: "Gold"
-    }
-]
 
 export default function CheckoutPage() {
-    // Calculate subtotal
-    const subtotal = MOCK_CART_ITEMS.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+    const cart = useCart()
+    const router = useRouter()
+    const { toast } = useToast()
+    const [isMounted, setIsMounted] = useState(false)
+    const [isValidating, setIsValidating] = useState(true)
+    const [stockError, setStockError] = useState<string | null>(null)
+
+    useEffect(() => {
+        setIsMounted(true)
+        
+        // Wait for cart to be ready
+        // If authenticated, we MUST wait for isSynced
+        // If not authenticated, we can proceed as soon as mounted (localStorage is sync)
+        const isCartReady = cart.isAuthenticated ? cart.isSynced : true
+
+        if (isCartReady) {
+            if (cart.items.length === 0) {
+                router.push('/cart') // Redirect back to cart instead of products
+                return
+            }
+            setIsValidating(false)
+        }
+    }, [cart.items, cart.isSynced, cart.isAuthenticated, router])
+
+    if (!isMounted || isValidating) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white">
+                <Loader2 className="w-8 h-8 animate-spin text-accent" />
+                <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-primary/40 font-sans">Preparing Secure Checkout...</p>
+            </div>
+        )
+    }
+
+    const subtotal = cart.getTotalPrice()
+    const shipping = 0 // Could be dynamic
+    const total = subtotal + shipping
 
     return (
         <div className="min-h-screen bg-white pt-10 pb-20">
@@ -64,17 +78,24 @@ export default function CheckoutPage() {
                     <h1 className="font-heading font-normal text-2xl md:text-4xl text-primary uppercase tracking-[0.05em]">Secure <span>Checkout</span></h1>
                 </div>
 
+                {stockError && (
+                    <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-sans font-bold uppercase tracking-wider">
+                        <AlertCircle className="w-5 h-5" />
+                        {stockError}
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
                     {/* Left Section: Checkout Form */}
                     <div className="lg:col-span-2">
                         <div className="bg-white border border-accent/20 rounded-[2.5rem] p-6 md:p-10 shadow-lg shadow-accent/5">
-                            <CheckoutForm />
+                            <CheckoutForm cartItems={cart.items} subtotal={subtotal} shippingCost={shipping} totalAmount={total} />
                         </div>
                     </div>
 
                     {/* Right Section: Order Summary */}
                     <div className="lg:col-span-1">
-                        <OrderSummary items={MOCK_CART_ITEMS} subtotal={subtotal} shipping={0} />
+                        <OrderSummary items={cart.items} subtotal={subtotal} shipping={shipping} />
                     </div>
                 </div>
             </div>

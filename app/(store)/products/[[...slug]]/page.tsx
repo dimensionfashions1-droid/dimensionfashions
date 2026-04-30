@@ -19,6 +19,7 @@ import { useSearchParams, useRouter, usePathname, useParams } from "next/navigat
 import useSWR from "swr"
 import { useDebounce } from "use-debounce"
 import { ProductRow, Product } from "@/types"
+import { createClient } from "@/lib/supabase/client"
 
 // Frontend-friendly Product interface extending the DB row
 interface FilteredProduct {
@@ -45,14 +46,44 @@ export default function ProductsPage() {
     const router = useRouter()
     const pathname = usePathname()
     const params = useParams()
-    
+
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+    useEffect(() => {
+        const checkUser = async () => {
+            try {
+                const supabase = createClient()
+                const { data } = await supabase.auth.getUser()
+                setIsAuthenticated(!!data?.user)
+            } catch (err) {
+                console.error("Auth check failed:", err)
+            }
+        }
+        checkUser()
+    }, [])
+
     // Extract category and subcategory from slug: /products/[[...slug]]
     const slug = params.slug as string[] | undefined
     const categoryFromUrl = slug?.[0] || null
     const subcategoryFromUrl = slug?.[1] || null
 
     const [sort, setSort] = useState(searchParams.get("sort") || "newest")
-    const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1)
+    
+    // Sync sort with URL
+    useEffect(() => {
+        const urlSort = searchParams.get("sort")
+        if (urlSort && urlSort !== sort) {
+            setSort(urlSort)
+        }
+    }, [searchParams])
+
+    const [currentPage, setCurrentPage] = useState(1)
+
+    // Sync currentPage with URL searchParams
+    useEffect(() => {
+        const page = Number(searchParams.get("page")) || 1
+        setCurrentPage(page)
+    }, [searchParams])
 
     // Filter State
     const [selectedCategories, setSelectedCategories] = useState<string[]>(
@@ -69,24 +100,38 @@ export default function ProductsPage() {
         } else {
             setSelectedCategories([])
         }
-        
+
         if (subcategoryFromUrl) {
             setSelectedSubcategories([subcategoryFromUrl])
         } else {
             setSelectedSubcategories([])
         }
+        // Reset to page 1 when category changes via URL
+        setCurrentPage(1)
     }, [categoryFromUrl, subcategoryFromUrl])
-    const [selectedSizes, setSelectedSizes] = useState<string[]>([])
-    const [selectedColors, setSelectedColors] = useState<string[]>([])
+
+    const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string[]>>({})
     const [priceRange, setPriceRange] = useState([0, 100000])
 
     const [debouncedPriceRange] = useDebounce(priceRange, 500)
     const searchString = searchParams.get("search")
 
+    // Reset to page 1 when filters or sort change
+    useEffect(() => {
+        // Only reset if we are not already on page 1
+        // and this wasn't triggered by a searchParams change that ALREADY has a page
+        const urlPage = Number(searchParams.get("page")) || 1
+        if (urlPage === 1 && currentPage !== 1) {
+            // This means we probably just cleared filters or changed something that led us back to page 1
+            setCurrentPage(1)
+        }
+    }, [debouncedPriceRange, sort, selectedAttributes, searchString])
+
+
     // Build URL for SWR
     const queryString = new URLSearchParams()
     queryString.append("page", currentPage.toString())
-    queryString.append("limit", "8")
+    queryString.append("limit", "12")
     queryString.append("sort", sort)
     if (searchString) queryString.append("search", searchString)
     if (selectedCategories.length > 0 && !selectedCategories.includes("all")) {
@@ -95,9 +140,14 @@ export default function ProductsPage() {
     if (selectedSubcategories.length > 0) {
         queryString.append("subcategory", selectedSubcategories[0])
     }
-    if (selectedSizes.length > 0) queryString.append("sizes", selectedSizes.join(","))
-    if (selectedColors.length > 0) queryString.append("colors", selectedColors.join(","))
-    
+
+    // Add dynamic attributes to query string
+    Object.entries(selectedAttributes).forEach(([slug, values]) => {
+        if (values.length > 0) {
+            queryString.append(slug, values.join(","))
+        }
+    })
+
     // Always include debounced price unless it's exactly 0-100000 (default max breadth)
     if (debouncedPriceRange[0] > 0) queryString.append("minPrice", debouncedPriceRange[0].toString())
     if (debouncedPriceRange[1] < 100000) queryString.append("maxPrice", debouncedPriceRange[1].toString())
@@ -139,14 +189,10 @@ export default function ProductsPage() {
                 router.push(`/products`)
             }
         },
-        selectedSizes,
-        setSelectedSizes,
-        selectedColors,
-        setSelectedColors,
+        selectedAttributes,
+        setSelectedAttributes,
         priceRange,
         setPriceRange,
-        availableColors: meta?.filters?.colors || [],
-        availableSizes: meta?.filters?.sizes || [],
         absoluteMinPrice: meta?.minPrice || 0,
         absoluteMaxPrice: meta?.maxPrice || 100000
     }
@@ -181,16 +227,20 @@ export default function ProductsPage() {
                                     </BreadcrumbItem>
                                 </>
                             )}
-                            </BreadcrumbList>
+                        </BreadcrumbList>
                     </Breadcrumb>
 
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
-                        <div className="space-y-4">
-                            <span className="text-accent uppercase tracking-[0.4em] text-[12px] font-bold font-sans">Explore our Products</span>
-
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
+                        <div className="space-y-2">
+                            <span className="text-accent uppercase tracking-[0.4em] text-[10px] font-bold font-sans">Explore our collections</span>
+                            <h1 className="font-heading text-4xl md:text-5xl text-primary capitalize tracking-tight">
+                                {subcategoryFromUrl || categoryFromUrl || "All Collections"}
+                            </h1>
                         </div>
-                        <div className="flex items-center gap-6">
-                            <FiltersSidebar isMobile {...filterProps} />
+                        <div className="flex items-center gap-3">
+                            <div className="lg:hidden">
+                                <FiltersSidebar isMobile {...filterProps} />
+                            </div>
                             <SortDropdown currentSort={sort} onSortChange={setSort} />
                         </div>
                     </div>
@@ -221,14 +271,16 @@ export default function ProductsPage() {
 
                                 {products.length > 0 ? (
                                     <>
-                                        <ProductGrid products={products} />
+                                        <ProductGrid products={products} isAuthenticated={isAuthenticated} />
 
                                         {totalPages > 1 && (
                                             <ProductPagination
                                                 currentPage={currentPage}
                                                 totalPages={totalPages}
                                                 onPageChange={(page) => {
-                                                    setCurrentPage(page)
+                                                    const params = new URLSearchParams(searchParams.toString())
+                                                    params.set("page", page.toString())
+                                                    router.push(`${pathname}?${params.toString()}`, { scroll: false })
                                                     window.scrollTo({ top: 0, behavior: 'smooth' })
                                                 }}
                                             />
@@ -236,22 +288,21 @@ export default function ProductsPage() {
                                     </>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-32 text-text-secondary space-y-8">
-                                <p className="text-xl font-heading tracking-wide">No exquisite pieces match your current selection.</p>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setSelectedCategories([])
-                                        setSelectedSizes([])
-                                        setSelectedColors([])
-                                        setPriceRange([0, 100000])
-                                    }}
-                                    className="inline-flex items-center justify-center bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] px-10 py-4 flex-shrink-0 h-12 rounded-full transition-all duration-500 hover:bg-black"
-                                >
-                                    Clear all filters
-                                </Button>
-                            </div>
-                        )}
-                        </>
+                                        <p className="text-xl font-heading tracking-wide">No exquisite pieces match your current selection.</p>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => {
+                                                setSelectedCategories([])
+                                                setSelectedAttributes({})
+                                                setPriceRange([0, 100000])
+                                            }}
+                                            className="inline-flex items-center justify-center bg-primary text-primary text-[10px] font-sans font-bold uppercase tracking-[0.25em] px-10 py-4 flex-shrink-0 h-12 rounded-full transition-all duration-500 hover:bg-black"
+                                        >
+                                            Clear all filters
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </main>
                 </div>

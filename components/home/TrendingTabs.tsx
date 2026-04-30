@@ -18,9 +18,10 @@ export interface CategoryData {
 interface TrendingTabsProps {
     initialCategories: CategoryData[];
     initialProducts: Product[];
+    isAuthenticated?: boolean;
 }
 
-export function TrendingTabs({ initialCategories, initialProducts }: TrendingTabsProps) {
+export function TrendingTabs({ initialCategories, initialProducts, isAuthenticated }: TrendingTabsProps) {
     const tabs = initialCategories && initialCategories.length > 0 ? initialCategories : FALLBACK_TABS;
     
     if (tabs.length === 0) return null;
@@ -107,7 +108,7 @@ export function TrendingTabs({ initialCategories, initialProducts }: TrendingTab
                                         <CarouselContent className="-ml-4 md:-ml-6">
                                             {tabProducts.map((product) => (
                                                 <CarouselItem key={product.id} className="pl-4 md:pl-6 basis-full sm:basis-1/2 lg:basis-1/4">
-                                                    <ProductCard product={product} />
+                                                    <ProductCard product={product} isAuthenticated={isAuthenticated} />
                                                 </CarouselItem>
                                             ))}
                                         </CarouselContent>

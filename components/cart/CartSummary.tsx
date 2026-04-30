@@ -5,14 +5,16 @@ import { ArrowRight, ShoppingBag } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
 interface CartSummaryProps {
     subtotal: number
     shipping?: number
     discount?: number
+    disabled?: boolean
 }
 
-export function CartSummary({ subtotal, shipping = 0, discount = 0 }: CartSummaryProps) {
+export function CartSummary({ subtotal, shipping = 0, discount = 0, disabled = false }: CartSummaryProps) {
     const total = subtotal + shipping - discount
 
     return (
@@ -32,8 +34,8 @@ export function CartSummary({ subtotal, shipping = 0, discount = 0 }: CartSummar
                 )}
                 {shipping !== 0 && (<div className="flex justify-between text-primary/50">
                     <span>Shipping</span>
-                    <span className="text-primary lowercase">
-                        `₹${shipping.toLocaleString("en-IN")}`
+                    <span className="text-primary uppercase">
+                        ₹{shipping.toLocaleString("en-IN")}
                     </span>
                 </div>)}
             </div>
@@ -45,11 +47,26 @@ export function CartSummary({ subtotal, shipping = 0, discount = 0 }: CartSummar
                 <span className="font-sans font-semibold text-xl text-accent tracking-tighter">₹{total.toLocaleString("en-IN")}</span>
             </div>
 
-            <Button className="w-full bg-accent text-white hover:bg-accent/90 font-sans font-bold uppercase tracking-[0.3em] text-[12px] h-14 rounded-full transition-all duration-500 shadow-lg shadow-accent/20" asChild>
-                <Link href="/checkout">
-                    Checkout Now
-                    <ArrowRight className="ml-3 h-3.5 w-3.5" />
-                </Link>
+            <Button 
+                className={cn(
+                    "w-full font-sans font-bold uppercase tracking-[0.3em] text-[12px] h-14 rounded-full transition-all duration-500 shadow-lg",
+                    disabled 
+                        ? "bg-primary/20 text-primary/40 cursor-not-allowed shadow-none" 
+                        : "bg-accent text-white hover:bg-accent/90 shadow-accent/20"
+                )} 
+                asChild={!disabled}
+                disabled={disabled}
+            >
+                {disabled ? (
+                    <span className="flex items-center gap-2">
+                         Checkout Restricted
+                    </span>
+                ) : (
+                    <Link href="/checkout">
+                        Checkout Now
+                        <ArrowRight className="ml-3 h-3.5 w-3.5" />
+                    </Link>
+                )}
             </Button>
 
             <div className="text-center">

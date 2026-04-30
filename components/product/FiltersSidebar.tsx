@@ -14,6 +14,7 @@ import {
     SheetTrigger
 } from "@/components/ui/sheet"
 import { Filter } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface FetchedCategory {
     id: string
@@ -40,10 +41,8 @@ interface FiltersSidebarProps {
     isMobile?: boolean
     selectedCategories: string[]
     setSelectedCategories: (categories: string[]) => void
-    selectedSizes: string[]
-    setSelectedSizes: (sizes: string[]) => void
-    selectedColors: string[]
-    setSelectedColors: (colors: string[]) => void
+    selectedAttributes: Record<string, string[]>
+    setSelectedAttributes: (attributes: Record<string, string[]>) => void
     priceRange: number[]
     setPriceRange: (range: number[]) => void
 }
@@ -53,16 +52,13 @@ export function FiltersSidebar({
     isMobile = false,
     selectedCategories,
     setSelectedCategories,
-    selectedSizes,
-    setSelectedSizes,
-    selectedColors,
-    setSelectedColors,
+    selectedAttributes,
+    setSelectedAttributes,
     priceRange,
     setPriceRange
 }: FiltersSidebarProps) {
     const [categories, setCategories] = useState<FetchedCategory[]>([])
-    const [colors, setColors] = useState<FetchedAttributeOption[]>([])
-    const [sizes, setSizes] = useState<FetchedAttributeOption[]>([])
+    const [filterableAttributes, setFilterableAttributes] = useState<FetchedAttribute[]>([])
 
     useEffect(() => {
         const fetchFilters = async () => {
@@ -80,12 +76,8 @@ export function FiltersSidebar({
                 if (attrRes.ok) {
                     const attrData = await attrRes.json()
                     const attrs: FetchedAttribute[] = attrData.data || []
-                    
-                    const colorAttr = attrs.find(a => a.slug === 'color')
-                    if (colorAttr) setColors(colorAttr.options)
-                    
-                    const sizeAttr = attrs.find(a => a.slug === 'size')
-                    if (sizeAttr) setSizes(sizeAttr.options)
+                    // Only show attributes marked as filterable
+                    setFilterableAttributes(attrs.filter(a => a.is_filterable))
                 }
             } catch (error) {
                 console.error("Failed to fetch filters:", error)
@@ -95,34 +87,29 @@ export function FiltersSidebar({
         fetchFilters()
     }, [])
 
-    const handleCategoryChange = (categoryId: string) => {
-        if (selectedCategories.includes(categoryId)) {
-            setSelectedCategories(selectedCategories.filter(id => id !== categoryId))
-        } else {
-            setSelectedCategories([...selectedCategories, categoryId])
-        }
+    const handleCategoryChange = (categorySlug: string) => {
+        setSelectedCategories([categorySlug])
     }
 
-    const handleSizeChange = (size: string) => {
-        if (selectedSizes.includes(size)) {
-            setSelectedSizes(selectedSizes.filter(s => s !== size))
-        } else {
-            setSelectedSizes([...selectedSizes, size])
-        }
-    }
+    const handleAttributeToggle = (attrSlug: string, value: string) => {
+        const currentSelected = selectedAttributes[attrSlug] || []
+        let newSelected: string[]
 
-    const handleColorChange = (color: string) => {
-        if (selectedColors.includes(color)) {
-            setSelectedColors(selectedColors.filter(c => c !== color))
+        if (currentSelected.includes(value)) {
+            newSelected = currentSelected.filter(v => v !== value)
         } else {
-            setSelectedColors([...selectedColors, color])
+            newSelected = [...currentSelected, value]
         }
+
+        setSelectedAttributes({
+            ...selectedAttributes,
+            [attrSlug]: newSelected
+        })
     }
 
     const clearAllFilters = () => {
         setSelectedCategories([])
-        setSelectedSizes([])
-        setSelectedColors([])
+        setSelectedAttributes({})
         setPriceRange([0, 100000])
     }
 
@@ -131,22 +118,31 @@ export function FiltersSidebar({
             {/* Categories */}
             <div className="space-y-8">
                 <h3 className="font-heading font-bold text-[14px] uppercase tracking-[0.25em] text-primary border-b border-primary/10 pb-4 block">Collection</h3>
-                <div className="space-y-5 pt-2">
+                <div className="space-y-4 pt-2">
+                    <button
+                        onClick={() => setSelectedCategories([])}
+                        className={cn(
+                            "w-full text-left text-[11px] uppercase tracking-[0.2em] font-bold transition-all duration-300",
+                            selectedCategories.length === 0 || selectedCategories.includes('all')
+                                ? "text-accent translate-x-1" 
+                                : "text-primary/40 hover:text-primary"
+                        )}
+                    >
+                        All Collections
+                    </button>
                     {categories.map((category) => (
-                        <div key={category.id} className="flex items-center space-x-4 group cursor-pointer">
-                            <Checkbox
-                                id={category.id}
-                                checked={selectedCategories.includes(category.id)}
-                                onCheckedChange={() => handleCategoryChange(category.id)}
-                                className="rounded-none w-4 h-4 data-[state=checked]:bg-primary data-[state=checked]:text-white border-primary/10"
-                            />
-                            <Label
-                                htmlFor={category.id}
-                                className="text-[11px] uppercase tracking-[0.15em] text-primary/80 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
-                            >
-                                {category.name}
-                            </Label>
-                        </div>
+                        <button
+                            key={category.id}
+                            onClick={() => handleCategoryChange(category.slug)}
+                            className={cn(
+                                "w-full text-left text-[11px] uppercase tracking-[0.2em] font-bold transition-all duration-300",
+                                selectedCategories.includes(category.slug)
+                                    ? "text-accent translate-x-1" 
+                                    : "text-primary/40 hover:text-primary"
+                            )}
+                        >
+                            {category.name}
+                        </button>
                     ))}
                 </div>
             </div>
@@ -170,32 +166,48 @@ export function FiltersSidebar({
                 </div>
             </div>
 
-            {/* Colors */}
-            <div className="space-y-8">
-                <h3 className="font-heading font-bold text-[14px] uppercase tracking-[0.25em] text-primary border-b border-primary/10 pb-4 block">Color Palette</h3>
-                <div className="grid grid-cols-2 gap-y-6 pt-2">
-                    {colors.map((color) => (
-                        <div key={color.value} className="flex items-center space-x-4 group cursor-pointer">
-                            <Checkbox
-                                id={`color-${color.value}`}
-                                checked={selectedColors.includes(color.value)}
-                                onCheckedChange={() => handleColorChange(color.value)}
-                                className="rounded-full w-4 h-4 data-[state=checked]:bg-primary data-[state=checked]:text-white border-primary/10"
-                            />
-                            <Label
-                                htmlFor={`color-${color.value}`}
-                                className="flex items-center gap-3 text-[11px] uppercase tracking-[0.1em] text-primary/80 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
-                            >
-                                <div
-                                    className="w-3 h-3 rounded-full border border-primary/10"
-                                    style={{ backgroundColor: color.hex_code || color.value.toLowerCase() }}
-                                />
-                                <span>{color.value}</span>
-                            </Label>
-                        </div>
-                    ))}
+            {/* Dynamic Attributes (Colors, Sizes, etc.) */}
+            {filterableAttributes.map((attr) => (
+                <div key={attr.id} className="space-y-8">
+                    <h3 className="font-heading font-bold text-[14px] uppercase tracking-[0.25em] text-primary border-b border-primary/10 pb-4 block">
+                        {attr.slug === 'color' ? 'Color Palette' : attr.name}
+                    </h3>
+                    <div className={cn(
+                        "pt-2",
+                        attr.slug === 'color' ? "grid grid-cols-2 gap-y-6" : "space-y-5"
+                    )}>
+                        {attr.options.map((option) => {
+                            const isChecked = (selectedAttributes[attr.slug] || []).includes(option.value);
+
+                            return (
+                                <div key={option.id} className="flex items-center space-x-4 group cursor-pointer">
+                                    <Checkbox
+                                        id={`${attr.slug}-${option.value}`}
+                                        checked={isChecked}
+                                        onCheckedChange={() => handleAttributeToggle(attr.slug, option.value)}
+                                        className={cn(
+                                            attr.slug === 'color' ? "rounded-full" : "rounded-none",
+                                            "w-4 h-4 data-[state=checked]:bg-primary data-[state=checked]:text-white border-primary/10"
+                                        )}
+                                    />
+                                    <Label
+                                        htmlFor={`${attr.slug}-${option.value}`}
+                                        className="flex items-center gap-3 text-[11px] uppercase tracking-[0.1em] text-primary/80 group-hover:text-primary font-bold cursor-pointer transition-colors font-sans"
+                                    >
+                                        {attr.slug === 'color' && (
+                                            <div
+                                                className="w-3 h-3 rounded-full border border-primary/10"
+                                                style={{ backgroundColor: option.hex_code || option.value.toLowerCase() }}
+                                            />
+                                        )}
+                                        <span>{option.value}</span>
+                                    </Label>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            ))}
 
             {/* Clear Filters */}
             <Button
@@ -211,19 +223,22 @@ export function FiltersSidebar({
         return (
             <Sheet>
                 <SheetTrigger asChild>
-                    <Button variant="outline" className="lg:hidden rounded-none border-primary/20 text-primary hover:bg-primary hover:text-white transition-all px-8">
-                        <Filter className="w-4 h-4 mr-2" />
-                        Refine
+                    <Button 
+                        variant="outline" 
+                        size="icon"
+                        className="lg:hidden rounded-full border-primary/10 text-primary hover:bg-primary hover:text-white transition-all w-12 h-12 shadow-sm bg-white"
+                    >
+                        <Filter className="w-5 h-5" />
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] border-primary/10 bg-surface overflow-y-auto">
-                    <SheetHeader className="text-left pb-8 border-b border-primary/5">
+                <SheetContent side="left" className="w-[320px] border-none bg-white p-0 overflow-y-auto">
+                    <SheetHeader className="text-left p-8 border-b border-gray-100 bg-gray-50/50">
                         <SheetTitle className="font-heading font-normal text-2xl tracking-wide text-primary">Filters</SheetTitle>
-                        <SheetDescription className="text-text-secondary/70 font-sans text-xs uppercase tracking-widest pt-1">
-                            Refine your search for the perfect look
+                        <SheetDescription className="text-primary/50 font-sans text-[10px] uppercase tracking-[0.2em] pt-1">
+                            Curate your selection
                         </SheetDescription>
                     </SheetHeader>
-                    <div className="py-10">
+                    <div className="p-8 pb-20">
                         <FilterContent />
                     </div>
                 </SheetContent>

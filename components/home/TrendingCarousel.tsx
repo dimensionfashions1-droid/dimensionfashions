@@ -9,9 +9,10 @@ import Link from "next/link"
 interface TrendingCarouselProps {
     title: string
     products: Product[]
+    isAuthenticated?: boolean
 }
 
-export function TrendingCarousel({ title, products }: TrendingCarouselProps) {
+export function TrendingCarousel({ title, products, isAuthenticated }: TrendingCarouselProps) {
     return (
         <section className="py-24 md:py-40 bg-primary/5">
             <div className="container mx-auto px-6 md:px-12">
@@ -43,7 +44,7 @@ export function TrendingCarousel({ title, products }: TrendingCarouselProps) {
                     <CarouselContent className="-ml-8">
                         {products.map((product) => (
                             <CarouselItem key={product.id} className="pl-8 md:basis-1/2 lg:basis-1/4">
-                                <ProductCard product={product} />
+                                <ProductCard product={product} isAuthenticated={isAuthenticated} />
                             </CarouselItem>
                         ))}
                     </CarouselContent>

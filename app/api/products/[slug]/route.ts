@@ -180,6 +180,7 @@ export async function GET(
     // Process the raw product data to format attributes cleanly for the frontend
     const formattedProduct = {
       ...product,
+      status: product.status || 'draft',
       computed_rating: averageRating,
       variants: formattedVariants,
       attributes: (rawAttributes || []).reduce<Record<string, FormattedAttribute>>((acc, pa) => {
