@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -17,6 +19,7 @@ export async function GET() {
       items:order_items(*)
     `)
     .eq('user_id', user.id)
+    .neq('payment_status', 'pending')
     .order('created_at', { ascending: false })
 
   if (error) {

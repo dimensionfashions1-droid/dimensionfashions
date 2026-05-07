@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { CreditCard, Truck, Wallet, Loader2, Plus, MapPin, CheckCircle2 } from "lucide-react"
+import { CreditCard, Wallet, Loader2, Plus, CheckCircle2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
@@ -43,15 +43,26 @@ interface CheckoutFormProps {
     subtotal: number
     shippingCost: number
     totalAmount: number
+    paymentMethod: 'upi' | 'cod'
+    setPaymentMethod: (m: 'upi' | 'cod') => void
+    codCharge: number
 }
 
 declare global {
-  interface Window {
-    Razorpay: any;
-  }
+    interface Window {
+        Razorpay: any;
+    }
 }
 
-export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }: CheckoutFormProps) {
+export function CheckoutForm({
+    cartItems,
+    subtotal,
+    shippingCost,
+    totalAmount,
+    paymentMethod,
+    setPaymentMethod,
+    codCharge
+}: CheckoutFormProps) {
     const { toast } = useToast()
     const router = useRouter()
     const cart = useCart()
@@ -108,7 +119,9 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
         script.async = true
         document.body.appendChild(script)
         return () => {
-            document.body.removeChild(script)
+            if (document.body.contains(script)) {
+                document.body.removeChild(script)
+            }
         }
     }, [])
 
@@ -159,7 +172,7 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                             is_default: addresses.length === 0
                         })
                     })
-                    
+
                     if (saveAddrRes.ok) {
                         const { data: savedAddr } = await saveAddrRes.json()
                         finalAddress = savedAddr
@@ -196,7 +209,9 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                     address: finalAddress,
                     subtotal,
                     shippingCost,
-                    totalAmount
+                    totalAmount,
+                    paymentMethod,
+                    codExtraCharge: codCharge
                 })
             })
 
@@ -215,7 +230,18 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                 throw new Error(orderData.error || "Failed to initiate order")
             }
 
-            // C. Open Razorpay Checkout
+            // C. Handle COD
+            if (paymentMethod === 'cod') {
+                cart.clearCart()
+                toast({
+                    title: "Order Placed Successfully",
+                    description: "Your order has been placed. Payment will be collected on delivery."
+                })
+                router.push(`/order-confirmation/${orderData.orderNumber}`)
+                return
+            }
+
+            // D. Open Razorpay Checkout for Prepaid
             if (!window.Razorpay) {
                 throw new Error("Razorpay SDK not loaded. Please check your connection.")
             }
@@ -232,6 +258,19 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                 name: "DIMENSION",
                 description: "Luxury Ethnic Wear",
                 order_id: orderData.orderId,
+                config: {
+                    display: {
+                        hide: [
+                            { method: "paylater" },
+                            { method: "emi" },
+                            { method: "netbanking" },
+                            { method: "wallet" }
+                        ],
+                        preferences: {
+                            show_default_blocks: true
+                        }
+                    }
+                },
                 handler: async function (response: any) {
                     // D. Verify Payment on Server
                     const verifyRes = await fetch('/api/payments/verify', {
@@ -245,13 +284,15 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                         })
                     })
 
+                    const verifyData = await verifyRes.json()
+
                     if (verifyRes.ok) {
                         cart.clearCart() // Clear client cart
                         toast({
                             title: "Order Placed Successfully",
                             description: "Your elegance is on its way."
                         })
-                        router.push(isAuthenticated ? `/profile/orders` : `/`)
+                        router.push(`/order-confirmation/${orderData.orderNumber}`)
                     } else {
                         toast({
                             variant: "destructive",
@@ -268,13 +309,20 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                     color: "#111111"
                 },
                 modal: {
-                    ondismiss: function() {
+                    ondismiss: function () {
                         setIsProcessing(false)
                     }
                 }
             }
 
             const rzp = new window.Razorpay(options)
+            rzp.on('payment.failed', function (response: any) {
+                toast({
+                    variant: "destructive",
+                    title: "Payment Declined",
+                    description: response.error.description || "Payment could not be completed."
+                })
+            })
             rzp.open()
 
         } catch (error: any) {
@@ -294,7 +342,7 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                 {/* Shipping Address Selection */}
                 <div className="space-y-6">
                     <h2 className="font-heading font-medium text-xl text-primary uppercase tracking-[0.1em] border-b border-primary/5 pb-4">Shipping Address</h2>
-                    
+
                     {isLoadingAddresses ? (
                         <div className="flex items-center gap-2 text-primary/40 py-4">
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -308,8 +356,8 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                                     onClick={() => setSelectedAddressId(addr.id)}
                                     className={cn(
                                         "relative p-5 rounded-2xl border transition-all duration-300 cursor-pointer flex items-start gap-4",
-                                        selectedAddressId === addr.id 
-                                            ? "border-accent bg-accent/5 ring-1 ring-accent" 
+                                        selectedAddressId === addr.id
+                                            ? "border-accent bg-accent/5 ring-1 ring-accent"
                                             : "border-primary/10 hover:border-primary/30"
                                     )}
                                 >
@@ -338,8 +386,8 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
                                 onClick={() => setSelectedAddressId("new")}
                                 className={cn(
                                     "p-5 rounded-2xl border border-dashed transition-all duration-300 cursor-pointer flex items-center gap-4",
-                                    selectedAddressId === "new" 
-                                        ? "border-accent bg-accent/5 ring-1 ring-accent" 
+                                    selectedAddressId === "new"
+                                        ? "border-accent bg-accent/5 ring-1 ring-accent"
                                         : "border-primary/20 hover:border-primary/40"
                                 )}
                             >
@@ -487,18 +535,42 @@ export function CheckoutForm({ cartItems, subtotal, shippingCost, totalAmount }:
 
                 <Separator className="bg-primary/5" />
 
+                {/* Payment Method Selection */}
+                <div className="space-y-6">
+                    <h2 className="font-heading font-medium text-xl text-primary uppercase tracking-[0.1em] border-b border-primary/5 pb-4">Payment Method</h2>
+
+                    <div className="grid grid-cols-1 gap-4">
+                        <div
+                            className="relative p-6 rounded-2xl border border-accent bg-accent/5 ring-1 ring-accent transition-all duration-300 cursor-default group"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0 bg-accent text-white">
+                                    <CreditCard className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-sans font-bold uppercase tracking-[0.1em] text-primary">Pay Online</p>
+                                    <p className="text-[10px] font-sans font-medium text-primary/40 uppercase tracking-widest mt-1">UPI & Cards Only</p>
+                                </div>
+                            </div>
+                            <CheckCircle2 className="w-4 h-4 text-accent absolute top-4 right-4" />
+                        </div>
+                    </div>
+                </div>
+
                 <div className="bg-gray-50/50 p-8 rounded-3xl border border-primary/5 space-y-4">
                     <div className="flex items-center gap-4 text-primary">
                         <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        <span className="text-xs font-sans font-bold uppercase tracking-[0.2em]">Secure Razorpay Payment</span>
+                        <span className="text-xs font-sans font-bold uppercase tracking-[0.2em]">
+                            Secure Razorpay Payment
+                        </span>
                     </div>
                     <p className="text-[10px] text-primary/40 font-medium tracking-wide leading-relaxed">
-                        By clicking "Complete Order", you will be redirected to the secure Razorpay gateway to complete your purchase using UPI, Cards, or Netbanking.
+                        By clicking "Complete Order", you will be redirected to the secure Razorpay gateway to complete your purchase using UPI or Cards.
                     </p>
                 </div>
 
-                <Button 
-                    type="submit" 
+                <Button
+                    type="submit"
                     disabled={isProcessing}
                     className="w-full h-16 bg-primary text-secondary hover:bg-black font-sans font-bold uppercase tracking-[0.4em] text-[11px] rounded-full transition-all duration-500 shadow-2xl shadow-black/10"
                 >

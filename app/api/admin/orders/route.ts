@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
 
 export async function GET(request: Request) {
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const limit = Number(searchParams.get('limit')) || 15
     const search = searchParams.get('search')
 
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     let query = supabase
       .from('orders')

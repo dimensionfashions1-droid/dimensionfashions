@@ -7,12 +7,14 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
+    const payload = await request.json()
+
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       dbOrderId
-    } = await request.json()
+    } = payload
 
     // 1. VERIFY SIGNATURE
     const body = razorpay_order_id + "|" + razorpay_payment_id

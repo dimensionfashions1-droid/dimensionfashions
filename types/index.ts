@@ -170,8 +170,20 @@ export interface OrderItem {
 export interface Order {
     id: string
     order_number: string
+    first_name: string
+    last_name: string
+    email: string
+    phone: string
+    address: string
+    city: string
+    state: string
+    pincode: string
+    subtotal: number
+    shipping_cost: number
+    discount_amount: number
     total_amount: number
-    order_status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+    order_status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned'
+    payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
     created_at: string
     user_id: string
     cancellation_requested: boolean

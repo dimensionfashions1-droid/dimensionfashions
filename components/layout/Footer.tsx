@@ -7,28 +7,37 @@ import { CategoryRow } from "@/types"
 
 export function Footer() {
     const [categories, setCategories] = useState<CategoryRow[]>([])
+    const [settings, setSettings] = useState<Record<string, string>>({})
 
     useEffect(() => {
-        const fetchFooterCats = async () => {
+        const fetchFooterData = async () => {
             try {
-                const res = await fetch('/api/categories?all=true')
-                const result = await res.json()
-                if (result.data) {
-                    // Show latest 5
-                    setCategories(result.data.slice(0, 5))
+                const [catRes, setRes] = await Promise.all([
+                    fetch('/api/categories?all=true'),
+                    fetch('/api/settings')
+                ])
+                
+                const catResult = await catRes.json()
+                const setResult = await setRes.json()
+
+                if (catResult.data) {
+                    setCategories(catResult.data.slice(0, 5))
+                }
+                if (setResult.data) {
+                    setSettings(setResult.data)
                 }
             } catch (error) {
-                console.error("Footer category fetch error:", error)
+                console.error("Footer fetch error:", error)
             }
         }
-        fetchFooterCats()
+        fetchFooterData()
     }, [])
 
     return (
         <footer className="bg-primary text-secondary">
 
             <div className="py-8 md:py-12">
-                <div className="container mx-auto px-6 md:px-12">
+                <div className="max-w-[1280px] mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 mb-24">
                         {/* Brand Section */}
                         <div className="lg:col-span-4 space-y-10">
@@ -38,6 +47,19 @@ export function Footer() {
                             <p className="text-secondary/50 text-sm leading-relaxed max-w-xs font-sans tracking-wide">
                                 A curated collection of premium women's wear, dedicated to empowering the modern woman with elegance and style.
                             </p>
+                            {/* Social Links */}
+                            <div className="flex gap-6 pt-2">
+                                {settings.instagram_url && (
+                                    <Link href={settings.instagram_url} target="_blank" className="text-secondary/40 hover:text-accent transition-all uppercase text-[10px] font-sans font-bold tracking-[0.2em]">
+                                        Instagram
+                                    </Link>
+                                )}
+                                {settings.whatsapp_number && (
+                                    <Link href={`https://wa.me/${settings.whatsapp_number.replace(/\D/g, '')}`} target="_blank" className="text-secondary/40 hover:text-accent transition-all uppercase text-[10px] font-sans font-bold tracking-[0.2em]">
+                                        WhatsApp
+                                    </Link>
+                                )}
+                            </div>
                         </div>
 
                         {/* Shop Links */}
@@ -72,19 +94,21 @@ export function Footer() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                         <div className="space-y-2">
                                             <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-accent">Customer Support</p>
-                                            <p className="text-sm font-sans text-secondary/70 tracking-wide font-medium">+91 9025783560</p>
+                                            <p className="text-sm font-sans text-secondary/70 tracking-wide font-medium">
+                                                {settings.store_phone || "+91 9025783560"}
+                                            </p>
                                         </div>
                                         <div className="space-y-2">
                                             <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-accent">Email Enquiries</p>
-                                            <Link href="mailto:contact@dimensionfashions.com" className="text-sm font-sans text-secondary/70 hover:text-secondary transition-colors tracking-wide block font-medium">
-                                                contact@dimensionfashions.com
+                                            <Link href={`mailto:${settings.store_email || 'contact@dimensionfashions.com'}`} className="text-sm font-sans text-secondary/70 hover:text-secondary transition-colors tracking-wide block font-medium">
+                                                {settings.store_email || "contact@dimensionfashions.com"}
                                             </Link>
                                         </div>
                                     </div>
                                     <div className="space-y-2 pt-4 border-t border-secondary/5">
                                         <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-accent">Shop Address</p>
                                         <p className="text-sm font-sans text-secondary/70 tracking-relaxed font-medium">
-                                            N.M Sungam, Valparai main road, Pollachi, Tamil Nadu, 642007, India
+                                            {settings.store_address || "N.M Sungam, Valparai main road, Pollachi, Tamil Nadu, 642007, India"}
                                         </p>
                                     </div>
                                 </div>
@@ -98,11 +122,15 @@ export function Footer() {
                             &copy; {new Date().getFullYear()} DIMENSION. PREMIUM WOMEN'S WEAR.
                         </p>
                         <div className="flex gap-10">
-                            {["Privacy", "Terms", "Shipping"].map((item) => (
-                                <Link key={item} href="#" className="text-[10px] font-sans text-secondary/30 hover:text-accent transition-colors uppercase tracking-[0.2em]">
-                                    {item}
-                                </Link>
-                            ))}
+                            <Link href="/privacy-policy" className="text-[10px] font-sans text-secondary/30 hover:text-accent transition-colors uppercase tracking-[0.2em]">
+                                Privacy
+                            </Link>
+                            <Link href="/terms" className="text-[10px] font-sans text-secondary/30 hover:text-accent transition-colors uppercase tracking-[0.2em]">
+                                Terms
+                            </Link>
+                            <Link href="/shipping-policy" className="text-[10px] font-sans text-secondary/30 hover:text-accent transition-colors uppercase tracking-[0.2em]">
+                                Shipping
+                            </Link>
                         </div>
                     </div>
                 </div>

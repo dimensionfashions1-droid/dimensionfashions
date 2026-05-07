@@ -24,10 +24,26 @@ export default function CheckoutPage() {
     const [isMounted, setIsMounted] = useState(false)
     const [isValidating, setIsValidating] = useState(true)
     const [stockError, setStockError] = useState<string | null>(null)
+    const [settings, setSettings] = useState<{ flat_shipping_rate?: string, free_shipping_threshold?: string, cod_extra_charge?: string }>({})
+    const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod'>('upi')
 
     useEffect(() => {
         setIsMounted(true)
         
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch('/api/settings')
+                if (res.ok) {
+                    const { data } = await res.json()
+                    setSettings(data)
+                }
+            } catch (err) {
+                console.error("Failed to fetch settings:", err)
+            }
+        }
+
+        fetchSettings()
+
         // Wait for cart to be ready
         // If authenticated, we MUST wait for isSynced
         // If not authenticated, we can proceed as soon as mounted (localStorage is sync)
@@ -52,8 +68,11 @@ export default function CheckoutPage() {
     }
 
     const subtotal = cart.getTotalPrice()
-    const shipping = 0 // Could be dynamic
-    const total = subtotal + shipping
+    const flatRate = Number(settings.flat_shipping_rate || 0)
+    const threshold = Number(settings.free_shipping_threshold || 0)
+    const shipping = subtotal >= threshold && threshold > 0 ? 0 : flatRate
+    const codCharge = paymentMethod === 'cod' ? Number(settings.cod_extra_charge || 0) : 0
+    const total = subtotal + shipping + codCharge
 
     return (
         <div className="min-h-screen bg-white pt-10 pb-20">
@@ -89,13 +108,21 @@ export default function CheckoutPage() {
                     {/* Left Section: Checkout Form */}
                     <div className="lg:col-span-2">
                         <div className="bg-white border border-accent/20 rounded-[2.5rem] p-6 md:p-10 shadow-lg shadow-accent/5">
-                            <CheckoutForm cartItems={cart.items} subtotal={subtotal} shippingCost={shipping} totalAmount={total} />
+                            <CheckoutForm 
+                                cartItems={cart.items} 
+                                subtotal={subtotal} 
+                                shippingCost={shipping} 
+                                totalAmount={total} 
+                                paymentMethod={paymentMethod}
+                                setPaymentMethod={setPaymentMethod}
+                                codCharge={codCharge}
+                            />
                         </div>
                     </div>
 
                     {/* Right Section: Order Summary */}
                     <div className="lg:col-span-1">
-                        <OrderSummary items={cart.items} subtotal={subtotal} shipping={shipping} />
+                        <OrderSummary items={cart.items} subtotal={subtotal} shipping={shipping} codCharge={codCharge} />
                     </div>
                 </div>
             </div>

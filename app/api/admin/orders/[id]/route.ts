@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
 
 export async function PUT(
@@ -10,13 +10,18 @@ export async function PUT(
   if (adminCheck) return adminCheck
 
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
     const { id } = await params
     const body = await request.json()
 
     // Only allow updating specific fields
     const allowedFields: Record<string, unknown> = {}
-    const permitted = ['order_status', 'payment_status', 'tracking_number', 'courier_name', 'notes']
+    const permitted = [
+      'order_status', 'payment_status', 'tracking_number', 'courier_name', 'notes',
+      'first_name', 'last_name', 'email', 'phone',
+      'address', 'city', 'state', 'pincode',
+      'subtotal', 'shipping_cost', 'total_amount', 'discount_amount'
+    ]
 
     for (const key of permitted) {
       if (key in body) {
@@ -42,5 +47,35 @@ export async function PUT(
     const err = error as Error
     console.error('API /admin/orders/[id] PUT error:', err)
     return NextResponse.json({ error: err.message || 'Failed to update order' }, { status: 500 })
+  }
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const adminCheck = await requireAdmin()
+  if (adminCheck) return adminCheck
+
+  try {
+    const supabase = await createAdminClient()
+    const { id } = await params
+
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (*)
+      `)
+      .eq('id', id)
+      .single()
+
+    if (error) throw error
+
+    return NextResponse.json({ data })
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error('API /admin/orders/[id] GET error:', err)
+    return NextResponse.json({ error: err.message || 'Failed to fetch order' }, { status: 500 })
   }
 }

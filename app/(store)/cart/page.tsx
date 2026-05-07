@@ -26,6 +26,7 @@ export default function CartPage() {
     const { toast } = useToast()
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [isMounted, setIsMounted] = useState(false)
+    const [settings, setSettings] = useState<{ flat_shipping_rate?: string, free_shipping_threshold?: string }>({})
 
     useEffect(() => {
         setIsMounted(true)
@@ -39,7 +40,21 @@ export default function CartPage() {
                 setIsAuthenticated(false)
             }
         }
+        
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch('/api/settings')
+                if (res.ok) {
+                    const { data } = await res.json()
+                    setSettings(data)
+                }
+            } catch (err) {
+                console.error("Failed to fetch settings:", err)
+            }
+        }
+
         checkUser()
+        fetchSettings()
     }, [])
 
     if (!isMounted) return null
@@ -123,6 +138,10 @@ export default function CartPage() {
 
     // Subtotal and stock are now driven entirely by the hydrated cart items from the API
     const subtotal = cart.getTotalPrice()
+    const flatRate = Number(settings.flat_shipping_rate || 0)
+    const threshold = Number(settings.free_shipping_threshold || 0)
+    const shipping = subtotal >= threshold && threshold > 0 ? 0 : flatRate
+
     const hasOutOfStockItems = cart.items.some(item => {
         const anyItem = item as any
         return anyItem.inStock === false || (anyItem.stockCount !== undefined && anyItem.stockCount < item.quantity)
@@ -186,7 +205,7 @@ export default function CartPage() {
                     <div className="lg:col-span-1">
                         <CartSummary 
                             subtotal={subtotal} 
-                            shipping={0} 
+                            shipping={shipping} 
                             disabled={hasOutOfStockItems} 
                         />
                     </div>

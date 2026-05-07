@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import Razorpay from 'razorpay'
-import { nanoid } from 'nanoid'
 
-// We need nanoid for order numbers, adding to package.json via pnpm later if needed, 
-// or just use a simple generator for now.
+// Order Number Generator
 const generateOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 
 const razorpay = new Razorpay({
@@ -17,19 +15,37 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    const { cartItems, address, subtotal, shippingCost, totalAmount } = await request.json()
+    const payload = await request.json()
+    const { cartItems, address, subtotal } = payload
 
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
     }
 
     // 1. STOCK VALIDATION (Variant Aware)
-    // We use admin client to bypass any RLS that might hide variants
     const { createAdminClient } = await import('@/lib/supabase/server')
     const adminSupabase = await createAdminClient()
 
+    // 1.1 Fetch Settings for Recalculation
+    const { data: settingsData } = await adminSupabase
+      .from('site_settings')
+      .select('key, value')
+    
+    const settings = (settingsData || []).reduce((acc: Record<string, string>, curr) => {
+      acc[curr.key] = curr.value
+      return acc
+    }, {})
+
+    const flatRate = Number(settings.flat_shipping_rate || 0)
+    const threshold = Number(settings.free_shipping_threshold || 0)
+
+    const recalculatedShipping = subtotal >= threshold && threshold > 0 ? 0 : flatRate
+    const recalculatedTotal = subtotal + recalculatedShipping
+    
+    const finalShippingCost = recalculatedShipping
+    const finalTotalAmount = recalculatedTotal
+
     for (const item of cartItems) {
-      // Fetch product with variants
       const { data: p, error: pError } = await adminSupabase
           .from('products')
           .select(`
@@ -51,7 +67,6 @@ export async function POST(request: Request) {
 
       let availableStock = p.stock_count
 
-      // If item has selected attributes, find matching variant
       if (item.selectedAttributes && Object.keys(item.selectedAttributes).length > 0) {
         const variant = p.product_variants.find((v: any) => {
             if (!v.is_active) return false
@@ -71,8 +86,6 @@ export async function POST(request: Request) {
         if (variant) {
             availableStock = variant.stock_count
         } else {
-            // If no variant matches but attributes were selected, this is an invalid state
-            // or we fall back to main product stock if that's the logic (usually variants MUST match)
             return NextResponse.json({ error: `Selected variant for ${item.title} is no longer available.` }, { status: 400 })
         }
       }
@@ -85,20 +98,21 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. CREATE RAZORPAY ORDER
+    // 2. CREATE RAZORPAY ORDER (Always online now)
+    const orderNumber = generateOrderNumber()
     const razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(totalAmount * 100),
+      amount: Math.round(finalTotalAmount * 100),
       currency: 'INR',
-      receipt: generateOrderNumber(),
+      receipt: orderNumber,
     })
 
-    // 3. PERSIST PENDING ORDER TO DB
+    // 3. PERSIST ORDER TO DB
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
-        user_id: user?.id || null, // Guest checkout supported
+        user_id: user?.id || null,
         order_number: razorpayOrder.receipt,
-        email: user?.email || address.email || "guest@example.com", // Fallback for guest
+        email: user?.email || address.email || "guest@example.com",
         phone: address.phone,
         first_name: address.first_name,
         last_name: address.last_name,
@@ -107,9 +121,9 @@ export async function POST(request: Request) {
         state: address.state,
         pincode: address.pincode,
         subtotal: subtotal,
-        shipping_cost: shippingCost,
-        total_amount: totalAmount,
-        payment_method: 'upi',
+        shipping_cost: finalShippingCost,
+        total_amount: finalTotalAmount,
+        payment_method: 'upi', // Fixed to upi/online
         payment_status: 'pending',
         order_status: 'processing',
         razorpay_order_id: razorpayOrder.id,
@@ -140,7 +154,8 @@ export async function POST(request: Request) {
         orderId: razorpayOrder.id,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        dbOrderId: order.id
+        dbOrderId: order.id,
+        orderNumber: order.order_number
     })
 
   } catch (error: any) {

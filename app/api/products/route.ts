@@ -3,6 +3,8 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
 import { ProductRow } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 // Interfaces for strict type safety
 interface JoinedProductAttribute {
   attribute_definitions: {
@@ -68,7 +70,7 @@ export async function GET(request: Request) {
     const search = searchParams.get('search')
     const page = Math.max(1, Number(searchParams.get('page')) || 1)
     const limit = Math.max(1, Number(searchParams.get('limit')) || 12)
-    const sort = searchParams.get('sort') || 'featured'
+    const sort = searchParams.get('sort') || 'newest'
 
     const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : null
     const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : null
@@ -125,7 +127,7 @@ export async function GET(request: Request) {
     // 1. Build Base Query with Joins
     let selectString = `
       *,
-      categories!inner(slug),
+      categories${category ? '!inner' : ''}(slug),
       product_attributes(
         attribute_definitions(slug),
         attribute_options(value)
@@ -145,6 +147,7 @@ export async function GET(request: Request) {
     // Security: Only allow admins to see drafts
     if (isAdmin) {
         const adminCheck = await requireAdmin()
+        console.log("Admin Check Result:", adminCheck ? "FAILED (Not Admin)" : "PASSED (Is Admin)")
         if (adminCheck) {
             query = query.eq('status', 'published')
         }
@@ -181,12 +184,6 @@ export async function GET(request: Request) {
       query = query.order('price', { ascending: true })
     } else if (sort === 'price-desc') {
       query = query.order('price', { ascending: false })
-    } else if (sort === 'newest') {
-      query = query.order('created_at', { ascending: false })
-    } else if (sort === 'bestsellers') {
-      query = query.order('reviews_count', { ascending: false })
-    } else if (sort === 'featured') {
-      query = query.order('featured', { ascending: false })
     } else {
       query = query.order('created_at', { ascending: false })
     }
@@ -195,6 +192,8 @@ export async function GET(request: Request) {
     const from = (page - 1) * limit
     const to = from + limit - 1
     const { data: rawProducts, error, count } = await query.range(from, to)
+
+    console.log("Raw products fetched:", rawProducts?.length, "Error:", error)
 
     if (error) throw error
 

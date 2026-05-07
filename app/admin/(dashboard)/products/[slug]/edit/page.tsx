@@ -90,7 +90,7 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined)
   const [subcategoryId, setSubcategoryId] = useState<string | undefined>(undefined)
   const [stockCount, setStockCount] = useState("0")
-  const [status, setStatus] = useState<"draft" | "published">("draft")
+  const [status, setStatus] = useState<"draft" | "published" | undefined>(undefined)
   const [images, setImages] = useState<string[]>([])
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string[] | string>>({})
   const [variants, setVariants] = useState<Variant[]>([])
@@ -113,6 +113,7 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
       setStatus(
         p.status ? p.status.toLowerCase() as "draft" | "published" : "draft"
       )
+      console.log("DEBUG EDIT PAGE: Database status is", p.status)
       // Ensure category IDs are strings for the Select component
       setCategoryId(p.category_id ? p.category_id.toString() : undefined)
       setSubcategoryId(p.subcategory_id ? p.subcategory_id.toString() : undefined)
@@ -429,14 +430,15 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ slu
             </div>
             <div className="space-y-2">
               <Label className="text-zinc-300">Status</Label>
-              <Select value={status} onValueChange={(val) => setStatus(val as "draft" | "published")}>                <SelectTrigger className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-                <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl">
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                value={status || ""}
+                onChange={(e) => setStatus(e.target.value as "draft" | "published")}
+                className="h-11 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-700/60 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+              >
+                <option value="" disabled className="text-zinc-500">Select status</option>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
             </div>
           </div>
         </div>

@@ -10,10 +10,11 @@ interface OrderSummaryProps {
     subtotal: number
     shipping?: number
     discount?: number
+    codCharge?: number
 }
 
-export function OrderSummary({ items, subtotal, shipping = 0, discount = 0 }: OrderSummaryProps) {
-    const total = subtotal + shipping - discount
+export function OrderSummary({ items, subtotal, shipping = 0, discount = 0, codCharge = 0 }: OrderSummaryProps) {
+    const total = subtotal + shipping - discount + codCharge
 
     return (
         <div className="bg-accent/10 border border-accent/5 rounded-[2.5rem] p-8 md:p-10 sticky top-28 space-y-8 shadow-sm shadow-accent/5">
@@ -73,6 +74,14 @@ export function OrderSummary({ items, subtotal, shipping = 0, discount = 0 }: Or
                         <span>Shipping</span>
                         <span className="text-primary uppercase">
                             ₹{shipping.toLocaleString("en-IN")}
+                        </span>
+                    </div>
+                )}
+                {codCharge !== 0 && (
+                    <div className="flex justify-between text-primary/50">
+                        <span>COD Charge</span>
+                        <span className="text-primary uppercase">
+                            ₹{codCharge.toLocaleString("en-IN")}
                         </span>
                     </div>
                 )}

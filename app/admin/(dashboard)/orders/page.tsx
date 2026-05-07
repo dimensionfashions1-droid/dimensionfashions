@@ -4,10 +4,8 @@ export const dynamic = 'force-dynamic'
 
 
 import { useState } from "react"
-import useSWR, { mutate } from "swr"
+import useSWR from "swr"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { TableCell } from "@/components/ui/table"
 import {
   Select,
@@ -16,15 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Eye, ClipboardList, Loader2 } from "lucide-react"
+import { Eye, ClipboardList, Download } from "lucide-react"
+import { generateInvoicePDF } from "@/lib/utils/invoice-generator"
+import Link from "next/link"
 import {
   AdminPageHeader,
   AdminSearch,
@@ -99,14 +91,6 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
-  const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null)
-  const [isUpdating, setIsUpdating] = useState(false)
-
-  const [editStatus, setEditStatus] = useState<OrderStatus>("processing")
-  const [editPaymentStatus, setEditPaymentStatus] = useState<PaymentStatus>("pending")
-  const [editTracking, setEditTracking] = useState("")
-  const [editCourier, setEditCourier] = useState("")
-
   const queryString = new URLSearchParams()
   queryString.append("page", page.toString())
   queryString.append("limit", "15")
@@ -116,37 +100,6 @@ export default function AdminOrdersPage() {
   const { data: response, isLoading } = useSWR(`/api/admin/orders?${queryString.toString()}`, fetcher)
   const orders: OrderRow[] = response?.data || []
   const meta = response?.meta
-
-  const openOrder = (order: OrderRow) => {
-    setSelectedOrder(order)
-    setEditStatus(order.order_status)
-    setEditPaymentStatus(order.payment_status)
-    setEditTracking(order.tracking_number || "")
-    setEditCourier(order.courier_name || "")
-  }
-
-  const handleUpdate = async () => {
-    if (!selectedOrder) return
-    setIsUpdating(true)
-    try {
-      await fetch(`/api/admin/orders/${selectedOrder.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          order_status: editStatus,
-          payment_status: editPaymentStatus,
-          tracking_number: editTracking || null,
-          courier_name: editCourier || null,
-        }),
-      })
-      mutate(`/api/admin/orders?${queryString.toString()}`)
-      setSelectedOrder(null)
-    } catch (error) {
-      console.error("Failed to update order:", error)
-    } finally {
-      setIsUpdating(false)
-    }
-  }
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
@@ -204,11 +157,39 @@ export default function AdminOrdersPage() {
             <TableCell>
               <StatusBadge label={order.order_status} variant={statusVariantMap[order.order_status]} />
             </TableCell>
-            <TableCell className="text-right">
-              <Button variant="ghost" size="icon" onClick={() => openOrder(order)}
-                className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800">
-                <Eye className="h-4 w-4" />
+            <TableCell className="text-right flex items-center justify-end gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                onClick={() => generateInvoicePDF({
+                  orderNumber: order.order_number,
+                  date: formatDate(order.created_at),
+                  customerName: `${order.first_name} ${order.last_name}`,
+                  email: order.email,
+                  phone: order.phone,
+                  address: order.address,
+                  city: order.city,
+                  state: order.state,
+                  pincode: order.pincode,
+                  items: order.order_items.map(item => ({
+                    title: item.title,
+                    quantity: item.quantity,
+                    price: item.price_at_purchase
+                  })),
+                  subtotal: order.subtotal,
+                  shipping: order.shipping_cost,
+                  discount: order.discount_amount,
+                  total: order.total_amount
+                })}
+              >
+                <Download className="h-4 w-4" />
               </Button>
+              <Link href={`/admin/orders/${order.id}/edit`}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800">
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </Link>
             </TableCell>
           </>
         )}
@@ -216,126 +197,6 @@ export default function AdminOrdersPage() {
 
       {meta && <AdminPagination meta={meta} page={page} onPageChange={setPage} label="orders" />}
 
-      {/* Order Detail Dialog */}
-      <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto rounded-[28px] border-zinc-800 bg-zinc-950/95 p-7 text-white shadow-2xl shadow-black/50 backdrop-blur-xl">
-          {selectedOrder && (
-            <>
-              <DialogHeader className="space-y-2">
-                <DialogTitle className="flex items-center gap-3 text-2xl font-semibold tracking-tight">
-                  Order {selectedOrder.order_number}
-                  <StatusBadge label={selectedOrder.order_status} variant={statusVariantMap[selectedOrder.order_status]} />
-                </DialogTitle>
-                <DialogDescription className="text-sm leading-6 text-zinc-400">
-                  Placed on {formatDate(selectedOrder.created_at)} · {selectedOrder.payment_method?.toUpperCase()}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-6 py-4">
-                {/* Customer + Shipping */}
-                <div className="grid grid-cols-2 gap-4 p-4 bg-zinc-800/50 rounded-lg">
-                  <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Customer</p>
-                    <p className="text-sm text-white">{selectedOrder.first_name} {selectedOrder.last_name}</p>
-                    <p className="text-xs text-zinc-400">{selectedOrder.email}</p>
-                    <p className="text-xs text-zinc-400">{selectedOrder.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Shipping</p>
-                    <p className="text-xs text-zinc-300">{selectedOrder.address}</p>
-                    <p className="text-xs text-zinc-400">{selectedOrder.city}, {selectedOrder.state} {selectedOrder.pincode}</p>
-                  </div>
-                </div>
-
-                {/* Items */}
-                <div>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-3">Items</p>
-                  <div className="space-y-2">
-                    {selectedOrder.order_items?.map(item => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 bg-zinc-800/30 rounded-lg">
-                        {item.image && <img src={item.image} alt={item.title} className="w-10 h-10 rounded object-cover bg-zinc-800" />}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white truncate">{item.title}</p>
-                          <p className="text-xs text-zinc-500">Qty: {item.quantity} × ₹{Number(item.price_at_purchase).toLocaleString()}</p>
-                        </div>
-                        <p className="text-sm font-medium text-white">₹{(item.quantity * Number(item.price_at_purchase)).toLocaleString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Amount Summary */}
-                <div className="p-4 bg-zinc-800/50 rounded-lg space-y-2 text-sm">
-                  <div className="flex justify-between text-zinc-400"><span>Subtotal</span><span>₹{Number(selectedOrder.subtotal).toLocaleString()}</span></div>
-                  <div className="flex justify-between text-zinc-400"><span>Shipping</span><span>₹{Number(selectedOrder.shipping_cost).toLocaleString()}</span></div>
-                  {Number(selectedOrder.discount_amount) > 0 && (
-                    <div className="flex justify-between text-emerald-400"><span>Discount</span><span>-₹{Number(selectedOrder.discount_amount).toLocaleString()}</span></div>
-                  )}
-                  <div className="flex justify-between text-white font-semibold border-t border-zinc-700 pt-2">
-                    <span>Total</span><span>₹{Number(selectedOrder.total_amount).toLocaleString()}</span>
-                  </div>
-                </div>
-
-                {/* Update Fields */}
-                <div className="space-y-4 border-t border-zinc-800 pt-4">
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Update Order</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-zinc-300 text-xs">Order Status</Label>
-                      <Select value={editStatus} onValueChange={val => setEditStatus(val as OrderStatus)}>
-                        <SelectTrigger className="h-10 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100"><SelectValue /></SelectTrigger>
-                        <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
-                          <SelectItem value="processing" className="rounded-lg focus:bg-zinc-900">Processing</SelectItem>
-                          <SelectItem value="shipped" className="rounded-lg focus:bg-zinc-900">Shipped</SelectItem>
-                          <SelectItem value="delivered" className="rounded-lg focus:bg-zinc-900">Delivered</SelectItem>
-                          <SelectItem value="cancelled" className="rounded-lg focus:bg-zinc-900">Cancelled</SelectItem>
-                          <SelectItem value="returned" className="rounded-lg focus:bg-zinc-900">Returned</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-zinc-300 text-xs">Payment Status</Label>
-                      <Select value={editPaymentStatus} onValueChange={val => setEditPaymentStatus(val as PaymentStatus)}>
-                        <SelectTrigger className="h-10 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100"><SelectValue /></SelectTrigger>
-                        <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
-                          <SelectItem value="pending" className="rounded-lg focus:bg-zinc-900">Pending</SelectItem>
-                          <SelectItem value="paid" className="rounded-lg focus:bg-zinc-900">Paid</SelectItem>
-                          <SelectItem value="failed" className="rounded-lg focus:bg-zinc-900">Failed</SelectItem>
-                          <SelectItem value="refunded" className="rounded-lg focus:bg-zinc-900">Refunded</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-zinc-300 text-xs">Courier</Label>
-                      <Select value={editCourier} onValueChange={setEditCourier}>
-                        <SelectTrigger className="h-10 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100"><SelectValue placeholder="Select courier" /></SelectTrigger>
-                        <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
-                          <SelectItem value="delhivery" className="rounded-lg focus:bg-zinc-900">Delhivery</SelectItem>
-                          <SelectItem value="dtdc" className="rounded-lg focus:bg-zinc-900">DTDC</SelectItem>
-                          <SelectItem value="xpressbees" className="rounded-lg focus:bg-zinc-900">Xpressbees</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-zinc-300 text-xs">Tracking Number</Label>
-                      <Input value={editTracking} onChange={e => setEditTracking(e.target.value)}
-                        className="h-10 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500" placeholder="AWB / Tracking ID" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setSelectedOrder(null)}
-                  className="bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white">Close</Button>
-                <Button onClick={handleUpdate} disabled={isUpdating} className="bg-white text-zinc-900 hover:bg-zinc-200 min-w-[100px]">
-                  {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

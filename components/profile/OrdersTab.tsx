@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Package, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { generateInvoicePDF } from "@/lib/utils/invoice-generator"
 
 import { AuthUser, Order } from "@/types"
 
@@ -173,15 +174,29 @@ export default function OrdersTab({ user }: { user: AuthUser }) {
                     ) : null}
                     <Button
                       variant="outline"
-                      onClick={() => {
-                        toast({
-                          title: "Invoice Simulated",
-                          description: "In a live environment this would download a PDF."
-                        })
-                      }}
+                      onClick={() => generateInvoicePDF({
+                        orderNumber: order.order_number,
+                        date: new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        customerName: `${order.first_name} ${order.last_name}`,
+                        email: order.email,
+                        phone: order.phone,
+                        address: order.address,
+                        city: order.city,
+                        state: order.state,
+                        pincode: order.pincode,
+                        items: order.items?.map(item => ({
+                          title: item.title,
+                          quantity: item.quantity,
+                          price: (item as any).price_at_purchase
+                        })) || [],
+                        subtotal: order.subtotal,
+                        shipping: order.shipping_cost,
+                        discount: order.discount_amount,
+                        total: order.total_amount
+                      })}
                       className="w-full rounded-full border-primary/20 text-primary hover:border-accent hover:bg-accent/5 hover:text-accent text-[10px] font-bold uppercase tracking-[0.2em] h-11 transition-all duration-300"
                     >
-                      View Invoice
+                      Download Invoice
                     </Button>
                   </div>
                 </div>

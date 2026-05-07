@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useState, useEffect } from "react"
 import { ArrowRight, ShoppingBag } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -15,11 +16,55 @@ interface CartSummaryProps {
 }
 
 export function CartSummary({ subtotal, shipping = 0, discount = 0, disabled = false }: CartSummaryProps) {
+    const [settings, setSettings] = useState<{ free_shipping_threshold?: string }>({})
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch('/api/settings')
+                if (res.ok) {
+                    const { data } = await res.json()
+                    setSettings(data)
+                }
+            } catch (err) {
+                console.error("CartSummary settings fetch error:", err)
+            }
+        }
+        fetchSettings()
+    }, [])
+
     const total = subtotal + shipping - discount
+    const threshold = Number(settings.free_shipping_threshold || 0)
+    const awayFromFreeShipping = threshold - subtotal
 
     return (
         <div className="bg-accent/10 border border-accent/5 rounded-[2.5rem] p-8 md:p-10 sticky top-28 space-y-8 shadow-sm shadow-accent/5">
             <h2 className="font-heading font-medium text-2xl text-primary uppercase tracking-[0.1em]">Order Summary</h2>
+
+            {threshold > 0 && awayFromFreeShipping > 0 && (
+                <div className="bg-white/50 border border-accent/10 p-4 rounded-2xl space-y-2">
+                    <p className="text-[10px] font-sans font-bold uppercase tracking-wider text-primary/60">
+                        Add <span className="text-accent font-extrabold">₹{awayFromFreeShipping.toLocaleString("en-IN")}</span> more for <span className="text-accent font-extrabold">FREE SHIPPING</span>
+                    </p>
+                    <div className="h-1 w-full bg-primary/5 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-accent transition-all duration-1000" 
+                            style={{ width: `${Math.min((subtotal / threshold) * 100, 100)}%` }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {threshold > 0 && awayFromFreeShipping <= 0 && (
+                <div className="bg-accent/5 border border-accent/20 p-4 rounded-2xl flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shrink-0">
+                        <ShoppingBag className="w-3 h-3 text-white" />
+                    </div>
+                    <p className="text-[10px] font-sans font-bold uppercase tracking-wider text-accent">
+                        Your order qualifies for <span className="font-extrabold">FREE SHIPPING</span>
+                    </p>
+                </div>
+            )}
 
             <div className="space-y-5 text-[12px] font-sans font-bold uppercase tracking-[0.2em]">
                 <div className="flex justify-between text-primary/50">

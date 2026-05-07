@@ -27,6 +27,7 @@ const navItems = [
   { name: 'Orders', href: '/admin/orders', icon: ClipboardList },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Messages', href: '/admin/contact', icon: Mail },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export function Sidebar() {

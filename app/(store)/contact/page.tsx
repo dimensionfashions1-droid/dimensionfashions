@@ -18,12 +18,28 @@ import { Mail, Phone, MapPin, Send, Loader2 } from "lucide-react"
 export default function ContactPage() {
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [settings, setSettings] = useState<Record<string, string>>({})
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         phone: "",
         subject: "",
         message: ""
+    })
+
+    useState(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch('/api/settings')
+                const result = await res.json()
+                if (result.data) {
+                    setSettings(result.data)
+                }
+            } catch (err) {
+                console.error("Contact settings fetch error:", err)
+            }
+        }
+        fetchSettings()
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -165,7 +181,7 @@ export default function ContactPage() {
                                     </div>
                                     <div className="space-y-1">
                                         <h4 className="font-sans font-bold text-[9px] uppercase tracking-[0.2em] text-primary/40 italic">Email Enquiries</h4>
-                                        <p className="font-sans font-bold text-sm text-primary break-all">contact@dimensionfashions.com</p>
+                                        <p className="font-sans font-bold text-sm text-primary break-all">{settings.store_email || "contact@dimensionfashions.com"}</p>
                                     </div>
                                 </div>
 
@@ -175,7 +191,7 @@ export default function ContactPage() {
                                     </div>
                                     <div className="space-y-1">
                                         <h4 className="font-sans font-bold text-[9px] uppercase tracking-[0.2em] text-primary/40 italic">Customer Support</h4>
-                                        <p className="font-sans font-bold text-sm text-primary">+91 9025783560</p>
+                                        <p className="font-sans font-bold text-sm text-primary">{settings.store_phone || "+91 9025783560"}</p>
                                     </div>
                                 </div>
 
@@ -186,7 +202,7 @@ export default function ContactPage() {
                                     <div className="space-y-1">
                                         <h4 className="font-sans font-bold text-[9px] uppercase tracking-[0.2em] text-primary/40 italic">Address</h4>
                                         <p className="font-sans font-bold text-sm text-primary leading-relaxed">
-                                            N.M Sungam, Valparai main road, Pollachi, Tamil Nadu, 642007, India
+                                            {settings.store_address || "N.M Sungam, Valparai main road, Pollachi, Tamil Nadu, 642007, India"}
                                         </p>
                                     </div>
                                 </div>

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
 
+export const dynamic = 'force-dynamic'
+
 // Interfaces for the raw joined data to avoid 'any'
 interface RawProductAttribute {
   attribute_definitions: {
@@ -176,6 +178,7 @@ export async function GET(
     })
 
     console.log(`DEBUG API: Product ${slug} fetched with ${formattedVariants.length} variants.`)
+    console.log(`DEBUG API: Raw DB status is "${product.status}"`)
 
     // Process the raw product data to format attributes cleanly for the frontend
     const formattedProduct = {
