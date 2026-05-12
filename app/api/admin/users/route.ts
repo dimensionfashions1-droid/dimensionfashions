@@ -16,11 +16,11 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from('users')
-      .select('id, email, first_name, last_name, phone, is_admin, created_at', { count: 'exact' })
+      .select('id, first_name, last_name, phone, is_admin, created_at', { count: 'exact' })
       .order('created_at', { ascending: false })
 
     if (search) {
-      query = query.or(`email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,phone.ilike.%${search}%`)
+      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,phone.ilike.%${search}%`)
     }
 
     // Pagination
@@ -28,15 +28,26 @@ export async function GET(request: Request) {
     const to = from + limit - 1
     query = query.range(from, to)
 
-    const { data: users, error, count } = await query
+    const { data: publicUsers, error, count } = await query
 
     if (error) throw error
+
+    // Fetch emails from auth.users in bulk (or as much as possible)
+    const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers()
+    
+    const enrichedUsers = (publicUsers || []).map(u => {
+      const authUser = authUsers?.find(au => au.id === u.id)
+      return {
+        ...u,
+        email: authUser?.email || null
+      }
+    })
 
     const total = count || 0
     const totalPages = Math.ceil(total / limit)
 
     return NextResponse.json({ 
-      data: users,
+      data: enrichedUsers,
       meta: { total, page, totalPages, limit }
     })
   } catch (error: unknown) {

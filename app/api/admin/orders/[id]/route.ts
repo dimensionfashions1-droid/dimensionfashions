@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
+import { sendEmail } from '@/lib/mail/mailer'
+import { orderStatusUpdateTemplate } from '@/lib/mail/templates'
 
 export async function PUT(
   request: Request,
@@ -41,6 +43,24 @@ export async function PUT(
       .single()
 
     if (error) throw error
+
+    // SEND STATUS UPDATE EMAIL (Async)
+    if (body.order_status || body.tracking_number) {
+      try {
+        sendEmail({
+          to: data.email,
+          subject: `Order Status Update - #${data.order_number}`,
+          html: orderStatusUpdateTemplate({
+            orderNumber: data.order_number,
+            status: data.order_status,
+            trackingNumber: data.tracking_number,
+            courierName: data.courier_name
+          })
+        })
+      } catch (e) {
+        console.error('Notification Error:', e)
+      }
+    }
 
     return NextResponse.json({ data, message: 'Order updated successfully' })
   } catch (error: unknown) {

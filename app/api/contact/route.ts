@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/mail/mailer'
+import { contactAcknowledgmentTemplate } from '@/lib/mail/templates'
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +19,21 @@ export async function POST(request: Request) {
       .insert([{ name, email, phone, subject, message }])
 
     if (error) throw error
+
+    // SEND ACKNOWLEDGMENT EMAIL (Async)
+    try {
+      sendEmail({
+        to: email,
+        subject: `We've received your message - ${subject || 'Contact Inquiry'}`,
+        html: contactAcknowledgmentTemplate({
+          customerName: name,
+          subject: subject || 'Contact Inquiry',
+          message: message
+        })
+      })
+    } catch (e) {
+      console.error('Notification Error:', e)
+    }
 
     return NextResponse.json({ success: true, message: 'Message sent successfully!' })
   } catch (error: unknown) {

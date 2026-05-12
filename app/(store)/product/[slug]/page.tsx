@@ -81,6 +81,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             rating: dbProduct.computed_rating,
             reviews: dbProduct.reviews_count,
             slug: dbProduct.slug,
+            stockCount: stockCount,
             colors: dbProduct.attributes?.color?.values?.map((v: any) => typeof v === 'string' ? v : v.value) || [],
             sizes: dbProduct.attributes?.size?.values?.map((v: any) => typeof v === 'string' ? v : v.value) || [],
         }
@@ -99,11 +100,19 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     const addToCart = async (attributes: Record<string, string>) => {
         if (!product) return
         
-        await cart.addToCart(product, attributes, quantity, isAuthenticated)
-        toast({
-            title: "Added to Bag",
-            description: `${product.title} has been added to your collection.`,
-        })
+        try {
+            await cart.addToCart(product, attributes, quantity)
+            toast({
+                title: "Added to Bag",
+                description: `${product.title} has been added to your collection.`,
+            })
+        } catch (error: any) {
+            toast({
+                title: "Limit Exceeded",
+                description: error.message || "Cannot add more items to cart",
+                variant: "destructive"
+            })
+        }
     }
 
     if (isLoading) {

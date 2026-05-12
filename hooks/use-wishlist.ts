@@ -10,8 +10,8 @@ interface WishlistStore {
   isSynced: boolean
   isSyncing: boolean
   setAuthenticated: (auth: boolean) => void
-  addToWishlist: (product: Product, isAuthenticated: boolean) => Promise<void>
-  removeFromWishlist: (productId: string, isAuthenticated: boolean) => Promise<void>
+  addToWishlist: (product: Product) => Promise<void>
+  removeFromWishlist: (productId: string) => Promise<void>
   isInWishlist: (productId: string) => boolean
   migrateToDB: () => Promise<void>
   fetchFromDB: () => Promise<void>
@@ -28,12 +28,12 @@ export const useWishlist = create<WishlistStore>()(
 
       setAuthenticated: (auth) => set({ isAuthenticated: auth }),
 
-      addToWishlist: async (product, isAuthenticated = false) => {
-        const { items } = get()
+      addToWishlist: async (product) => {
+        const { items, isAuthenticated } = get()
         const exists = items.some((item) => item.id === product.id)
         if (exists) return
 
-        set({ items: [...items, product], isAuthenticated })
+        set({ items: [...items, product] })
 
         if (isAuthenticated) {
           try {
@@ -47,9 +47,9 @@ export const useWishlist = create<WishlistStore>()(
         }
       },
 
-      removeFromWishlist: async (productId, isAuthenticated = false) => {
-        const { items } = get()
-        set({ items: items.filter((item) => item.id !== productId), isAuthenticated })
+      removeFromWishlist: async (productId) => {
+        const { items, isAuthenticated } = get()
+        set({ items: items.filter((item) => item.id !== productId) })
 
         if (isAuthenticated) {
           try {

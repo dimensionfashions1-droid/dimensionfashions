@@ -17,6 +17,7 @@ export interface Product {
     slug?: string
     originalPrice?: number
     hasVariants?: boolean
+    stockCount?: number
 }
 
 // DB Table Interfaces
@@ -153,6 +154,7 @@ export interface CartItem {
     quantity: number
     selectedAttributes?: Record<string, string>
     slug?: string
+    stockCount?: number
 }
 
 export interface OrderItem {

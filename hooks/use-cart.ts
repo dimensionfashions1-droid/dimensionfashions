@@ -10,9 +10,9 @@ interface CartStore {
   isSynced: boolean
   isSyncing: boolean
   setAuthenticated: (auth: boolean) => void
-  addToCart: (product: Product, attributes: Record<string, string>, quantity: number, isAuthenticated: boolean) => Promise<void>
-  removeFromCart: (itemId: string, isAuthenticated: boolean) => Promise<void>
-  updateQuantity: (itemId: string, quantity: number, isAuthenticated: boolean) => Promise<void>
+  addToCart: (product: Product, attributes: Record<string, string>, quantity: number) => Promise<void>
+  removeFromCart: (itemId: string) => Promise<void>
+  updateQuantity: (itemId: string, quantity: number) => Promise<void>
   migrateToDB: () => Promise<void>
   fetchFromDB: () => Promise<void>
   clearCart: () => void
@@ -30,8 +30,8 @@ export const useCart = create<CartStore>()(
 
       setAuthenticated: (auth) => set({ isAuthenticated: auth }),
 
-      addToCart: async (product, attributes, quantity = 1, isAuthenticated = false) => {
-        const { items } = get()
+      addToCart: async (product, attributes, quantity = 1) => {
+        const { items, isAuthenticated } = get()
         
         const sortedAttributes = Object.keys(attributes).sort().reduce((acc: any, key) => {
             acc[key] = attributes[key]
@@ -48,13 +48,24 @@ export const useCart = create<CartStore>()(
             }, {})) === attrString
         )
 
+        const stockLimit = product.stockCount ?? 999
         let updatedItems = [...items]
         const tempId = Math.random().toString(36).substr(2, 9)
 
         if (existingItemIndex > -1) {
           const item = updatedItems[existingItemIndex]
-          updatedItems[existingItemIndex] = { ...item, quantity: item.quantity + quantity }
+          const newQuantity = item.quantity + quantity
+          
+          if (newQuantity > stockLimit) {
+            throw new Error(`Only ${stockLimit} items available in stock`)
+          }
+          
+          updatedItems[existingItemIndex] = { ...item, quantity: newQuantity }
         } else {
+          if (quantity > stockLimit) {
+            throw new Error(`Only ${stockLimit} items available in stock`)
+          }
+          
           updatedItems.push({
             id: tempId,
             productId: product.id,
@@ -63,7 +74,8 @@ export const useCart = create<CartStore>()(
             image: product.image,
             quantity,
             selectedAttributes: sortedAttributes,
-            slug: product.slug
+            slug: product.slug,
+            stockCount: stockLimit
           })
         }
 
@@ -97,9 +109,9 @@ export const useCart = create<CartStore>()(
         }
       },
 
-      removeFromCart: async (itemId, isAuthenticated = false) => {
-        const { items } = get()
-        set({ items: items.filter((i) => i.id !== itemId), isAuthenticated })
+      removeFromCart: async (itemId) => {
+        const { items, isAuthenticated } = get()
+        set({ items: items.filter((i) => i.id !== itemId) })
 
         if (isAuthenticated) {
           try {
@@ -110,14 +122,20 @@ export const useCart = create<CartStore>()(
         }
       },
 
-      updateQuantity: async (itemId, quantity, isAuthenticated = false) => {
-        const { items } = get()
+      updateQuantity: async (itemId, quantity) => {
+        const { items, isAuthenticated } = get()
         const targetItem = items.find(i => i.id === itemId)
         if (!targetItem) return
 
+        const stockLimit = targetItem.stockCount ?? 999
+        const validatedQuantity = Math.max(1, quantity)
+        
+        if (validatedQuantity > stockLimit) {
+            throw new Error(`Only ${stockLimit} items available in stock`)
+        }
+
         set({
-          items: items.map((i) => (i.id === itemId ? { ...i, quantity: Math.max(1, quantity) } : i)),
-          isAuthenticated
+          items: items.map((i) => (i.id === itemId ? { ...i, quantity: validatedQuantity } : i))
         })
 
         if (isAuthenticated) {
@@ -125,6 +143,7 @@ export const useCart = create<CartStore>()(
                 await fetch('/api/users/cart', {
                     method: 'POST',
                     body: JSON.stringify({
+                        id: itemId,
                         productId: targetItem.productId,
                         quantity: quantity,
                         selectedAttributes: targetItem.selectedAttributes,

@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ArrowLeft, Loader2, Package, Truck, CreditCard, User, FileText, Download } from "lucide-react"
+import { ArrowLeft, Loader2, Package, Truck, CreditCard, User, FileText, Download, AlertTriangle } from "lucide-react"
 import { generateInvoicePDF } from "@/lib/utils/invoice-generator"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
@@ -232,6 +232,27 @@ export default function AdminOrderEditPage({ params }: { params: Promise<{ id: s
           Download Invoice
         </Button>
       </div>
+
+      {/* Cancellation Request Banner */}
+      {order.cancellation_requested && (
+        <div className="bg-red-950/40 border border-red-900/60 rounded-xl p-6 space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+              <AlertTriangle className="h-5 w-5 text-red-400" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-red-300">Cancellation Requested</h3>
+              <p className="text-xs text-red-400/70 mt-0.5">The customer has requested to cancel this order.</p>
+            </div>
+          </div>
+          {order.cancellation_reason && (
+            <div className="ml-[52px] bg-red-950/60 border border-red-900/40 rounded-lg p-4">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-red-400/60 mb-2">Customer&apos;s Reason</p>
+              <p className="text-sm text-red-200/90 italic leading-relaxed">&ldquo;{order.cancellation_reason}&rdquo;</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
 

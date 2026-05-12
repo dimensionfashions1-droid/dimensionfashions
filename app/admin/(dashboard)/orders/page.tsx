@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Eye, ClipboardList, Download } from "lucide-react"
+import { Eye, ClipboardList, Download, AlertTriangle } from "lucide-react"
 import { generateInvoicePDF } from "@/lib/utils/invoice-generator"
 import Link from "next/link"
 import {
@@ -52,6 +52,8 @@ interface OrderRow {
   tracking_number: string | null
   courier_name: string | null
   notes: string | null
+  cancellation_requested: boolean
+  cancellation_reason: string | null
   created_at: string
   order_items: {
     id: string
@@ -123,6 +125,7 @@ export default function AdminOrdersPage() {
           </SelectTrigger>
           <SelectContent className="rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 shadow-2xl shadow-black/40">
             <SelectItem value="all" className="rounded-lg focus:bg-zinc-900">All Statuses</SelectItem>
+            <SelectItem value="cancel_requested" className="rounded-lg focus:bg-zinc-900 text-red-400">Cancel Requested</SelectItem>
             <SelectItem value="processing" className="rounded-lg focus:bg-zinc-900">Processing</SelectItem>
             <SelectItem value="shipped" className="rounded-lg focus:bg-zinc-900">Shipped</SelectItem>
             <SelectItem value="delivered" className="rounded-lg focus:bg-zinc-900">Delivered</SelectItem>
@@ -144,6 +147,12 @@ export default function AdminOrdersPage() {
             <TableCell>
               <p className="font-medium text-white text-sm">{order.order_number}</p>
               <p className="text-[11px] text-zinc-500">{order.order_items?.length || 0} items</p>
+              {order.cancellation_requested && (
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <AlertTriangle className="h-3 w-3 text-red-400" />
+                  <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Cancel Requested</span>
+                </div>
+              )}
             </TableCell>
             <TableCell>
               <p className="text-sm text-zinc-300">{order.first_name} {order.last_name}</p>

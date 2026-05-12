@@ -35,7 +35,8 @@ export async function GET() {
             price: item.products.price,
             image: item.products.images?.[0] || '',
             slug: item.products.slug,
-            inStock: item.products.stock_count > 0
+            inStock: item.products.stock_count > 0,
+            stockCount: item.products.stock_count
         }))
 
         return NextResponse.json({ data: wishlistItems })

@@ -272,33 +272,41 @@ export function CheckoutForm({
                     }
                 },
                 handler: async function (response: any) {
-                    // D. Verify Payment on Server
-                    const verifyRes = await fetch('/api/payments/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature,
-                            dbOrderId: orderData.dbOrderId
+                    try {
+                        // D. Verify Payment on Server
+                        const verifyRes = await fetch('/api/payments/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                dbOrderId: orderData.dbOrderId
+                            })
                         })
-                    })
 
-                    const verifyData = await verifyRes.json()
+                        const verifyData = await verifyRes.json()
 
-                    if (verifyRes.ok) {
-                        cart.clearCart() // Clear client cart
-                        toast({
-                            title: "Order Placed Successfully",
-                            description: "Your elegance is on its way."
-                        })
-                        router.push(`/order-confirmation/${orderData.orderNumber}`)
-                    } else {
+                        if (verifyRes.ok) {
+                            cart.clearCart() // Clear client cart
+                            // Use window.location for reliable redirect after Razorpay callback
+                            window.location.href = `/order-confirmation/${orderData.orderNumber}`
+                        } else {
+                            toast({
+                                variant: "destructive",
+                                title: "Payment Verification Failed",
+                                description: verifyData.error || "Please contact support if amount was deducted."
+                            })
+                            setIsProcessing(false)
+                        }
+                    } catch (err: any) {
+                        console.error('Payment verification error:', err)
                         toast({
                             variant: "destructive",
-                            title: "Payment Verification Failed",
-                            description: "Please contact support if amount was deducted."
+                            title: "Verification Error",
+                            description: "Payment was received but verification failed. Please contact support."
                         })
+                        setIsProcessing(false)
                     }
                 },
                 prefill: {

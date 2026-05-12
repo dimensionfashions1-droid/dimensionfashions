@@ -56,15 +56,22 @@ export async function GET() {
                     const vOptions = v.product_variant_options || []
                     if (vOptions.length === 0) return false
 
-                    // Get unique attributes for this variant
-                    const vAttrSlugs = Array.from(new Set(vOptions.map((o: any) => o.attribute_definitions?.slug)))
-                    
-                    // Check if every attribute of this variant matches the user selection
-                    return vAttrSlugs.every(slug => {
-                        const userVal = String(selected[slug] || '').toLowerCase().trim()
-                        const opt = vOptions.find((o: any) => o.attribute_definitions?.slug === slug)
-                        const variantVal = String(opt?.attribute_options?.value || '').toLowerCase().trim()
-                        return userVal === variantVal && userVal !== ''
+                    // Build a map of slug -> value from the variant's options
+                    const variantAttrMap: Record<string, string> = {}
+                    for (const opt of vOptions) {
+                        const slug = opt.attribute_definitions?.slug
+                        const value = opt.attribute_options?.value
+                        if (slug && value !== undefined) {
+                            variantAttrMap[slug] = String(value).toLowerCase().trim()
+                        }
+                    }
+
+                    const selectedKeys = Object.keys(selected)
+                    // Every user-selected attribute must match this variant
+                    return selectedKeys.every(key => {
+                        const userVal = String(selected[key] || '').toLowerCase().trim()
+                        const variantVal = variantAttrMap[key]
+                        return userVal !== '' && variantVal !== undefined && userVal === variantVal
                     })
                 })
 
@@ -106,15 +113,23 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { productId, quantity, selectedAttributes, action } = await request.json()
+        const { productId, quantity, selectedAttributes, action, id } = await request.json()
 
-        const { data: existing } = await supabase
+        let existingQuery = supabase
             .from('cart')
             .select('id, quantity')
             .eq('user_id', user.id)
-            .eq('product_id', productId)
-            .eq('selected_attributes', selectedAttributes)
-            .maybeSingle()
+
+        if (id) {
+            existingQuery = existingQuery.eq('id', id)
+        } else {
+            existingQuery = existingQuery
+                .eq('product_id', productId)
+                .eq('selected_attributes', selectedAttributes)
+        }
+
+        const { data: existing, error: existingError } = await existingQuery.maybeSingle()
+        if (existingError) throw existingError
 
         if (existing) {
             let newQuantity = existing.quantity + quantity

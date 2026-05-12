@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import Razorpay from 'razorpay'
+import { sendEmail } from '@/lib/mail/mailer'
+import { orderConfirmationTemplate, adminOrderAlertTemplate } from '@/lib/mail/templates'
 
 // Order Number Generator
 const generateOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`
@@ -68,18 +70,28 @@ export async function POST(request: Request) {
       let availableStock = p.stock_count
 
       if (item.selectedAttributes && Object.keys(item.selectedAttributes).length > 0) {
+        const selectedKeys = Object.keys(item.selectedAttributes)
+        
         const variant = p.product_variants.find((v: any) => {
             if (!v.is_active) return false
             const vOptions = v.product_variant_options || []
             if (vOptions.length === 0) return false
 
-            const vAttrSlugs = Array.from(new Set(vOptions.map((o: any) => o.attribute_definitions?.slug)))
-            return vAttrSlugs.every(slug => {
-                const s = slug as string
-                const userVal = String(item.selectedAttributes[s] || '').toLowerCase().trim()
-                const opt = vOptions.find((o: any) => o.attribute_definitions?.slug === s)
-                const variantVal = String(opt?.attribute_options?.value || '').toLowerCase().trim()
-                return userVal === variantVal && userVal !== ''
+            // Build a map of slug -> value from the variant's options
+            const variantAttrMap: Record<string, string> = {}
+            for (const opt of vOptions) {
+                const slug = opt.attribute_definitions?.slug
+                const value = opt.attribute_options?.value
+                if (slug && value !== undefined) {
+                    variantAttrMap[slug] = String(value).toLowerCase().trim()
+                }
+            }
+
+            // Every user-selected attribute must match this variant
+            return selectedKeys.every(key => {
+                const userVal = String(item.selectedAttributes[key] || '').toLowerCase().trim()
+                const variantVal = variantAttrMap[key]
+                return userVal !== '' && variantVal !== undefined && userVal === variantVal
             })
         })
 
@@ -149,6 +161,35 @@ export async function POST(request: Request) {
       .insert(orderItemsRows)
 
     if (itemsError) throw itemsError
+
+    // 5. SEND EMAIL NOTIFICATIONS (Async)
+    try {
+        const orderData = {
+            orderNumber: order.order_number,
+            customerName: `${address.first_name} ${address.last_name}`,
+            items: cartItems,
+            total: finalTotalAmount.toLocaleString(),
+        }
+
+        // To Customer
+        sendEmail({
+            to: order.email,
+            subject: `Order Confirmed - #${order.order_number}`,
+            html: orderConfirmationTemplate(orderData)
+        })
+
+        // To Admin (Store Email from settings or env)
+        const adminEmail = settings.store_email || process.env.SMTP_USER
+        if (adminEmail) {
+            sendEmail({
+                to: adminEmail,
+                subject: `New Order Alert - #${order.order_number}`,
+                html: adminOrderAlertTemplate(orderData)
+            })
+        }
+    } catch (e) {
+        console.error('Notification Error:', e)
+    }
 
     return NextResponse.json({ 
         orderId: razorpayOrder.id,

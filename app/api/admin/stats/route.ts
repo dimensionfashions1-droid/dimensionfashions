@@ -10,14 +10,24 @@ export async function GET() {
     const supabase = await createClient()
 
     // Aggregate Orders & Revenue
-    const { data: orders, error: ordersError } = await supabase
+    // Revenue: only paid and not cancelled
+    const { data: revenueOrders, error: revenueError } = await supabase
       .from('orders')
-      .select('total_amount, created_at')
+      .select('total_amount')
+      .eq('payment_status', 'paid')
+      .neq('order_status', 'cancelled')
+
+    if (revenueError) throw revenueError
+
+    const totalRevenue = revenueOrders.reduce((sum, order) => sum + Number(order.total_amount), 0)
+
+    // Confirmed Orders: not cancelled
+    const { count: totalOrders, error: ordersError } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .neq('order_status', 'cancelled')
 
     if (ordersError) throw ordersError
-
-    const totalOrders = orders.length
-    const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total_amount), 0)
 
     // Aggregate Out of Stock products
     const { count: outOfStock, error: stockError } = await supabase
@@ -27,20 +37,20 @@ export async function GET() {
 
     if (stockError) throw stockError
 
-    // Aggregate Users (acting as proxies for ' subscribers' or strictly querying public.users)
-    const { count: newSubscribers, error: subsError } = await supabase
-      .from('newsletter_subscribers')
+    // Aggregate Users (Customers) - excluding admins
+    const { count: totalCustomers, error: usersError } = await supabase
+      .from('users')
       .select('*', { count: 'exact', head: true })
+      .eq('is_admin', false)
 
-    if (subsError) throw subsError
+    if (usersError) throw usersError
 
     return NextResponse.json({
       data: {
         totalRevenue,
-        totalOrders,
+        totalOrders: totalOrders || 0,
         outOfStock: outOfStock || 0,
-        newSubscribers: newSubscribers || 0,
-        recentActivity: orders.slice(0, 5) // Return some stubbed recent orders
+        totalCustomers: totalCustomers || 0,
       }
     })
 

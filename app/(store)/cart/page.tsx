@@ -147,12 +147,20 @@ export default function CartPage() {
         return anyItem.inStock === false || (anyItem.stockCount !== undefined && anyItem.stockCount < item.quantity)
     })
 
-    const handleUpdateQuantity = (id: string, newQuantity: number) => {
-        cart.updateQuantity(id, newQuantity, isAuthenticated)
+    const handleUpdateQuantity = async (id: string, newQuantity: number) => {
+        try {
+            await cart.updateQuantity(id, newQuantity)
+        } catch (error: any) {
+            toast({
+                title: "Limit Exceeded",
+                description: error.message || "Cannot add more items",
+                variant: "destructive"
+            })
+        }
     }
 
     const handleRemoveItem = (id: string) => {
-        cart.removeFromCart(id, isAuthenticated)
+        cart.removeFromCart(id)
     }
 
     return (

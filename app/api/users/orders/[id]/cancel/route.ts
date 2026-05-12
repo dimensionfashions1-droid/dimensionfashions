@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/mail/mailer'
+import { adminCancellationAlertTemplate } from '@/lib/mail/templates'
 
 export async function POST(
   request: Request,
@@ -25,7 +27,7 @@ export async function POST(
   // Look up the order to make sure they own it and it's eligible to be cancelled
   const { data: order, error: fetchError } = await supabase
     .from('orders')
-    .select('order_status')
+    .select('order_status, order_number, first_name, last_name, email, total_amount')
     .eq('id', orderId)
     .eq('user_id', user.id)
     .single()
@@ -40,17 +42,49 @@ export async function POST(
   }
 
   // Update table adding cancellation request
-  const { error: updateError } = await supabase
+  // Use admin client since users don't have UPDATE RLS on orders table.
+  // Ownership was already verified by the SELECT query above.
+  const adminSupabase = await createAdminClient()
+
+  const { error: updateError } = await adminSupabase
     .from('orders')
     .update({
       cancellation_requested: true,
       cancellation_reason: reason
     })
     .eq('id', orderId)
-    .eq('user_id', user.id)
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
+  }
+
+  // Send cancellation alert email to admin
+  try {
+    const { data: settingsData } = await adminSupabase
+      .from('site_settings')
+      .select('key, value')
+      .in('key', ['store_email'])
+
+    const settings = (settingsData || []).reduce((acc: Record<string, string>, curr) => {
+      acc[curr.key] = curr.value
+      return acc
+    }, {})
+
+    const adminEmail = settings.store_email || process.env.SMTP_USER
+    if (adminEmail) {
+      sendEmail({
+        to: adminEmail,
+        subject: `Cancellation Request - Order #${order.order_number}`,
+        html: adminCancellationAlertTemplate({
+          orderNumber: order.order_number,
+          customerName: `${order.first_name} ${order.last_name}`,
+          total: Number(order.total_amount).toLocaleString(),
+          message: reason
+        })
+      })
+    }
+  } catch (e) {
+    console.error('Cancellation Notification Error:', e)
   }
 
   return NextResponse.json({ success: true, message: 'Cancellation request submitted to admin' })

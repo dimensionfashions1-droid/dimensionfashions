@@ -52,9 +52,9 @@ export function ProductInfo({
 
     const toggleWishlist = () => {
         if (isWishlisted) {
-            wishlist.removeFromWishlist(product.id, isAuthenticated)
+            wishlist.removeFromWishlist(product.id)
         } else {
-            wishlist.addToWishlist(product, isAuthenticated)
+            wishlist.addToWishlist(product)
         }
     }
 

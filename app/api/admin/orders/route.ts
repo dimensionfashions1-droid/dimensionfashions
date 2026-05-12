@@ -21,7 +21,11 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false })
 
     if (status && status !== 'all') {
-      query = query.eq('order_status', status)
+      if (status === 'cancel_requested') {
+        query = query.eq('cancellation_requested', true)
+      } else {
+        query = query.eq('order_status', status)
+      }
     }
 
     if (search) {

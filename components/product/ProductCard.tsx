@@ -26,11 +26,19 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
     const handleQuickAdd = async (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        await cart.addToCart(product, {}, 1, isAuthenticated)
-        toast({
-            title: "Added to Bag",
-            description: `${product.title} has been added.`,
-        })
+        try {
+            await cart.addToCart(product, {}, 1)
+            toast({
+                title: "Added to Bag",
+                description: `${product.title} has been added.`,
+            })
+        } catch (error: any) {
+            toast({
+                title: "Limit Exceeded",
+                description: error.message || "Cannot add more items",
+                variant: "destructive"
+            })
+        }
     }
 
     return (
@@ -54,9 +62,9 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
                     onClick={(e) => {
                         e.preventDefault()
                         if (isWishlisted) {
-                            wishlist.removeFromWishlist(product.id, isAuthenticated)
+                            wishlist.removeFromWishlist(product.id)
                         } else {
-                            wishlist.addToWishlist(product, isAuthenticated)
+                            wishlist.addToWishlist(product)
                         }
                     }}
                     className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur-md border border-black/5 shadow-sm flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 hover:shadow-md z-10"

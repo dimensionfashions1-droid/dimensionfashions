@@ -16,7 +16,7 @@ export default function AdminDashboardPage() {
     totalRevenue: 0,
     totalOrders: 0,
     outOfStock: 0,
-    newSubscribers: 0,
+    totalCustomers: 0,
   }
 
   return (
@@ -36,7 +36,7 @@ export default function AdminDashboardPage() {
           isLoading={isLoading}
         />
         <StatCard
-          title="Global Orders"
+          title="Confirmed Orders"
           value={stats.totalOrders}
           icon={<LayoutDashboard className="w-6 h-6 text-indigo-400" />}
           iconBg="bg-indigo-500/10 border-indigo-500/20"
@@ -52,8 +52,8 @@ export default function AdminDashboardPage() {
           isLoading={isLoading}
         />
         <StatCard
-          title="Subscribers"
-          value={stats.newSubscribers}
+          title="Customers"
+          value={stats.totalCustomers}
           icon={<Users className="w-6 h-6 text-blue-400" />}
           iconBg="bg-blue-500/10 border-blue-500/20"
           iconColor="text-blue-400"

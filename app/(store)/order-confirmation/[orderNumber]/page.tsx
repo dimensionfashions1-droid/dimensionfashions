@@ -62,7 +62,7 @@ export default function OrderConfirmationPage() {
                     </div>
 
                     <div className="space-y-4">
-                        <h1 className="text-4xl md:text-6xl font-heading text-primary tracking-tight">Thank you for <br />your purchase</h1>
+                        <h1 className="text-4xl md:text-5xl font-heading text-primary tracking-tight">Thank you for your purchase</h1>
                         <p className="text-zinc-500 font-sans text-sm md:text-base max-w-md mx-auto leading-relaxed">
                             Your order <span className="font-bold text-primary">#{order.order_number}</span> has been confirmed.
                             We've sent a confirmation email to <span className="text-primary font-medium">{order.email}</span>.
@@ -72,7 +72,7 @@ export default function OrderConfirmationPage() {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                         <Button
                             variant="outline"
-                            className="rounded-full h-12 px-8 border-primary/10 text-primary hover:bg-primary hover:text-white transition-all uppercase text-[10px] font-bold tracking-[0.2em] w-full sm:w-auto"
+                            className="rounded-full h-12 px-8 border-primary/10 text-primary hover:!bg-accent hover:text-white transition-all uppercase text-[10px] font-bold tracking-[0.2em] w-full sm:w-auto"
                             onClick={() => generateInvoicePDF({
                                 orderNumber: order.order_number,
                                 date: new Date(order.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),

@@ -245,7 +245,7 @@ export async function GET(request: Request) {
         status: p.status || 'draft',
         hasVariants: hasVariants,
         inStock: totalStock > 0,
-        stock_count: totalStock,
+        stockCount: totalStock,
         colors: p.product_attributes
           ?.filter((pa: any) => pa.attribute_definitions?.slug === 'color')
           .map((pa: any) => pa.attribute_options?.value)

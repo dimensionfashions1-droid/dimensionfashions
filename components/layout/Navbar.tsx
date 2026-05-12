@@ -120,9 +120,11 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                         </Link>
                         <Link href="/cart" className="text-primary hover:text-accent transition-colors relative">
                             <ShoppingCart className="w-5 h-5" />
-                            <span className="absolute -top-1.5 -right-1.5 bg-accent text-primary text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
-                                {isMounted ? cart.getTotalItems() : 0}
-                            </span>
+                            {isMounted && cart.getTotalItems() > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 bg-accent text-primary text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                                    {cart.getTotalItems()}
+                                </span>
+                            )}
                         </Link>
                         <button
                             className="text-primary p-1"
@@ -155,9 +157,11 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                         </Link>
                         <Link href="/cart" className="text-primary hover:text-accent transition-colors relative">
                             <ShoppingCart className="w-5 h-5" />
-                            <span className="absolute -top-1.5 -right-1.5 bg-accent text-primary text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
-                                {isMounted ? cart.getTotalItems() : 0}
-                            </span>
+                            {isMounted && cart.getTotalItems() > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 bg-accent text-primary text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                                    {cart.getTotalItems()}
+                                </span>
+                            )}
                         </Link>
                     </div>
                 </div>

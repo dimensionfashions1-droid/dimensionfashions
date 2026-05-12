@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
+import { sendEmail } from '@/lib/mail/mailer'
+import { orderConfirmationTemplate } from '@/lib/mail/templates'
 
 export async function POST(request: Request) {
   try {
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
         razorpay_signature: razorpay_signature
       })
       .eq('id', dbOrderId)
-      .select('id, user_id')
+      .select('*, order_items(*)')
       .single()
 
     if (orderError) throw orderError
@@ -82,13 +84,23 @@ export async function POST(request: Request) {
             variantToUpdate = p.product_variants.find((v: any) => {
                 if (!v.is_active) return false
                 const vOptions = v.product_variant_options || []
-                const vAttrSlugs = Array.from(new Set(vOptions.map((o: any) => o.attribute_definitions?.slug)))
-                return vAttrSlugs.every(slug => {
-                    const s = slug as string
-                    const userVal = String(selected[s] || '').toLowerCase().trim()
-                    const opt = vOptions.find((o: any) => o.attribute_definitions?.slug === s)
-                    const variantVal = String(opt?.attribute_options?.value || '').toLowerCase().trim()
-                    return userVal === variantVal && userVal !== ''
+
+                // Build a map of slug -> value from the variant's options
+                const variantAttrMap: Record<string, string> = {}
+                for (const opt of vOptions) {
+                    const slug = opt.attribute_definitions?.slug
+                    const value = opt.attribute_options?.value
+                    if (slug && value !== undefined) {
+                        variantAttrMap[slug] = String(value).toLowerCase().trim()
+                    }
+                }
+
+                const selectedKeys = Object.keys(selected)
+                // Every user-selected attribute must match this variant
+                return selectedKeys.every(key => {
+                    const userVal = String(selected[key] || '').toLowerCase().trim()
+                    const variantVal = variantAttrMap[key]
+                    return userVal !== '' && variantVal !== undefined && userVal === variantVal
                 })
             })
         }
@@ -109,6 +121,22 @@ export async function POST(request: Request) {
     // 4. CLEAR CART (If user is logged in)
     if (order.user_id) {
         await adminSupabase.from('cart').delete().eq('user_id', order.user_id)
+    }
+
+    // 5. SEND EMAIL NOTIFICATION (Async)
+    try {
+        sendEmail({
+            to: order.email,
+            subject: `Payment Confirmed - Order #${order.order_number}`,
+            html: orderConfirmationTemplate({
+                orderNumber: order.order_number,
+                customerName: `${order.first_name} ${order.last_name}`,
+                items: order.order_items,
+                total: order.total_amount.toLocaleString()
+            })
+        })
+    } catch (e) {
+        console.error('Notification Error:', e)
     }
 
     return NextResponse.json({ success: true })

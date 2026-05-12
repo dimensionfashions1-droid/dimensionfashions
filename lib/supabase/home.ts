@@ -32,7 +32,7 @@ export async function getHomeProducts(requestedCategorySlug?: string | null) {
                 is_in_stock,
                 images,
                 categories!inner(name,slug),
-                product_variants(id)
+                product_variants(id, stock_count)
             `)
             .eq('status', 'published')
             .eq('categories.slug', targetCategorySlug)
@@ -47,6 +47,10 @@ export async function getHomeProducts(requestedCategorySlug?: string | null) {
                 const variantsList = p.product_variants || []
                 const hasVariants = Array.isArray(variantsList) && variantsList.length > 0
 
+                const totalStock = hasVariants 
+                    ? variantsList.reduce((acc: number, v: any) => acc + (v.stock_count || 0), 0)
+                    : (p.stock_count || 0)
+
                 return {
                     id: p.id,
                     title: p.title,
@@ -56,7 +60,8 @@ export async function getHomeProducts(requestedCategorySlug?: string | null) {
                     image: p.images?.[0] || 'https://www.sourcesplash.com/i/random?q=western-fashion&w=1200&h=1600',
                     category: p.categories?.slug || targetCategorySlug,
                     hasVariants: hasVariants,
-                    inStock: p.is_in_stock
+                    inStock: totalStock > 0,
+                    stockCount: totalStock
                 }
             })
         }
