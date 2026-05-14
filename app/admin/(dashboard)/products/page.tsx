@@ -33,7 +33,7 @@ interface AdminProduct {
   status: 'draft' | 'published'
   hasVariants: boolean
   inStock: boolean
-  stock_count: number
+  stockCount: number
   colors: string[]
   sizes: string[]
 }
@@ -138,8 +138,8 @@ export default function AdminProductsPage() {
             </TableCell>
             <TableCell className="text-zinc-300">₹{product.price.toLocaleString()}</TableCell>
             <TableCell>
-              <span className={`text-sm font-medium ${product.stock_count > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {product.stock_count}
+              <span className={`text-sm font-medium ${product.stockCount > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {product.stockCount}
               </span>
             </TableCell>
             <TableCell>

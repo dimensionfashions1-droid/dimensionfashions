@@ -53,13 +53,13 @@ export default function StoreRegisterPage() {
                   <p className="text-xs text-gray-400 font-light italic">
                     If you don't see the email, please check your spam folder.
                   </p>
-                  <Link 
-                    href="/register" 
+                  <button 
+                    onClick={() => setSuccess(false)}
                     className="flex items-center text-sm font-medium text-gray-900 hover:text-accent transition-colors group"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                     Back to registration
-                  </Link>
+                  </button>
                 </div>
               </div>
             ) : (
