@@ -84,17 +84,35 @@ export async function PUT(
 
     // 2. Replace options if provided
     if (options && Array.isArray(options)) {
-      // Delete existing options
-      const { error: delError } = await supabase
+      const { data: existingOptions, error: existingError } = await supabase
         .from('attribute_options')
-        .delete()
+        .select('id')
         .eq('attribute_id', id)
 
-      if (delError) throw delError
+      if (existingError) throw existingError
 
-      // Insert new options
+      const incomingIds = options.map((o: any) => o.id).filter(Boolean)
+      const idsToDelete = (existingOptions || [])
+        .map(eo => eo.id)
+        .filter(eid => !incomingIds.includes(eid))
+
+      if (idsToDelete.length > 0) {
+        const { error: delError } = await supabase
+          .from('attribute_options')
+          .delete()
+          .in('id', idsToDelete)
+
+        if (delError) {
+          if (delError.code === '23503') {
+            return NextResponse.json({ error: 'Cannot delete an option that is currently in use by a product.' }, { status: 409 })
+          }
+          throw delError
+        }
+      }
+
       if (options.length > 0) {
-        const optionRows = options.map((opt: { value: string; hex_code?: string; display_value?: string; display_order?: number }, index: number) => ({
+        const optionRows = options.map((opt: any, index: number) => ({
+          id: opt.id || crypto.randomUUID(),
           attribute_id: id,
           value: opt.value,
           hex_code: opt.hex_code || null,
@@ -102,11 +120,11 @@ export async function PUT(
           display_order: opt.display_order ?? index,
         }))
 
-        const { error: insError } = await supabase
+        const { error: upsertError } = await supabase
           .from('attribute_options')
-          .insert(optionRows)
+          .upsert(optionRows, { onConflict: 'id' })
 
-        if (insError) throw insError
+        if (upsertError) throw upsertError
       }
     }
 

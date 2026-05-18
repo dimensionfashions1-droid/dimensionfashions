@@ -36,6 +36,7 @@ interface AttributeWithOptions extends AttributeDefinitionRow {
 }
 
 interface OptionFormItem {
+  id?: string
   value: string
   hex_code: string
   display_value: string
@@ -77,7 +78,7 @@ export default function AdminAttributesPage() {
     setEditingAttr(attr)
     setName(attr.name); setSlug(attr.slug); setType(attr.type)
     setIsFilterable(attr.is_filterable); setIsVariant(attr.is_variant)
-    setOptions(attr.options.map(o => ({ value: o.value, hex_code: o.hex_code || "", display_value: o.display_value || "" })))
+    setOptions(attr.options.map(o => ({ id: o.id, value: o.value, hex_code: o.hex_code || "", display_value: o.display_value || "" })))
     setDialogOpen(true)
   }
 
