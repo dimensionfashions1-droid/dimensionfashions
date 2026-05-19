@@ -407,7 +407,18 @@ export async function DELETE(
       .delete()
       .eq('slug', slug)
 
-    if (error) throw error
+    if (error) {
+      if (error.code === '23503') {
+        if (error.message?.includes('order_items')) {
+          return NextResponse.json({ error: 'Cannot delete product because it has been ordered by customers. Please change its status to "draft" instead.' }, { status: 409 })
+        }
+        if (error.message?.includes('cart') || error.message?.includes('wishlist')) {
+          return NextResponse.json({ error: 'Cannot delete product because it is currently in a user\'s cart or wishlist. Please change its status to "draft" instead.' }, { status: 409 })
+        }
+        return NextResponse.json({ error: 'Cannot delete product because it is linked to other records. Please change its status to "draft" instead.' }, { status: 409 })
+      }
+      throw error
+    }
 
     return NextResponse.json({ message: 'Product deleted successfully' })
   } catch (error: unknown) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/supabase/check-admin'
 
 export async function GET() {
@@ -7,7 +7,7 @@ export async function GET() {
   if (adminCheck) return adminCheck
 
   try {
-    const supabase = await createClient()
+    const supabase = await createAdminClient()
 
     // Aggregate Orders & Revenue
     // Revenue: only paid and not cancelled
