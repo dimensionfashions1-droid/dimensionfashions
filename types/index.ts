@@ -6,6 +6,7 @@ export interface Product {
     image: string
     images?: string[]
     colors?: string[]
+    colorOptions?: { name: string; hex: string }[]
     rating?: number
     reviews?: number
     inStock?: boolean

@@ -83,6 +83,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             slug: dbProduct.slug,
             stockCount: stockCount,
             colors: dbProduct.attributes?.color?.values?.map((v: any) => typeof v === 'string' ? v : v.value) || [],
+            colorOptions: dbProduct.attributes?.color?.values?.map((v: any) => ({
+                name: typeof v === 'string' ? v : v.value,
+                hex: typeof v === 'string' ? v.toLowerCase() : (v.hex_code || v.value.toLowerCase())
+            })) || [],
             sizes: dbProduct.attributes?.size?.values?.map((v: any) => typeof v === 'string' ? v : v.value) || [],
         }
     }, [dbProduct, selectedColor, selectedSize])

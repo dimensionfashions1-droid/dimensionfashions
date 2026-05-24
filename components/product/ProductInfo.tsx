@@ -112,16 +112,16 @@ export function ProductInfo({
                                 <span className="text-[10px] font-bold text-primary/40 font-sans uppercase tracking-widest">{selectedColor}</span>
                             </div>
                             <div className="flex flex-wrap gap-3">
-                                {product.colors.map((color) => (
+                                {(product.colorOptions || product.colors?.map(c => ({ name: c, hex: c.toLowerCase() })) || []).map((colorOpt) => (
                                     <button
-                                        key={color}
-                                        onClick={() => setSelectedColor(color)}
+                                        key={colorOpt.name}
+                                        onClick={() => setSelectedColor(colorOpt.name)}
                                         className={cn(
                                             "w-10 h-10 rounded-full border transition-all duration-500 flex items-center justify-center hover:scale-110",
-                                            selectedColor === color ? 'ring-2 ring-primary ring-offset-4 border-transparent' : 'border-primary/10'
+                                            selectedColor === colorOpt.name ? 'ring-2 ring-primary ring-offset-4 border-transparent' : 'border-primary/10'
                                         )}
-                                        style={{ backgroundColor: color.toLowerCase() }}
-                                        aria-label={`Select ${color}`}
+                                        style={{ backgroundColor: colorOpt.hex }}
+                                        aria-label={`Select ${colorOpt.name}`}
                                     />
                                 ))}
                             </div>

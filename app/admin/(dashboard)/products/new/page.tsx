@@ -48,6 +48,7 @@ interface Variant {
   price: string
   original_price: string
   stock_count: string
+  images?: string[]
   options: { attribute_id: string; option_id: string; attribute_name: string; option_value: string }[]
 }
 
@@ -88,6 +89,7 @@ export default function AdminProductNewPage() {
   
   // Variants State
   const [variants, setVariants] = useState<Variant[]>([])
+  const [variantUploading, setVariantUploading] = useState<Record<string, boolean>>({})
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -172,6 +174,7 @@ export default function AdminProductNewPage() {
         price: price || "0",
         original_price: originalPrice || "0",
         stock_count: stockCount || "0",
+        images: [],
         options: combo
       }
     })
@@ -186,6 +189,40 @@ export default function AdminProductNewPage() {
 
   const removeVariant = (id: string) => {
     setVariants(prev => prev.filter(v => v.id !== id))
+  }
+
+  const handleVariantImageUpload = async (variantId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setVariantUploading(prev => ({ ...prev, [variantId]: true }))
+    try {
+      const newUrls: string[] = []
+      for (const file of Array.from(files)) {
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("folder", "products/variants")
+        const res = await fetch("/api/upload", { method: "POST", body: formData })
+        if (!res.ok) continue
+        const data = await res.json()
+        if (data.data?.url) newUrls.push(data.data.url)
+      }
+      setVariants(prev => prev.map(v => v.id === variantId ? { ...v, images: [...(v.images || []), ...newUrls] } : v))
+    } catch (error) {
+      console.error("Variant upload failed:", error)
+    } finally {
+      setVariantUploading(prev => ({ ...prev, [variantId]: false }))
+    }
+  }
+
+  const removeVariantImage = (variantId: string, indexToRemove: number) => {
+    setVariants(prev => prev.map(v => {
+      if (v.id === variantId) {
+        const newImages = [...(v.images || [])]
+        newImages.splice(indexToRemove, 1)
+        return { ...v, images: newImages }
+      }
+      return v
+    }))
   }
 
   if (isCatLoading || isAttrLoading) {
@@ -290,10 +327,12 @@ export default function AdminProductNewPage() {
 
       // 2. Format variants for API
       const variantPayload = variants.map(v => ({
+        id: v.id,
         sku: v.sku || null,
         price: v.price ? Number(v.price) : null,
         original_price: v.original_price ? Number(v.original_price) : null,
         stock_count: Number(v.stock_count),
+        images: v.images || null,
         options: v.options.map(opt => ({
           attribute_id: opt.attribute_id,
           option_id: opt.option_id
@@ -652,6 +691,28 @@ export default function AdminProductNewPage() {
                         onChange={(e) => updateVariant(v.id, 'stock_count', e.target.value)}
                         className="h-9 rounded-lg border-zinc-800 bg-zinc-950 text-xs"
                       />
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-zinc-800/50">
+                    <Label className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-3 block">Variant Images (Optional)</Label>
+                    <div className="flex flex-wrap gap-3">
+                      {(v.images || []).map((url, i) => (
+                        <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden border border-zinc-800 group/img">
+                          <img src={url} alt="Variant" className="w-full h-full object-cover" />
+                          <button type="button" onClick={() => removeVariantImage(v.id, i)} className="absolute inset-0 bg-rose-500/20 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-all">
+                            <X className="w-4 h-4 text-white" />
+                          </button>
+                        </div>
+                      ))}
+                      <label className="w-14 h-14 rounded-lg border border-dashed border-zinc-700 bg-zinc-950/50 flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-900 transition-colors">
+                        {variantUploading[v.id] ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+                        ) : (
+                          <Upload className="w-4 h-4 text-zinc-500" />
+                        )}
+                        <input type="file" accept="image/*" multiple className="hidden" disabled={variantUploading[v.id]} onChange={(e) => handleVariantImageUpload(v.id, e)} />
+                      </label>
                     </div>
                   </div>
                 </div>
