@@ -54,27 +54,30 @@ export const generateInvoicePDF = (data: InvoiceData) => {
   doc.setDrawColor(240, 240, 240)
   doc.line(20, 45, 190, 45)
 
+  // FROM (Left side: x=20)
   doc.setFont("helvetica", "bold")
   doc.setTextColor(17, 17, 17)
-  doc.text("BILL TO:", 20, 55)
+  doc.text("FROM:", 20, 55)
   doc.setFont("helvetica", "normal")
-  doc.text(data.customerName, 20, 62)
+  doc.text("DIMENSION FASHIONS", 20, 62)
   doc.setTextColor(100, 100, 100)
-  doc.text(data.email, 20, 67)
-  doc.text(data.phone, 20, 72)
-  
-  const addressLines = doc.splitTextToSize(`${data.address}, ${data.city}, ${data.state} - ${data.pincode}`, 80)
-  doc.text(addressLines, 20, 77)
+  doc.text("N.M Sungam, Valparai main road", 20, 67)
+  doc.text("Pollachi, Tamil Nadu, 642007", 20, 72)
+  doc.text("contact@dimensionfashions.com", 20, 77)
+  doc.text("+919025783560", 20, 82)
 
+  // BILL TO (Right side: x=120)
   doc.setFont("helvetica", "bold")
   doc.setTextColor(17, 17, 17)
-  doc.text("FROM:", 120, 55)
+  doc.text("BILL TO:", 120, 55)
   doc.setFont("helvetica", "normal")
-  doc.text("DIMENSION FASHIONS", 120, 62)
+  doc.text(data.customerName, 120, 62)
   doc.setTextColor(100, 100, 100)
-  doc.text("N.M Sungam, Valparai main road", 120, 67)
-  doc.text("Pollachi, Tamil Nadu, 642007", 120, 72)
-  doc.text("contact@dimensionfashions.com", 120, 77)
+  doc.text(data.email, 120, 67)
+  doc.text(data.phone, 120, 72)
+  
+  const addressLines = doc.splitTextToSize(`${data.address}, ${data.city}, ${data.state} - ${data.pincode}`, 70)
+  doc.text(addressLines, 120, 77)
 
   // --- ITEMS TABLE ---
   const tableRows = data.items.map((item, index) => {
