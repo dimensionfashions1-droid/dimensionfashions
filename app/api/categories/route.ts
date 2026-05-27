@@ -56,6 +56,7 @@ export async function GET(request: Request) {
     let catQuery = supabase
       .from('categories')
       .select('*', { count: 'exact' })
+      .order('display_order', { ascending: true })
       .order('name', { ascending: true })
 
     if (search) {

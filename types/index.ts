@@ -28,6 +28,7 @@ export interface CategoryRow {
     name: string
     slug: string
     image_url?: string
+    display_order: number
     created_at: string
 }
 

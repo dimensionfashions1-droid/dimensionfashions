@@ -263,18 +263,6 @@ export function Navbar({ user }: { user?: SupabaseUser | null }) {
                             )}
                         </div>
 
-                        {categories.slice(0, 4).map((cat) => (
-                            <Link
-                                key={`nav_main_cat_${cat.id}`}
-                                href={`/products/${cat.slug}`}
-                                className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap"
-                            >
-                                {cat.name}
-                            </Link>
-                        ))}
-
-                        <div className="h-4 w-px bg-white mx-2" />
-
                         <Link href="/products?sort=bestsellers" className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Best Sellers</Link>
                         <Link href="/products?sort=newest" className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Latest Arrivals</Link>
                         <Link href="/contact" className="text-[11px] font-sans font-bold text-white hover:text-accent uppercase tracking-[0.15em] transition-colors whitespace-nowrap">Contact Us</Link>

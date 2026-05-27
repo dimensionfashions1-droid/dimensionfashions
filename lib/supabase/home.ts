@@ -8,7 +8,8 @@ export async function getHomeProducts(requestedCategorySlug?: string | null) {
         .from('categories')
         .select('id, name, slug')
         .limit(5)
-        .order('created_at', { ascending: true })
+        .order('display_order', { ascending: true })
+        .order('name', { ascending: true })
 
     if (catError) throw catError
 

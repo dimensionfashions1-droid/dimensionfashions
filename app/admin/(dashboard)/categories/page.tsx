@@ -66,6 +66,7 @@ const categoryColumns = [
   { key: "image", label: "Image" },
   { key: "category", label: "Category" },
   { key: "slug", label: "Slug" },
+  { key: "display_order", label: "Order" },
   { key: "actions", label: "Actions", className: "text-right" },
 ]
 
@@ -100,6 +101,7 @@ export default function AdminCategoriesPage() {
   const [categoryName, setCategoryName] = useState("")
   const [categorySlug, setCategorySlug] = useState("")
   const [categoryImageUrl, setCategoryImageUrl] = useState("")
+  const [categoryDisplayOrder, setCategoryDisplayOrder] = useState("0")
 
   const [subcategoryCategoryId, setSubcategoryCategoryId] = useState("")
   const [subcategoryName, setSubcategoryName] = useState("")
@@ -152,6 +154,7 @@ export default function AdminCategoriesPage() {
     setCategoryName("")
     setCategorySlug("")
     setCategoryImageUrl("")
+    setCategoryDisplayOrder("0")
   }
 
   const resetSubcategoryForm = () => {
@@ -172,6 +175,7 @@ export default function AdminCategoriesPage() {
     setCategoryName(category.name)
     setCategorySlug(category.slug)
     setCategoryImageUrl(category.image_url || "")
+    setCategoryDisplayOrder((category.display_order ?? 0).toString())
     setCategoryDialogOpen(true)
   }
 
@@ -196,6 +200,7 @@ export default function AdminCategoriesPage() {
         name: categoryName.trim(),
         slug: categorySlug.trim(),
         image_url: categoryImageUrl || null,
+        display_order: parseInt(categoryDisplayOrder) || 0,
       }
 
       const response = await fetch(
@@ -423,6 +428,7 @@ export default function AdminCategoriesPage() {
               </TableCell>
               <TableCell className="text-white font-medium text-sm">{category.name}</TableCell>
               <TableCell className="text-zinc-400 text-sm">/{category.slug}</TableCell>
+              <TableCell className="text-zinc-400 text-sm">{category.display_order ?? 0}</TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
                   <Button
@@ -558,6 +564,16 @@ export default function AdminCategoriesPage() {
                 onChange={(event) => setCategorySlug(event.target.value)}
                 className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60"
                 placeholder="sarees"
+              />
+            </div>
+            <div className="space-y-2.5">
+              <Label className="text-sm font-medium text-zinc-200">Display Order</Label>
+              <Input
+                type="number"
+                value={categoryDisplayOrder}
+                onChange={(event) => setCategoryDisplayOrder(event.target.value)}
+                className="h-11 rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60"
+                placeholder="0"
               />
             </div>
           </div>
