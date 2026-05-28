@@ -2,6 +2,7 @@
 
 import { useState, use, useEffect, useMemo } from "react"
 import useSWR from "swr"
+import { useRouter } from "next/navigation"
 import { ProductImageGallery } from "@/components/product/ProductImageGallery"
 import { ProductInfo } from "@/components/product/ProductInfo"
 import { RelatedProducts } from "@/components/product/RelatedProducts"
@@ -24,6 +25,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     // Auth state
     const [user, setUser] = useState<any>(null)
     const isAuthenticated = !!user
+    
+    const router = useRouter()
+    const [isRedirecting, setIsRedirecting] = useState(false)
 
     // Fetch product data
     const { data: response, error, isLoading } = useSWR(`/api/products/${slug}`, fetcher)
@@ -119,6 +123,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         }
     }
 
+    const handleBuyNow = async () => {
+        if (!product || !product.inStock) return
+        setIsRedirecting(true)
+        
+        const attributes: Record<string, string> = {}
+        if (selectedColor) attributes.color = selectedColor
+        if (selectedSize) attributes.size = selectedSize
+        
+        await addToCart(attributes)
+        router.push('/checkout')
+    }
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
@@ -153,19 +169,19 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                             <BreadcrumbItem>
                                 <BreadcrumbLink href="/" className="uppercase text-[9px] tracking-[0.3em] text-primary/30 hover:text-primary transition-colors font-sans font-bold">Home</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="text-primary/5" />
+                            <BreadcrumbSeparator className="text-accent/40" />
                             <BreadcrumbItem>
                                 <BreadcrumbLink href="/products" className="uppercase text-[9px] tracking-[0.3em] text-primary/30 hover:text-primary transition-colors font-sans font-bold">Collections</BreadcrumbLink>
                             </BreadcrumbItem>
                             {dbProduct.categories && (
                                 <>
-                                    <BreadcrumbSeparator className="text-primary/5" />
+                                    <BreadcrumbSeparator className="text-accent/40" />
                                     <BreadcrumbItem>
                                         <BreadcrumbLink href={`/products/${dbProduct.categories.slug}`} className="uppercase text-[9px] tracking-[0.3em] text-primary/30 hover:text-primary transition-colors font-sans font-bold">{dbProduct.categories.name}</BreadcrumbLink>
                                     </BreadcrumbItem>
                                 </>
                             )}
-                            <BreadcrumbSeparator className="text-primary/5" />
+                            <BreadcrumbSeparator className="text-accent/40" />
                             <BreadcrumbItem>
                                 <BreadcrumbPage className="uppercase text-[9px] tracking-[0.3em] font-sans font-bold text-primary/60">{product.title}</BreadcrumbPage>
                             </BreadcrumbItem>
@@ -201,22 +217,27 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </div>
 
             {/* Sticky Mobile Add to Cart */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-primary/5 p-5 lg:hidden z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-                <div className="flex gap-4 items-center">
-                    <div className="shrink-0 bg-gray-50 px-4 py-3 rounded-full border border-primary/5">
-                        <span className="text-xs font-bold font-sans">₹{product.price.toLocaleString()}</span>
-                    </div>
+            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-primary/5 p-4 lg:hidden z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+                <div className="flex gap-3">
                     <Button
-                        className="flex-1 h-14 bg-primary hover:bg-black text-white rounded-full uppercase tracking-[0.2em] font-bold text-[10px] shadow-xl transition-all duration-500"
+                        variant="outline"
+                        className="flex-1 h-14 border-primary/20 text-primary rounded-full uppercase tracking-[0.2em] font-bold text-[10px] transition-all duration-500"
                         onClick={() => {
                             const attributes: Record<string, string> = {}
                             if (selectedColor) attributes.color = selectedColor
                             if (selectedSize) attributes.size = selectedSize
                             addToCart(attributes)
                         }}
-                        disabled={!product.inStock}
+                        disabled={!product.inStock || isRedirecting}
                     >
-                        {product.inStock ? `Add to Bag` : 'Out of Stock'}
+                        Add to Bag
+                    </Button>
+                    <Button
+                        className="flex-1 h-14 bg-black hover:bg-zinc-900 text-white rounded-full uppercase tracking-[0.2em] font-bold text-[10px] shadow-xl transition-all duration-500"
+                        onClick={handleBuyNow}
+                        disabled={!product.inStock || isRedirecting}
+                    >
+                        {isRedirecting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Buy Now'}
                     </Button>
                 </div>
             </div>
