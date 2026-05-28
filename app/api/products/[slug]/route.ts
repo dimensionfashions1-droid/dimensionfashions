@@ -129,13 +129,13 @@ export async function GET(
     // --- RAW DEBUG TRACING START ---
     console.log("DEBUG API RAW: Product found ID:", product.id)
     console.log("DEBUG API RAW: Product variations array length:", product.product_variants?.length || 0)
-    
+
     // Independent check: double-check product_variants table directly
     const { count: variantCountDirect } = await supabase
       .from('product_variants')
       .select('*', { count: 'exact', head: true })
       .eq('product_id', product.id)
-    
+
     console.log("DEBUG API RAW: Independent variant count query for ID:", product.id, "RESULTS:", variantCountDirect)
     // --- RAW DEBUG TRACING END ---
 
@@ -144,11 +144,11 @@ export async function GET(
       .from('reviews')
       .select('rating')
       .eq('product_id', product.id)
-    
+
     let averageRating = product.rating
     if (!reviewsError && reviews && reviews.length > 0) {
-       const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0)
-       averageRating = sum / reviews.length
+      const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0)
+      averageRating = sum / reviews.length
     }
 
     const rawAttributes = product.product_attributes as unknown as RawProductAttribute[]
@@ -160,7 +160,7 @@ export async function GET(
         const value = pvo.attribute_options?.value
         const optionId = pvo.option_id
         const attributeId = pvo.attribute_id
-        
+
         if (slug && value !== undefined) {
           acc[slug] = {
             value,
@@ -189,7 +189,7 @@ export async function GET(
       attributes: (rawAttributes || []).reduce<Record<string, FormattedAttribute>>((acc, pa) => {
         const attrDef = pa.attribute_definitions
         if (!attrDef) return acc
-        
+
         if (!acc[attrDef.slug]) {
           acc[attrDef.slug] = {
             id: attrDef.id,

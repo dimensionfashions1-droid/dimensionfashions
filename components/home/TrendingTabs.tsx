@@ -26,7 +26,9 @@ export function TrendingTabs({ initialCategories, initialProducts, isAuthenticat
     
     if (tabs.length === 0) return null;
 
-    const defaultTab = tabs[0]?.slug;
+    const defaultTab = (initialProducts && initialProducts.length > 0 && initialProducts[0].category) 
+        ? initialProducts[0].category 
+        : tabs[0]?.slug;
 
     const [activeTab, setActiveTab] = React.useState<string>(defaultTab);
     const [productsMap, setProductsMap] = React.useState<Record<string, Product[]>>({

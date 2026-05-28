@@ -130,9 +130,9 @@ export async function GET(request: Request) {
       categories${category ? '!inner' : ''}(slug),
       product_attributes(
         attribute_definitions(slug),
-        attribute_options(value)
+        attribute_options(value, hex_code)
       ),
-      product_variants(id, stock_count)
+      product_variants(id, stock_count, price, images, product_variant_options(attribute_definitions(slug), attribute_options(value, hex_code)))
     `
 
     let query = supabase
@@ -234,6 +234,45 @@ export async function GET(request: Request) {
         ? p.product_variants.reduce((acc: number, v: any) => acc + (v.stock_count || 0), 0)
         : (p.stock_count || 0)
 
+      // Extract color options from variants
+      const colorOptionsMap = new Map<string, any>()
+      if (hasVariants) {
+          p.product_variants.forEach((v: any) => {
+              const colorOpt = v.product_variant_options?.find(
+                  (pvo: any) => pvo.attribute_definitions?.slug === 'color'
+              )
+              if (colorOpt && colorOpt.attribute_options) {
+                  const val = colorOpt.attribute_options.value
+                  if (!colorOptionsMap.has(val)) {
+                      colorOptionsMap.set(val, {
+                          name: val,
+                          hex: colorOpt.attribute_options.hex_code || val.toLowerCase(),
+                          image: v.images?.[0] || null,
+                          price: v.price || p.price,
+                          stockCount: v.stock_count || 0
+                      })
+                  } else {
+                      const existing = colorOptionsMap.get(val)
+                      existing.stockCount += (v.stock_count || 0)
+                  }
+              }
+          })
+      }
+
+      const colorOptions = Array.from(colorOptionsMap.values())
+
+      // fallback to attributes if no variants exist
+      if (colorOptions.length === 0) {
+          p.product_attributes?.forEach((pa: any) => {
+              if (pa.attribute_definitions?.slug === 'color' && pa.attribute_options) {
+                  colorOptions.push({
+                      name: pa.attribute_options.value,
+                      hex: pa.attribute_options.hex_code || pa.attribute_options.value.toLowerCase(),
+                  })
+              }
+          })
+      }
+
       return {
         id: p.id,
         title: p.title,
@@ -246,6 +285,7 @@ export async function GET(request: Request) {
         hasVariants: hasVariants,
         inStock: totalStock > 0,
         stockCount: totalStock,
+        colorOptions: colorOptions.length > 0 ? colorOptions : undefined,
         colors: p.product_attributes
           ?.filter((pa: any) => pa.attribute_definitions?.slug === 'color')
           .map((pa: any) => pa.attribute_options?.value)

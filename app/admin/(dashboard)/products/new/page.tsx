@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import useSWR from "swr"
 import { Button } from "@/components/ui/button"
@@ -49,7 +49,7 @@ interface Variant {
   original_price: string
   stock_count: string
   images?: string[]
-  options: { attribute_id: string; option_id: string; attribute_name: string; option_value: string }[]
+  options: { attribute_id: string; option_id: string; attribute_name: string; attribute_slug?: string; option_value: string }[]
 }
 
 interface Category {
@@ -168,13 +168,22 @@ export default function AdminProductNewPage() {
 
       const variantSlug = combo.map((c: any) => c.option_value.toString().toLowerCase().replace(/\s+/g, '-')).join('-')
 
+      const colorOption = combo.find((c: any) => c.attribute_slug === 'color')
+      let existingImages: string[] = []
+      if (colorOption) {
+         const sibling = variants.find(v => v.options.some(o => o.attribute_slug === 'color' && o.option_id === colorOption.option_id))
+         if (sibling && sibling.images) {
+            existingImages = [...sibling.images]
+         }
+      }
+
       return {
         id: `temp-${Date.now()}-${idx}`,
         sku: slug ? `${slug}-${variantSlug}` : variantSlug,
         price: price || "0",
         original_price: originalPrice || "0",
         stock_count: stockCount || "0",
-        images: [],
+        images: existingImages,
         options: combo
       }
     })
@@ -223,6 +232,62 @@ export default function AdminProductNewPage() {
       }
       return v
     }))
+  }
+
+  // ── Bulk Color Images Handlers ─────────────────────────────────────
+  const uniqueColors = useMemo(() => {
+    const colorSet = new Set<string>()
+    variants.forEach(v => {
+      const colorOpt = v.options.find(o => o.attribute_slug === 'color')
+      if (colorOpt) colorSet.add(colorOpt.option_value)
+    })
+    return Array.from(colorSet)
+  }, [variants])
+
+  const handleBulkColorImageUpload = async (colorName: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setVariantUploading(prev => ({ ...prev, [`color-${colorName}`]: true }))
+    try {
+      const newUrls: string[] = []
+      for (const file of Array.from(files)) {
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("folder", "products/variants")
+        const res = await fetch("/api/upload", { method: "POST", body: formData })
+        if (!res.ok) continue
+        const data = await res.json()
+        if (data.data?.url) newUrls.push(data.data.url)
+      }
+      setVariants(prev => prev.map(v => {
+        const hasColor = v.options.some(o => o.attribute_slug === 'color' && o.option_value === colorName)
+        if (hasColor) {
+           return { ...v, images: [...(v.images || []), ...newUrls] }
+        }
+        return v
+      }))
+    } catch (error) {
+      console.error("Bulk upload failed:", error)
+    } finally {
+      setVariantUploading(prev => ({ ...prev, [`color-${colorName}`]: false }))
+    }
+  }
+
+  const removeBulkColorImage = (colorName: string, indexToRemove: number) => {
+    setVariants(prev => prev.map(v => {
+      const hasColor = v.options.some(o => o.attribute_slug === 'color' && o.option_value === colorName)
+      if (hasColor) {
+         const newImages = [...(v.images || [])]
+         newImages.splice(indexToRemove, 1)
+         return { ...v, images: newImages }
+      }
+      return v
+    }))
+  }
+
+  const getImagesForColor = (colorName: string) => {
+    const firstVariant = variants.find(v => v.options.some(o => o.attribute_slug === 'color' && o.option_value === colorName))
+    return firstVariant?.images || []
   }
 
   if (isCatLoading || isAttrLoading) {
@@ -628,6 +693,50 @@ export default function AdminProductNewPage() {
               >
                 Generate Product Variants
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Bulk Color Images ── */}
+        {uniqueColors.length > 0 && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Images by Color (Bulk Apply)</h2>
+                <p className="text-xs text-zinc-400 mt-1">Upload images here to automatically apply them to ALL variants of the same color.</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {uniqueColors.map(colorName => {
+                const colorImages = getImagesForColor(colorName)
+                return (
+                  <div key={colorName} className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-4">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full border border-zinc-700 bg-zinc-800 inline-block" />
+                      {colorName}
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {colorImages.map((url, i) => (
+                        <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden border border-zinc-800 group/img">
+                          <img src={url} alt={colorName} className="w-full h-full object-cover" />
+                          <button type="button" onClick={() => removeBulkColorImage(colorName, i)} className="absolute inset-0 bg-rose-500/20 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-all">
+                            <X className="w-4 h-4 text-white" />
+                          </button>
+                        </div>
+                      ))}
+                      <label className="w-14 h-14 rounded-lg border border-dashed border-zinc-700 bg-zinc-950/50 flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-900 transition-colors">
+                        {variantUploading[`color-${colorName}`] ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+                        ) : (
+                          <Upload className="w-4 h-4 text-zinc-500" />
+                        )}
+                        <input type="file" accept="image/*" multiple className="hidden" disabled={variantUploading[`color-${colorName}`]} onChange={(e) => handleBulkColorImageUpload(colorName, e)} />
+                      </label>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

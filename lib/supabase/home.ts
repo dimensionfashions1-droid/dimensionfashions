@@ -17,7 +17,28 @@ export async function getHomeProducts(requestedCategorySlug?: string | null) {
     let products: any[] = []
 
     // 2. Identify target category
-    const targetCategorySlug = requestedCategorySlug || (categories.length > 0 ? categories[0].slug : null)
+    let targetCategorySlug = requestedCategorySlug || null
+
+    if (!targetCategorySlug && categories.length > 0) {
+        // Find the first category that actually has products
+        for (const cat of categories) {
+            const { count } = await supabase
+                .from('products')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'published')
+                .eq('category_id', cat.id)
+
+            if (count && count > 0) {
+                targetCategorySlug = cat.slug
+                break
+            }
+        }
+
+        // Fallback to the first category if all are empty
+        if (!targetCategorySlug) {
+            targetCategorySlug = categories[0].slug
+        }
+    }
 
     if (targetCategorySlug) {
         // 3. Fetch products using pure DB queries (Inner Join filter), limiting to 8 items
@@ -33,7 +54,7 @@ export async function getHomeProducts(requestedCategorySlug?: string | null) {
                 is_in_stock,
                 images,
                 categories!inner(name,slug),
-                product_variants(id, stock_count)
+                product_variants(id, stock_count, price, images, product_variant_options(attribute_definitions(slug), attribute_options(value, hex_code)))
             `)
             .eq('status', 'published')
             .eq('categories.slug', targetCategorySlug)
@@ -52,6 +73,33 @@ export async function getHomeProducts(requestedCategorySlug?: string | null) {
                     ? variantsList.reduce((acc: number, v: any) => acc + (v.stock_count || 0), 0)
                     : (p.stock_count || 0)
 
+                // Extract color options from variants
+                const colorOptionsMap = new Map<string, any>()
+                if (hasVariants) {
+                    variantsList.forEach((v: any) => {
+                        const colorOpt = v.product_variant_options?.find(
+                            (pvo: any) => pvo.attribute_definitions?.slug === 'color'
+                        )
+                        if (colorOpt && colorOpt.attribute_options) {
+                            const val = colorOpt.attribute_options.value
+                            if (!colorOptionsMap.has(val)) {
+                                colorOptionsMap.set(val, {
+                                    name: val,
+                                    hex: colorOpt.attribute_options.hex_code || val.toLowerCase(),
+                                    image: v.images?.[0] || null,
+                                    price: v.price || p.price,
+                                    stockCount: v.stock_count || 0
+                                })
+                            } else {
+                                const existing = colorOptionsMap.get(val)
+                                existing.stockCount += (v.stock_count || 0)
+                            }
+                        }
+                    })
+                }
+
+                const colorOptions = Array.from(colorOptionsMap.values())
+
                 return {
                     id: p.id,
                     title: p.title,
@@ -62,7 +110,8 @@ export async function getHomeProducts(requestedCategorySlug?: string | null) {
                     category: p.categories?.slug || targetCategorySlug,
                     hasVariants: hasVariants,
                     inStock: totalStock > 0,
-                    stockCount: totalStock
+                    stockCount: totalStock,
+                    colorOptions: colorOptions.length > 0 ? colorOptions : undefined
                 }
             })
         }

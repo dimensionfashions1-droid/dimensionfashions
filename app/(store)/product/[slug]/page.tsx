@@ -146,7 +146,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         )
     }
 
-    if (error || !product) {
+    if (error || !product || dbProduct?.status === 'draft') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="text-center space-y-4">

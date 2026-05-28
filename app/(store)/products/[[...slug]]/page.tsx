@@ -37,6 +37,13 @@ interface FilteredProduct {
     rating?: number
     reviews_count?: number
     description?: string
+    colorOptions?: { 
+        name: string; 
+        hex: string;
+        image?: string | null;
+        price?: number;
+        stockCount?: number;
+    }[]
 }
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
@@ -173,7 +180,8 @@ export default function ProductsPage() {
         sizes: p.sizes || [],
         slug: p.slug,
         originalPrice: p.originalPrice,
-        hasVariants: p.hasVariants
+        hasVariants: p.hasVariants,
+        colorOptions: p.colorOptions
     }))
 
     const totalPages = meta?.totalPages || 1

@@ -22,6 +22,15 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
     const cart = useCart()
     const { toast } = useToast()
     const isWishlisted = wishlist.isInWishlist(product.id)
+    
+    const [selectedColorIndex, setSelectedColorIndex] = useState(0)
+
+    const hasColorOptions = product.colorOptions && product.colorOptions.length > 0
+    const activeColor = hasColorOptions ? product.colorOptions![selectedColorIndex] : null
+
+    const displayImage = activeColor?.image || product.image
+    const displayPrice = activeColor?.price || product.price
+    const displayOriginalPrice = product.originalPrice
 
     const handleQuickAdd = async (e: React.MouseEvent) => {
         e.preventDefault()
@@ -47,7 +56,7 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
             <div className="relative aspect-[3/4] overflow-hidden bg-primary/5 rounded-2xl">
                 <Link href={`/product/${product.slug}`} className="block w-full h-full">
                     <Image
-                        src={product.image}
+                        src={displayImage}
                         alt={product.title}
                         fill
                         className="object-cover transition-transform duration-[1500ms] ease-out group-hover:scale-110"
@@ -81,26 +90,51 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
                     />
                 </button>
 
-                {/* Action Button — slides up on hover */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-10">
-                    {product.hasVariants ? (
-                        <Link href={`/product/${product.slug}`}>
+                {/* Action Area */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 flex flex-col gap-2 z-10 pointer-events-none">
+                    {hasColorOptions ? (
+                        <div className="flex justify-center translate-y-0 transition-transform duration-500 pb-1 pointer-events-auto" onClick={(e) => e.preventDefault()}>
+                            <div className="bg-white/90 backdrop-blur-md px-3 py-2 rounded-full shadow-sm border border-black/5 flex flex-wrap items-center justify-center gap-2">
+                                {product.colorOptions!.map((color, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            e.stopPropagation()
+                                            setSelectedColorIndex(idx)
+                                        }}
+                                        className={cn(
+                                            "w-3.5 h-3.5 rounded-full border border-black/10 transition-all duration-300",
+                                            selectedColorIndex === idx ? "ring-1 ring-primary ring-offset-2 scale-110" : "hover:scale-110 opacity-70 hover:opacity-100"
+                                        )}
+                                        style={{ backgroundColor: color.hex }}
+                                        title={color.name}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ) : product.hasVariants ? (
+                        <div className="translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out pointer-events-auto">
+                            <Link href={`/product/${product.slug}`}>
+                                <Button
+                                    size="sm"
+                                    className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] h-10 transition-all duration-500 hover:bg-black gap-2"
+                                >
+                                    View Product
+                                </Button>
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out pointer-events-auto">
                             <Button
                                 size="sm"
                                 className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] h-10 transition-all duration-500 hover:bg-black gap-2"
+                                onClick={handleQuickAdd}
                             >
-                                View Product
+                                <ShoppingBag className="w-3.5 h-3.5" />
+                                Add to Cart
                             </Button>
-                        </Link>
-                    ) : (
-                        <Button
-                            size="sm"
-                            className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] h-10 transition-all duration-500 hover:bg-black gap-2"
-                            onClick={handleQuickAdd}
-                        >
-                            <ShoppingBag className="w-3.5 h-3.5" />
-                            Add to Cart
-                        </Button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -118,20 +152,22 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
                     </Link>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <p className="text-[14px] font-sans font-bold text-primary tracking-tight">
-                        ₹{product.price.toLocaleString("en-IN")}
-                    </p>
-                    {product.originalPrice && product.originalPrice > product.price && (
-                        <div className="flex items-center gap-2">
-                            <p className="text-[11px] font-sans font-medium text-primary/30 line-through">
-                                ₹{product.originalPrice.toLocaleString("en-IN")}
-                            </p>
-                            <span className="text-[10px] font-sans font-extrabold text-accent uppercase tracking-tighter">
-                                {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-                            </span>
-                        </div>
-                    )}
+                <div className="flex items-center justify-between mt-1">
+                    <div className="flex items-center gap-3">
+                        <p className="text-[14px] font-sans font-bold text-primary tracking-tight">
+                            ₹{displayPrice.toLocaleString("en-IN")}
+                        </p>
+                        {displayOriginalPrice && displayOriginalPrice > displayPrice && (
+                            <div className="flex items-center gap-2">
+                                <p className="text-[11px] font-sans font-medium text-primary/30 line-through">
+                                    ₹{displayOriginalPrice.toLocaleString("en-IN")}
+                                </p>
+                                <span className="text-[10px] font-sans font-extrabold text-accent uppercase tracking-tighter">
+                                    {Math.round(((displayOriginalPrice - displayPrice) / displayOriginalPrice) * 100)}% OFF
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

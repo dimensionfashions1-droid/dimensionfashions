@@ -31,10 +31,14 @@ export function RelatedProducts({ currentProductId, categorySlug, isAuthenticate
             id: p.id,
             title: p.title,
             price: p.price,
+            originalPrice: p.originalPrice,
             category: p.category || 'Collection',
-            image: p.images?.[0] || '',
+            image: p.image || p.images?.[0] || '',
             slug: p.slug,
             rating: p.rating,
+            hasVariants: p.hasVariants,
+            colors: p.colors || [],
+            colorOptions: p.colorOptions || []
         }))
 
     if (products.length === 0) return null

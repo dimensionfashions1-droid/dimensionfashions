@@ -46,10 +46,10 @@ export function FeaturedDrop() {
 
                         <div className="flex flex-col md:flex-row gap-8 items-start md:items-center pt-6">
                             <Link
-                                href="/collections/dresses"
+                                href="/products"
                                 className="inline-flex items-center justify-center bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] px-10 py-4 rounded-full transition-all duration-500 hover:bg-black"
                             >
-                                Shop Dresses
+                                Shop Now
                             </Link>
 
                         </div>
