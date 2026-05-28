@@ -5,6 +5,7 @@ import { Heart, ShoppingBag, Star, Truck, ShieldCheck, RefreshCw } from "lucide-
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { QuantitySelector } from "./QuantitySelector"
+import { RichTextRenderer } from "@/components/ui/rich-text-renderer"
 import { Product } from "@/types"
 import { useWishlist } from "@/hooks/use-wishlist"
 
@@ -98,8 +99,14 @@ export function ProductInfo({
             </div>
 
             {/* Description */}
-            <div className="max-w-none text-primary/70 leading-relaxed font-sans text-sm border-l-2 border-accent/20 pl-6 italic">
-                {product.description || "Engineered for the modern urban landscape. This piece combines functional utility with avant-garde aesthetics. Crafted from premium materials for durability and comfort."}
+            <div className="border-l-2 border-accent/20 pl-6 italic">
+                {product.description ? (
+                    <RichTextRenderer content={product.description} />
+                ) : (
+                    <div className="max-w-none text-primary/70 leading-relaxed font-sans text-sm">
+                        Engineered for the modern urban landscape. This piece combines functional utility with avant-garde aesthetics. Crafted from premium materials for durability and comfort.
+                    </div>
+                )}
             </div>
 
             <div className="flex flex-col gap-10">

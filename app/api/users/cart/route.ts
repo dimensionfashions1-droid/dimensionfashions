@@ -32,7 +32,7 @@ export async function GET() {
                 .select(`
                     id, title, price, slug, images, stock_count, is_in_stock,
                     product_variants (
-                        id, price, stock_count, is_active,
+                        id, price, stock_count, is_active, images,
                         product_variant_options (
                             attribute_definitions (slug),
                             attribute_options (value)

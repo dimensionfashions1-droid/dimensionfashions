@@ -9,7 +9,7 @@ import useSWR from "swr"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Switch } from "@/components/ui/switch"
 import {
   Select,
@@ -421,8 +421,11 @@ export default function AdminProductNewPage() {
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label className="text-zinc-300">Description</Label>
-              <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={4}
-                className="min-h-[120px] rounded-xl border-zinc-800 bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus-visible:border-zinc-700 focus-visible:ring-zinc-700/60" placeholder="Product description..." />
+              <RichTextEditor 
+                value={description} 
+                onChange={setDescription} 
+                placeholder="Product description..." 
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-zinc-300">Status</Label>
