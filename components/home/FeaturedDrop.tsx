@@ -12,7 +12,7 @@ export function FeaturedDrop() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 lg:gap-32 items-center">
 
                     {/* Visual */}
-                    <div className="lg:col-span-6 relative aspect-[4/4] w-full max-w-lg mx-auto lg:mx-0 group">
+                    <div className="lg:col-span-6 order-2 lg:order-1 relative aspect-[4/4] w-full max-w-lg mx-auto lg:mx-0 group">
                         <div className="relative w-full h-full overflow-hidden shadow-2xl">
                             <Image
                                 src="/images/contemprory.jpg"
@@ -28,7 +28,7 @@ export function FeaturedDrop() {
                     </div>
 
                     {/* Content */}
-                    <div className="lg:col-span-6 space-y-12">
+                    <div className="lg:col-span-6 order-1 lg:order-2 space-y-12">
                         <div className="space-y-8">
                             <div className="flex flex-col text-left space-y-3">
                                 <span className="text-[10px] text-accent uppercase tracking-[0.4em] font-sans font-bold">
@@ -39,7 +39,7 @@ export function FeaturedDrop() {
                                 </h2>
                             </div>
 
-                            <p className="font-sans text-primary/60 text-sm md:text-base max-w-md leading-relaxed tracking-wide pt-2">
+                            <p className="font-sans text-primary/60 text-sm md:text-base  leading-relaxed tracking-wide pt-2">
                                 Step into effortless grace with our meticulously crafted western collection. Designed with sharp silhouettes, premium fabrics, and modern cuts for the modern wardrobe. From breezy daytime tops to elegant evening dresses, find your perfect fit.
                             </p>
                         </div>

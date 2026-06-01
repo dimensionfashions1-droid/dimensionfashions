@@ -184,6 +184,8 @@ export async function GET(request: Request) {
       query = query.order('price', { ascending: true })
     } else if (sort === 'price-desc') {
       query = query.order('price', { ascending: false })
+    } else if (sort === 'bestsellers') {
+      query = query.order('rating', { ascending: false })
     } else {
       query = query.order('created_at', { ascending: false })
     }
