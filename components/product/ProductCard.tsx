@@ -2,13 +2,10 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, ShoppingBag } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Heart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 import { Product } from "@/types"
-import { useCart } from "@/hooks/use-cart"
-import { useToast } from "@/hooks/use-toast"
 import { useWishlist } from "@/hooks/use-wishlist"
 import { createClient } from "@/lib/supabase/client"
 
@@ -19,8 +16,6 @@ interface ProductCardProps {
 
 export function ProductCard({ product, isAuthenticated = false }: ProductCardProps) {
     const wishlist = useWishlist()
-    const cart = useCart()
-    const { toast } = useToast()
     const isWishlisted = wishlist.isInWishlist(product.id)
     
     const [selectedColorIndex, setSelectedColorIndex] = useState(0)
@@ -32,23 +27,6 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
     const displayPrice = activeColor?.price || product.price
     const displayOriginalPrice = product.originalPrice
 
-    const handleQuickAdd = async (e: React.MouseEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        try {
-            await cart.addToCart(product, {}, 1)
-            toast({
-                title: "Added to Bag",
-                description: `${product.title} has been added.`,
-            })
-        } catch (error: any) {
-            toast({
-                title: "Limit Exceeded",
-                description: error.message || "Cannot add more items",
-                variant: "destructive"
-            })
-        }
-    }
 
     return (
         <div className="group space-y-5">
@@ -92,7 +70,7 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
 
                 {/* Action Area */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 flex flex-col gap-2 z-10 pointer-events-none">
-                    {hasColorOptions ? (
+                    {hasColorOptions && (
                         <div className="flex justify-center translate-y-0 transition-transform duration-500 pb-1 pointer-events-auto" onClick={(e) => e.preventDefault()}>
                             <div className="bg-white/90 backdrop-blur-md px-3 py-2 rounded-full shadow-sm border border-black/5 flex flex-wrap items-center justify-center gap-2">
                                 {product.colorOptions!.map((color, idx) => (
@@ -112,28 +90,6 @@ export function ProductCard({ product, isAuthenticated = false }: ProductCardPro
                                     />
                                 ))}
                             </div>
-                        </div>
-                    ) : product.hasVariants ? (
-                        <div className="translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out pointer-events-auto">
-                            <Link href={`/product/${product.slug}`}>
-                                <Button
-                                    size="sm"
-                                    className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] h-10 transition-all duration-500 hover:bg-black gap-2"
-                                >
-                                    View Product
-                                </Button>
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out pointer-events-auto">
-                            <Button
-                                size="sm"
-                                className="w-full rounded-full bg-primary text-secondary text-[10px] font-sans font-bold uppercase tracking-[0.25em] h-10 transition-all duration-500 hover:bg-black gap-2"
-                                onClick={handleQuickAdd}
-                            >
-                                <ShoppingBag className="w-3.5 h-3.5" />
-                                Add to Cart
-                            </Button>
                         </div>
                     )}
                 </div>
