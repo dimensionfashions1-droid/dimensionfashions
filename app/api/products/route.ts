@@ -124,10 +124,13 @@ export async function GET(request: Request) {
         }
     }
 
+    const subcategory = searchParams.get('subcategory')
+
     // 1. Build Base Query with Joins
     let selectString = `
       *,
       categories${category ? '!inner' : ''}(slug),
+      subcategories${subcategory ? '!inner' : ''}(slug),
       product_attributes(
         attribute_definitions(slug),
         attribute_options(value, hex_code)
@@ -160,11 +163,8 @@ export async function GET(request: Request) {
         query = query.eq('categories.slug', category)
     }
 
-    const subcategory = searchParams.get('subcategory')
     if (subcategory) {
-        // Since we have categories!inner, we might need a similar join for subcategories if we filter by them
-        // But for now, we can filter by the product's subcategory relation if it's joined
-        // Let's keep it simple for now as per schema
+        query = query.eq('subcategories.slug', subcategory)
     }
 
     if (search) {
